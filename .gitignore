@@ -1,0 +1,4 @@
+*.pdf
+
+.history/
+.DS_Store

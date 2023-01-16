@@ -23,7 +23,7 @@ input_shape = [1, 3, 224, 224]
 model_file_name = 'ResNet50_with_mask_sparsity_50.pth'  # 模型文件
 base_name = osp.splitext(model_file_name)[0] 
 current_dir = os.path.abspath(os.path.dirname(__file__))
-weight_path = osp.join(current_dir, './weights/', model_file_name); print(weight_path)
+weight_path = osp.join(current_dir, '../weights/', model_file_name); print(weight_path)
 
 ####################################################################################################################
 def arg_parse():
@@ -76,7 +76,7 @@ def main(net_torch, net_name, input_shape):
     # 3, Start model inference
     net = model_inference(net, input_data, None)
     # 4, Convert torch model to onnx model
-    onnx_file_path = osp.abspath(osp.join(current_dir, '../data/onnx_model/classifynet', net_name+".onnx"))  # onnx 模型权重文件路径定义
+    onnx_file_path = osp.abspath(osp.join(current_dir, '.../data/onnx_model/classifynet', net_name+".onnx"))  # onnx 模型权重文件路径定义
     torch_to_onnx(net, input_data, onnx_file_path)
 
     # 5, Analysis model FLOPs

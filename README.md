@@ -20,7 +20,7 @@
 1. [深度学习炼丹-数据标准化](./3-deep_learning_alchemy/深度学习炼丹-数据标准化.md)
 2. [深度学习炼丹-数据增强](./3-deep_learning_alchemy/深度学习炼丹-数据增强.md)
 3. [深度学习炼丹-不平衡样本的处理](./3-deep_learning_alchemy/深度学习炼丹-不平衡样本的处理.md)
-4. [深度学习炼丹-超参数设定和模型训练](./3-deep_learning_alchemy/深度学习炼丹-超参数设定和模型训练.md)
+4. [深度学习炼丹-超参数设定](./3-deep_learning_alchemy/深度学习炼丹-超参数设定.md)
 5. [深度学习炼丹-正则化策略](./3-deep_learning_alchemy/深度学习炼丹-正则化策略.md)
 
 ## 四，深度学习推理框架

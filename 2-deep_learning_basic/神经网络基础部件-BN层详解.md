@@ -160,14 +160,13 @@ $$
 论文中的公式不太清晰，下面我给出更为清晰的  Batch Normalizing Transform 算法计算过程。
 
 设 $m$ 表示 batch_size 的大小，$n$ 表示 features 数量，即样本特征值数量。在训练过程中，针对每一个 `batch` 数据，`BN` 过程进行的操作是，将这组数据 `normalization`，之后对其进行线性变换，具体算法步骤如下:
-$$
-\begin{aligned} 
+
+$$\begin{aligned} 
 \mu_B &= \frac{1}{m}\sum_1^m x_i \\
 \sigma^2_B &= \frac{1}{m} \sum_1^m (x_i-\mu_B)^2 \\
 n_i &= \frac{x_i-\mu_B}{\sqrt{\sigma^2_B + \epsilon}} \\
-z_i &= \gamma n_i + \beta = \frac{\gamma}{\sqrt{\sigma^2_B + \epsilon}}x_i + (\beta - \frac{\gamma\mu_{B}}{\sqrt{\sigma^2_B + \epsilon}}) \\
-\end{aligned}
-$$
+z_i &= \gamma n_i + \beta = \frac{\gamma}{\sqrt{\sigma^2_B + \epsilon}}x_i + (\beta - \frac{\gamma\mu_{B}}{\sqrt{\sigma^2_B + \epsilon}})
+\end{aligned}$$
 
 以上公式乘法都为元素乘，即 `element wise` 的乘法。其中，参数 $\gamma,\beta$ 是训练出来的， $\epsilon$ 是为零防止 $\sigma_B^2$ 为 $0$ ，加的一个很小的数值，通常为`1e-5`。公式各个符号解释如下:
 
@@ -221,21 +220,21 @@ BN 的反向传播过程中，会更新 BN 层中的所有 $\beta$ 和 $\gamma$ 
 批量归一化（batch normalization）的“批量”两个字，表示在模型的迭代训练过程中，BN 首先计算小批量（ mini-batch，如 32）的均值和方差。但是，在推理过程中，我们只有一个样本，而不是一个小批量。在这种情况下，我们该如何获得均值和方差呢？
 
 第一种方法是，使用的均值和方差数据是在训练过程中样本值的平均，即：
-$$
-\begin{align}
+
+$$\begin{align}
 E[x] &= E[\mu_B] \nonumber \\
 Var[x] &= \frac{m}{m-1} E[\sigma^2_B] \nonumber \\
-\end{align}
-$$
+\end{align}$$
+
 这种做法会把所有训练批次的 $\mu$ 和 $\sigma$ 都保存下来，然后在最后训练完成时（或做测试时）做下平均。
 
 第二种方法是使用类似动量的方法，训练时，加权平均每个批次的值，权值 $\alpha$ 可以为0.9：
-$$
-\begin{align}
+
+$$\begin{aligned}
 \mu_{mov_{i}} &= \alpha \cdot \mu_{mov_{i}} + (1-\alpha) \cdot \mu_i \nonumber \\
 \sigma_{mov_{i}} &= \alpha \cdot \sigma_{mov_{i}} + (1-\alpha) \cdot \sigma_i \nonumber \\
-\end{align}
-$$
+\end{aligned}$$
+
 推理或测试时，直接使用模型文件中保存的 $\mu_{mov_{i}}$ 和 $\sigma_{mov_{i}}$ 的值即可。
 
 ### 3.4，实验

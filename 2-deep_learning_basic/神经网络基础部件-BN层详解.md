@@ -1,3 +1,20 @@
+- [一，数学基础](#一数学基础)
+  - [1.1，概率密度函数](#11概率密度函数)
+  - [1.2，正态分布](#12正态分布)
+- [二，背景](#二背景)
+  - [2.1，如何理解 Internal Covariate Shift](#21如何理解-internal-covariate-shift)
+  - [2.2，Internal Covariate Shift 带来的问题](#22internal-covariate-shift-带来的问题)
+  - [2.3，减少 Internal Covariate Shift 的一些尝试](#23减少-internal-covariate-shift-的一些尝试)
+- [三，批量归一化（BN）](#三批量归一化bn)
+  - [3.1，BN 的前向计算](#31bn-的前向计算)
+  - [3.2，BN 层如何工作](#32bn-层如何工作)
+  - [3.3，训练和推理式的 BN 层](#33训练和推理式的-bn-层)
+  - [3.4，实验](#34实验)
+  - [3.5，BN 层的优点](#35bn-层的优点)
+- [参考资料](#参考资料)
+
+> 训练深度神经网络的复杂性在于，因为前面的层的参数会发生变化导致每层输入的分布在训练过程中会发生变化。这又导致模型需要需要较低的学习率和非常谨慎的参数初始化策略，从而减慢了训练速度，并且具有饱和非线性的模型训练起来也非常困难。
+> 网络层输入数据分布发生变化的这种现象称为内部协变量转移，BN 就是来解决这个问题。
 ## 一，数学基础
 
 ### 1.1，概率密度函数
@@ -120,7 +137,7 @@ $$
 
    随着网络层的加深，后面网络输入 $x$ 越来越大，而如果我们又采用 `Sigmoid` 型激活函数，那么每层的输入很容易移动到非线性饱和区域，此时梯度会变得很小甚至接近于 $0$，导致参数的更新速度就会减慢，进而又会放慢网络的收敛速度。
 
-饱和问题和由此产生的梯度消失通常通过使用修正线性单元激活（ReLU(x)=max(x,0)$），更好的参数初始化方法和小的学习率来解决。然而，如果我们能保证非线性输入的分布在网络训练时保持更稳定，那么优化器将不太可能陷入饱和状态，进而训练也将加速。
+饱和问题和由此产生的梯度消失通常通过使用修正线性单元激活（$ReLU(x)=max(x,0)$），更好的参数初始化方法和小的学习率来解决。然而，如果我们能保证非线性输入的分布在网络训练时保持更稳定，那么优化器将不太可能陷入饱和状态，进而训练也将加速。
 
 ### 2.3，减少 Internal Covariate Shift 的一些尝试
 
@@ -144,12 +161,12 @@ $$
 
 设 $m$ 表示 batch_size 的大小，$n$ 表示 features 数量，即样本特征值数量。在训练过程中，针对每一个 `batch` 数据，`BN` 过程进行的操作是，将这组数据 `normalization`，之后对其进行线性变换，具体算法步骤如下:
 $$
-\begin{align} 
-\mu_B &= \frac{1}{m}\sum_1^m x_i \tag{6} \\
-\sigma^2_B &= \frac{1}{m} \sum_1^m (x_i-\mu_B)^2 \tag{7} \\
-n_i &= \frac{x_i-\mu_B}{\sqrt{\sigma^2_B + \epsilon}} \tag{8} \\
-z_i &= \gamma n_i + \beta = \frac{\gamma}{\sqrt{\sigma^2_B + \epsilon}}x_i + (\beta - \frac{\gamma\mu_{B}}{\sqrt{\sigma^2_B + \epsilon}})\tag{9} \\
-\end{align}
+\begin{aligned} 
+\mu_B &= \frac{1}{m}\sum_1^m x_i \\
+\sigma^2_B &= \frac{1}{m} \sum_1^m (x_i-\mu_B)^2 \\
+n_i &= \frac{x_i-\mu_B}{\sqrt{\sigma^2_B + \epsilon}} \\
+z_i &= \gamma n_i + \beta = \frac{\gamma}{\sqrt{\sigma^2_B + \epsilon}}x_i + (\beta - \frac{\gamma\mu_{B}}{\sqrt{\sigma^2_B + \epsilon}}) \\
+\end{aligned}
 $$
 
 以上公式乘法都为元素乘，即 `element wise` 的乘法。其中，参数 $\gamma,\beta$ 是训练出来的， $\epsilon$ 是为零防止 $\sigma_B^2$ 为 $0$ ，加的一个很小的数值，通常为`1e-5`。公式各个符号解释如下:
@@ -240,5 +257,5 @@ $$
 
 1. [维基百科-正态分布](https://zh.wikipedia.org/zh-hans/%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83)
 2. [Batch Norm Explained Visually — How it works, and why neural networks need it](https://towardsdatascience.com/batch-norm-explained-visually-how-it-works-and-why-neural-networks-need-it-b18919692739)
-3. [15.5 批量归一化的原理])(https://microsoft.github.io/ai-edu/%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/A2-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/%E7%AC%AC7%E6%AD%A5%20-%20%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/15.5-%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96%E7%9A%84%E5%8E%9F%E7%90%86.html)
+3. [15.5 批量归一化的原理](https://microsoft.github.io/ai-edu/%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/A2-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/%E7%AC%AC7%E6%AD%A5%20-%20%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/15.5-%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96%E7%9A%84%E5%8E%9F%E7%90%86.html)
 4. [Batch Normalization原理与实战](https://zhuanlan.zhihu.com/p/34879333)

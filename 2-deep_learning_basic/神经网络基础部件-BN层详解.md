@@ -52,7 +52,7 @@ $$
 
 ![正态分布概率密度函数曲线](../images/bn/normal-distribution-curve-1.png)
 
-可认为构造正态分布函数，也可通过 `np.random.normal` 函数生成指定均值和标准差的正态分布随机数，然后基于 `matplotlib + seaborn` 库 `kdeplot`函数绘制概率密度曲线。示例代码如下所示：
+可视化正态分布，可直接通过 `np.random.normal` 函数生成指定均值和标准差的正态分布随机数，然后基于 `matplotlib + seaborn` 库 `kdeplot`函数绘制概率密度曲线。示例代码如下所示：
 
 ```py
 import seaborn as sns

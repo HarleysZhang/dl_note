@@ -48,11 +48,11 @@ $$
 $$
 f(x)=\frac{1}{\sqrt{2 \pi}} e^{- \frac{x^2}{2}} \tag{4}
 $$
-正太分布的数学期望值或期望值 $\mu$ 等于位置参数，决定了分布的位置；其方差 $\sigma^2$ 的开平方或标准差 $\sigma$ 等于尺度参数，决定了分布的幅度。正太分布的概率密度函数曲线呈钟形，常称之为**钟形曲线**，如下图所示:
+正态分布的数学期望值或期望值 $\mu$ 等于位置参数，决定了分布的位置；其方差 $\sigma^2$ 的开平方或标准差 $\sigma$ 等于尺度参数，决定了分布的幅度。正态分布的概率密度函数曲线呈钟形，常称之为**钟形曲线**，如下图所示:
 
-![正太分布概率密度函数曲线](../images/bn/normal-distribution-curve-1.png)
+![正态分布概率密度函数曲线](../images/bn/normal-distribution-curve-1.png)
 
-可认为构造正太分布函数，也可通过 `np.random.normal` 函数生成指定均值和标准差的正态分布随机数，然后基于 `matplotlib + seaborn` 库 `kdeplot`函数绘制概率密度曲线。示例代码如下所示：
+可认为构造正态分布函数，也可通过 `np.random.normal` 函数生成指定均值和标准差的正态分布随机数，然后基于 `matplotlib + seaborn` 库 `kdeplot`函数绘制概率密度曲线。示例代码如下所示：
 
 ```py
 import seaborn as sns
@@ -77,7 +77,7 @@ plt.show()
 
 ![不同参数的正态分布函数曲线](../images/bn/normal_distribution_curve.png)
 
-当然也可以自己实现正太分布的概率密度函数，代码和程序输出结果如下:
+当然也可以自己实现正态分布的概率密度函数，代码和程序输出结果如下:
 
 ```python
 import numpy as np
@@ -86,7 +86,7 @@ plt.figure(dpi = 200)
 plt.style.use('seaborn-darkgrid') # 主题设置
 
 def nd_func(x, sigma, mu):
-  	"""自定义实现正太分布的概率密度函数
+  	"""自定义实现正态分布的概率密度函数
   	"""
     a = - (x-mu)**2 / (2*sigma*sigma)
     f = np.exp(a) / (sigma * np.sqrt(2*np.pi))

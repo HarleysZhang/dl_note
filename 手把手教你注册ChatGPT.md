@@ -1,3 +1,14 @@
+- [一，何为 ChatGPT](#一何为-chatgpt)
+- [二，ChatGPT 注册步骤](#二chatgpt-注册步骤)
+  - [2.1，准备条件](#21准备条件)
+  - [2.2，注册虚拟电话号码](#22注册虚拟电话号码)
+  - [2.3，注册 OpenAI 账号](#23注册-openai-账号)
+- [三，使用 ChatGPT 官网服务](#三使用-chatgpt-官网服务)
+- [四，使用 ChatGPT App](#四使用-chatgpt-app)
+- [五，使用 ChatGPT Python API](#五使用-chatgpt-python-api)
+
+> 本文给出了 ChatGPT 的详细注册及使用教程，称得上是保姆级别的丰富图文教程。
+
 ## 一，何为 ChatGPT
 
 ChatGPT 是一个基于 GPT-3 模型的对话系统，它主要用于处理自然语言对话。通过训练模型来模拟人类的语言行为，ChatGPT 可以通过文本交流与用户互动。它可以用于各种场景，包括聊天机器人、智能客服系统等。基于 GPT-3 模型的对话系统通常会有很好的语言生成能力，并能够模拟人类的语言行为。
@@ -53,4 +64,71 @@ ChatGPT 虽然才发布几天时间，但是就已经火爆全网了，截止目
 
 <img src="./images/chatgpt/sigin_ip_openai.png" alt="注册openai账号1" style="zoom:33%;" />
 
-## 三，使用 ChatGPT
+## 三，使用 ChatGPT 官网服务
+> 注意：经常官网服务经常会拥挤，并出现如下提示，刷新重新进入即可。
+> "We're experiencing exceptionally high demand. Please hang tight as we work on scaling our systems."
+
+1. 访问 [OpenAI 官网](https://openai.com/)，点击网页左边底部的 “Chat GPT”，进入 [ChatGPT 页面](https://chat.openai.com/chat)。
+2. 点击 “TRY CHATGPT”，进入 ChatGPT 服务页面。
+3. 在“Input”中输入你要和Chat GPT聊天的信息，然后点击“Send”。
+4. Chat GPT会根据你的输入回复一条信息，你可以根据回复的信息继续聊天。
+
+![chatgpt_network](./images/chatgpt/chatgpt_network.png)
+
+## 四，使用 ChatGPT App
+
+github 有个 stars 数目比较多的开源项目[ChatGPT](https://github.com/lencx/ChatGPT)，实现了将 ChatGPT 服务封装成 App 的功能，并支持 Mac, Windows 和 Linux 平台。
+
+这里以 Mac 系统的安装使用为例，其他平台类似，都很简单。
+
+1. 通过下载 [ChatGPT dmg安装包]( https://github.com/lencx/ChatGPT/releases/download/v0.10.3/ChatGPT_0.10.3_x64.dmg)方式直接双击安装。
+2. 通过 Homebrew 服务下载安装。
+
+```shell
+brew tap lencx/chatgpt https://github.com/lencx/ChatGPT.git
+brew install --cask chatgpt --no-quarantine
+```
+
+下载安装 chatgpt app 后，打开软件会要求你先输入 openai 账户邮箱和密码，然后就可以直接使用了，App 界面如下所示。
+
+![chatgpt_app](./images/chatgpt/chatgpt_app_use.png)
+
+## 五，使用 ChatGPT Python API
+
+在前面的步骤完成注册 OpenAI 账户并申请 API Key 后，我们就可以愉快的玩耍 ChatGPT 了，这里通过 Python API 的形式调用 ChatGPT 服务。可以通过 [OpenAI 账户](https://platform.openai.com/account/org-settings) 找到自己 `API keys`，具体如下图所示。
+
+![api_key1](images/chatgpt/api_key.png)
+![api_key2](images/chatgpt/api_key2.png)
+
+然后创建以下 Python 代码并运行。
+
+```python
+import openai
+
+# Set the API key
+openai.api_key = "YOUR_API_KEY"
+
+# Define the model and prompt
+model_engine = "text-davinci-003"
+prompt = "What is the capital of France?"
+
+# Generate a response
+completion = openai.Completion.create(
+    engine=model_engine,
+    prompt=prompt,
+    max_tokens=1024,
+    n=1,
+    stop=None,
+    temperature=0.5,
+)
+
+# Get the response text
+message = completion.choices[0].text
+
+print(message)
+```
+
+在上面的代码中，您需要将 `YOUR_API_KEY` 替换为您的 `API Key`，然后您可以运行代码并检查生成的输出。您可以通过更改提示文本和其他参数来生成不同的响应（回答）。
+
+![result](./images/chatgpt/result.png)
+

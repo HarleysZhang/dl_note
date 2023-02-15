@@ -114,7 +114,7 @@ if __name__ == '__main__':
 训练深度神经网络的复杂性在于，因为前面的层的参数会发生变化导致每层输入的分布在训练过程中会发生变化。这又导致模型需要需要较低的学习率和非常谨慎的参数初始化策略，从而减慢了训练速度，并且具有饱和非线性的模型训练起来也非常困难。
 
 网络层输入数据分布发生变化的这种现象称为**内部协变量转移**，BN 就是来解决这个问题。
- 
+
 ### 2.1，如何理解 Internal Covariate Shift
 
 在深度神经网络训练的过程中，由于网络中参数变化而引起网络中间层数据分布发生变化的这一过程被称在论文中称之为**内部协变量偏移**（Internal Covariate Shift）。
@@ -187,12 +187,6 @@ z_i &= \gamma n_i + \beta = \frac{\gamma}{\sqrt{\sigma^2_B + \epsilon}}x_i + (\b
 |    $z_i$     |  线性变换后的单样本  |  [1, n]  |
 |   $\delta$   |    反向传入的误差    |  [m, n]  |
 
-其中：
-$$
-z_i = \gamma n_i + \beta = \frac{\gamma}{\sqrt{\sigma^2_B + \epsilon}}x_i + (\beta - \frac{\gamma\mu_{B}}{\sqrt{\sigma^2_B + \epsilon}}) \nonumber
-$$
-可以看出 `BN` 本质上是做线性变换。
-
 ### 3.2，BN 层如何工作
 
 在论文中，训练一个带 `BN` 层的网络， `BN` 算法步骤如下图所示:
@@ -205,7 +199,7 @@ $$
 
 > 图片来源[这里](https://towardsdatascience.com/batch-norm-explained-visually-how-it-works-and-why-neural-networks-need-it-b18919692739)。
 
-注意，图中计算均值与方差的无偏估计方法是吴恩达在 Coursera 上的 Deep Learning 课程上提出的方法：对 train 阶段每个 batch 计算的 mean/variance 采用**指数加权平均**来得到 test 阶段 mean/variance 的估计。
+注意，图中计算模型推理时 BN 层均值与方差的无偏估计方法，是吴恩达在 Coursera 上的 Deep Learning 课程上提出的方法：对 train 阶段每个 batch 计算的 mean/variance 采用**指数加权平均**来得到 test 阶段 mean/variance 的估计。
 
 在训练期间，它只是计算此 EMA，但不对其执行任何操作。在训练结束时，它只是将该值保存为层状态的一部分，以供在推理阶段使用。
 
@@ -217,9 +211,11 @@ $$
 
 BN 的反向传播过程中，会更新 BN 层中的所有 $\beta$ 和 $\gamma$ 参数。
 
-### 3.3，训练和推理式的 BN 层
+### 3.3，推理时的 BN 层
 
-批量归一化（batch normalization）的“批量”两个字，表示在模型的迭代训练过程中，BN 首先计算小批量（ mini-batch，如 32）的均值和方差。但是，在推理过程中，我们只有一个样本，而不是一个小批量。在这种情况下，我们该如何获得均值和方差呢？
+批量归一化（batch normalization）的“批量”两个字，表示在模型的迭代训练过程中，BN 首先计算小批量（ mini-batch，如 32）的均值和方差。但是，在推理过程中，我们只有一个样本，而不是一个小批量。即在模型训练的时候，均值 $\mu$、方差 $\sigma^2$、$\gamma$、$\beta$ 是一直在更新的，但是，在推理的时候，这四个值都是固定了的。
+
+虽然 $\gamma$、$\beta$  参数可通过模型训练后得到，但是，有一个问题，模型推理时 BN 层的均值和方差应该如何获得呢？
 
 第一种方法是，使用的均值和方差数据是在训练过程中样本值的平均，即：
 
@@ -237,7 +233,13 @@ $$\begin{aligned}
 \sigma_{mov_{i}} &= \alpha \cdot \sigma_{mov_{i}} + (1-\alpha) \cdot \sigma_i \nonumber \\
 \end{aligned}$$
 
-推理或测试时，直接使用模型文件中保存的 $\mu_{mov_{i}}$ 和 $\sigma_{mov_{i}}$ 的值即可。
+模型推理或测试时，直接使用模型文件中保存的 $\mu_{mov_{i}}$ 和 $\sigma_{mov_{i}}$ 的值即可。
+
+同时，上面 `BN` 的计算公式（算法 1）可以变形为：
+$$
+z_i = \gamma n_i + \beta = \frac{\gamma}{\sqrt{\sigma^2_B + \epsilon}}x_i + (\beta - \frac{\gamma\mu_{B}}{\sqrt{\sigma^2_B + \epsilon}}) = ax_i + b\nonumber
+$$
+因为推理时，均值 $\mu$、方差 $\sigma^2$、$\gamma$、$\beta$ 值固定，因此可以看出推理时 `BN` 本质上是做线性变换，且 $a$、$b$ 都是常数。
 
 ### 3.4，实验
 

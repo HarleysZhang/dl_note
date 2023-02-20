@@ -1,4 +1,5 @@
 *.pdf
 
+openai-quickstart-python/
 .history/
 .DS_Store

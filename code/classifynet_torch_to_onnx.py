@@ -125,7 +125,3 @@ if __name__ == '__main__':
         net_torch.to(device)
     
     main(net_torch, net_name, input_shape)
-
-
-
-torch.optim.SGD

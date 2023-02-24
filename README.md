@@ -15,6 +15,7 @@
 2. [神经网络基础部件-卷积层详解](./2-deep_learning_basic/神经网络基础部件-卷积层详解.md)
 3. [神经网络基础部件-BN层详解](./2-deep_learning_basic/神经网络基础部件-BN层详解.md)
 4. [神经网络基础部件-激活函数详解](./2-deep_learning_basic/神经网络基础部件-激活函数详解.md)
+5. [神经网络基础部件-Transformer 详解](./2-deep_learning_basic/神经网络基础部件-Transformer详解.md)
 
 2，**深度学习基础**：
 - [反向传播与梯度下降详解](2-deep_learning_basic/反向传播与梯度下降详解.md)
@@ -29,7 +30,18 @@
 4. [深度学习炼丹-超参数设定](./3-deep_learning_alchemy/深度学习炼丹-超参数设定.md)
 5. [深度学习炼丹-正则化策略](./3-deep_learning_alchemy/深度学习炼丹-正则化策略.md)
 
-## 四，深度学习推理框架
+## 四，深度学习模型压缩
+
+1. [深度学习模型压缩算法综述](./4-model_compression/深度学习模型压缩方法综述.md)
+2. [模型压缩-轻量化网络设计与部署总结](./4-model_compression/模型压缩-模型压缩-轻量级网络详解.md)
+3. [模型压缩-剪枝算法详解](./4-model_compression/模型压缩-剪枝算法详解.md)
+4. [模型压缩-知识蒸馏详解](./4-model_compression/模型压缩-知识蒸馏详解.md)
+5. [模型压缩-量化算法详解](./4-model_compression/模型压缩-量化算法详解.md)
+
+
+## 五，深度学习推理框架
+
+gemm 算法解析与优化、neon、cuda 等内容。
 
 ## 参考资料
 

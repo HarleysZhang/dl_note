@@ -1,8 +1,58 @@
-## 一，视频结构化定义
+- [一，视频结构化概述](#一视频结构化概述)
+- [二，视频结构化应用任务开源框架](#二视频结构化应用任务开源框架)
+- [三，任务pipeline框图总结](#三任务pipeline框图总结)
+- [四，人群分析框架](#四人群分析框架)
+- [五，人群行为算法实现](#五人群行为算法实现)
+  - [3.1，跨线算法](#31跨线算法)
+  - [3.2，入侵算法](#32入侵算法)
+  - [3.3，滞留算法](#33滞留算法)
+- [参考资料](#参考资料)
 
-所谓视频结构化，就是利用深度学习技术对视频进行逐帧分析，解析出视频帧中感兴趣的目标、并且进一步推理出每个目标感兴趣的属性，最后将这些目标、属性保存成**结构化数据**（能与每帧关联起来）。视频结构化的应用场景有很多，比如智能安防、智能交通、智能医疗、智能零售等。
+## 一，视频结构化概述
 
-## 二，人群分析框架
+所谓视频结构化，就是利用深度学习技术对**视频进行逐帧分析**，解析出视频帧中感兴趣的目标、并且进一步推理出每个目标感兴趣的属性，最后将这些目标、属性保存成**结构化数据**（能与每帧关联起来）。视频结构化的应用场景有很多，比如智能安防、智能交通、智能医疗、智能零售等。
+
+## 二，视频结构化应用任务开源框架
+
+1，[DeepStream](https://developer.nvidia.com/deepstream-sdk)
+
+DeepStream SDK 框架主要针对的是流媒体视频的 AI 应用开发，可以快速开发和部署视觉 AI 应用和服务。提供视频解码/编码、图像缩放和转换等服务，可以用来构建智能视频分析 (IVA) 管道
+
+这个框架**不开源**，需要自己英伟达[官网](https://developer.nvidia.com/deepstream-sdk)下载，初步看了下安装教程，一如既往的复杂繁琐啊！为了简单省事，还是使用官网提供的 docker 镜像去试用吧。
+
+![DeepStream](../images/video_structual/deepstream_docker.png)
+
+2，[MegFlow](https://github.com/MegEngine/MegFlow)
+
+也是视频 AI 应用快速开发和落地的框架，其直接用 Python 搭建计算图，提供 pipeline 搭建、测试、调试、部署、结果可视化一条龙服务。
+
+**但是**框架使用 `Rust` 编写，提供 `Python` 接口，其根本目的是为了在 to b 业务中，方便研究员快速搭建功能 `pipeline`。
+
+3，[taskflow](https://github.com/taskflow/taskflow) 
+
+taskflow 旨在帮助快速编写**并行和异构任务**程序。在处理复杂的并行工作负载方面，Taskflow 比许多现有的任务编程框架更快、更具表现力并且更容易进行嵌入式集成。
+
+其并不是针对视频AI应用任务，但是 `task` 流的设计，是类似于视频 AI 应用开发的各个模块串成 `pipeline` 的思想。
+
+![taskflow](../images/video_structual/taskflow.png)
+
+4，[VideoPipe](https://github.com/sherlockchou86/video_pipe_c): VideoPipe 是一个旨在使 CV 领域的模型集成更简单的视频结构化乎应用开发框架，它不是深度学习推理的框架，如 tensorflow、tensorrt。初步看了代码，发现还处于初始状态，代码目录结构不是很清晰，功能模块还比较少，主要是目标检测、多目标跟踪模块的代码，还有一些基础的工具函数，如日志、配置文件解析等。
+
+相对其他 AI 流媒体框架，VideoPipe 的功能特色是提供 `pipeline` 运行状态可视化服务，包括各个节点连接流程可视化、运行 `fps`，`cache size`，pipeline 的 `latency`。但是，功能还比较初级，可用于学习和参考。
+
+![VideoPipe](../images/video_structual/video_structual.png)
+
+> `GStreamer` 是用于创建流媒体应用程序的框架。
+
+## 三，任务pipeline框图总结
+
+一般视频结构化应用任务的 `pipeline` 都可抽象总结为下图所示：
+
+![pipeline](../images/video_structual/video_ai_pipeline.png)
+
+主要涉及的技术栈包括：视频编解码（h.264 协议）、帧图像预处理（OpenCV）、目标检测、分类和分割等算法模型、人群行为分析策略算法、质量分析策略算法、目标筛选策略算法（显存优化）、多线程编程等技术。
+
+## 四，人群分析框架
 
 以典型的人群分析任务为例，其 `pipeline` 如下图所示：
 
@@ -27,7 +77,7 @@
 
 ![社交距离算法图例](../images/video_structual/social_distance.png)
 
-## 三，人群行为算法实现
+## 五，人群行为算法实现
 
 ### 3.1，跨线算法
 
@@ -122,16 +172,6 @@ plot_lines(p1, q1, p2, q2)
 ### 3.2，入侵算法
 
 ### 3.3，滞留算法
-
-## 四，视频结构化应用任务开源框架
-
-1. [DeepStream](https://developer.nvidia.com/deepstream-sdk)
-2. [MegFlow](https://github.com/MegEngine/MegFlow)
-3. [taskflow](https://github.com/taskflow/taskflow) 
-4. [VideoPipe](https://github.com/sherlockchou86/video_pipe_c): VideoPipe 是一个旨在使 CV 领域的模型集成更简单的视频结构化乎应用开发框架，它不是深度学习推理的框架，如 tensorflow、tensorrt。
-
-## 五，任务pipeline框图总结
-
 
 ## 参考资料
 

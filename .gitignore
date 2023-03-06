@@ -1,9 +1,9 @@
 *.pdf
-
-openai-quickstart-python/
 .history/
 .DS_Store
-.images/interview
+
+code/openai-py/
+images/interview/
 docs/
-images/interview
+
 视觉算法面试笔记.md

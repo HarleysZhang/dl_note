@@ -3,3 +3,7 @@
 openai-quickstart-python/
 .history/
 .DS_Store
+.images/interview
+docs/
+images/interview
+视觉算法面试笔记.md

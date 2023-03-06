@@ -4,6 +4,7 @@
 - [三，深度学习炼丹](#三深度学习炼丹)
 - [四，深度学习模型压缩](#四深度学习模型压缩)
 - [五，深度学习推理框架](#五深度学习推理框架)
+- [六，进阶课程](#六进阶课程)
 - [参考资料](#参考资料)
 
 ## 项目概述
@@ -50,11 +51,18 @@
 
 `gemm` 算法解析与优化、`neon`、`cuda` 编程等内容，以及 `ncnn` 框架代码解析总结。
 
+## 六，进阶课程
+
+推荐几个比较好的深度学习模型压缩与加速的仓库和课程资料：
+
+1. [awesome-emdl](https://github.com/EMDL/awesome-emdl): 嵌入式与移动端深度学习研究资料合集。
+2. [AI-System](https://github.com/microsoft/AI-System/tree/main/Textbook): 深度学习系统。
 ## 参考资料
 
 - 《深度学习》
 - 《机器学习》
 - 《动手学深度学习》
 - [《AI-EDU》](https://microsoft.github.io/ai-edu/index.html)
+- [《AI-System》](https://github.com/microsoft/AI-System/tree/main/Textbook)
 - [《PyTorch_tutorial_0.0.5_余霆嵩》](https://github.com/TingsongYu/PyTorch_Tutorial)
 - [《动手编写深度学习推理框架 Planer》](https://github.com/Image-Py/planer)

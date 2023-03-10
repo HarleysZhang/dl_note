@@ -91,7 +91,7 @@ def fibonacci(n):
 print(fibonacci(10))
 print(fibonacci(20))
 
-##################### 1，Python 多态 #########################
+##################### 1，面向对象基础编程-继承和多态 #########################
 import math
 
 class Shape:
@@ -145,7 +145,7 @@ The class name is type Circle
 Area: 78.54 78.53981633974483
 """
 
-##################### 2，Python @property #########################
+##################### 2，面向对象基础编程-@property #########################
 class Person:
     def __init__(self, age):
         self._age = age
@@ -186,7 +186,7 @@ print(person.age,",",person.age_group)  # Output: 70,Age range: 65 or over
 
 # person.age = -10  # Raises ValueError
 
-##################### 3，面向对象编程-多重继承 #########################
+##################### 3，面向对象基础编程-多重继承 #########################
 class A:
     def method1(self):
         print("A method1")
@@ -212,4 +212,100 @@ B method2
 C method3
 """
 
-##################### 4，面向对象编程-定制类 #########################
+##################### 4，面向对象高级编程-定制类 #########################
+class IntList:
+    def __init__(self, data):
+        self._data = data
+
+    def __len__(self):
+        return len(self._data)
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            return self._data[index]
+        elif isinstance(index, slice):
+            return IntList(self._data[index])
+
+    def __setitem__(self, index, value):
+        if isinstance(index, int) and isinstance(value, int):
+            self._data[index] = value
+        elif isinstance(index, slice) and isinstance(value, IntList):
+            self._data[index] = value._data
+
+    def __delitem__(self, index):
+        if isinstance(index, int):
+            del self._data[index]
+        elif isinstance(index, slice):
+            del self._data[index]
+
+    def __contains__(self, item):
+        return item in self._data
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __repr__(self):
+        return str(self._data)
+
+int_list = IntList([1, 2, 3, 4, 5])
+print(len(int_list))  # 输出 5
+print(int_list[0])  # 输出 1
+print(int_list[1:4])  # 输出 [2, 3, 4]
+int_list[0] = 10
+print(int_list)  # 输出 [10, 2, 3, 4, 5]
+int_list[1:4] = IntList([20, 30])
+print(int_list)  # 输出 [10, 20, 30, 5]
+del int_list[1]
+print(int_list)  # 输出 [10, 30, 5]
+print(30 in int_list)  # 输出 True
+for item in int_list:
+    print(item)  # 依次输出 10, 30, 5
+
+
+##################### 5，面向对象高级编程-元类 #########################
+import datetime
+class Meta(type):
+    def __init__(cls, name, bases, attrs):
+        cls.created_at = datetime.datetime.now()
+        super().__init__(name, bases, attrs)
+
+class MyClass(metaclass=Meta):
+    @property
+    def name(self):
+        return "MyClass class"
+
+# 输出 MyClass class create at time: 2023-03-07 00:39:38.628766
+print(MyClass().name, "create at time:", MyClass.created_at)
+
+##################### 6，面向对象编程-实例方法、类方法和静态方法 #########################
+
+class StringUtils:
+    @staticmethod
+    def reverse_string(string):
+        """用于反转给定的字符串"""
+        return string[::-1]
+
+    @classmethod
+    def count_characters(cls, string):
+        """用于计算给定字符串的字符数"""
+        return len(string)
+
+    def __init__(self, string):
+        self.string = string
+
+    def reverse_instance_string(self):
+        """用于反转字符串对象中的字符串"""
+        return self.string[::-1]
+
+# 使用工具类
+print(StringUtils.reverse_string("Hello, world!"))
+
+print(StringUtils.count_characters("Hello, world!"))
+
+s = StringUtils("Hello, world!")
+print(s.reverse_instance_string())
+""" 
+!dlrow ,olleH
+13
+!dlrow ,olleH
+"""

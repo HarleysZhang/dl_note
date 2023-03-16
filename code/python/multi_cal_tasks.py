@@ -1,3 +1,9 @@
+# -*- coding  : utf-8 -*-
+# Author: honggao.zhang + chatgpt
+# Create: 2023-03-07
+# Version     : 0.1.0
+# Description: 矩阵计算的 cpu 型密集任务，单进程、多进程和进程池创建指定数量多进程的性能对比
+
 import threading, multiprocessing
 import time
 import numpy as np

@@ -1,6 +1,7 @@
-# coding: utf-8
+# -*- coding  : utf-8 -*-
 # Author: honggao.zhang + chatgpt
-# Date: 2023-03-07
+# Create: 2023-03-07
+# Version     : 0.1.0
 # Description: 下载网页图片的 I/O 型密集任务，单线程、多线程和多进程的性能对比
 
 import time, os

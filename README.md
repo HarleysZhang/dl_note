@@ -36,7 +36,7 @@
 1. [深度学习炼丹-数据标准化](./3-deep_learning_alchemy/深度学习炼丹-数据标准化.md)
 2. [深度学习炼丹-数据增强](./3-deep_learning_alchemy/深度学习炼丹-数据增强.md)
 3. [深度学习炼丹-不平衡样本的处理](./3-deep_learning_alchemy/深度学习炼丹-不平衡样本的处理.md)
-4. [深度学习炼丹-超参数设定](./3-deep_learning_alchemy/深度学习炼丹-超参数设定.md)
+4. [深度学习炼丹-超参数设定](./3-deep_learning_alchemy/深度学习炼丹-超参数调整.md)
 5. [深度学习炼丹-正则化策略](./3-deep_learning_alchemy/深度学习炼丹-正则化策略.md)
 
 ## 四，深度学习模型压缩
@@ -45,7 +45,7 @@
 2. [模型压缩-轻量化网络设计与部署总结](./4-model_compression/模型压缩-轻量化网络详解.md)
 3. [模型压缩-剪枝算法详解](./4-model_compression/模型压缩-剪枝算法详解.md)
 4. [模型压缩-知识蒸馏详解](./4-model_compression/模型压缩-知识蒸馏详解.md)
-5. [模型压缩-量化算法详解](./4-model_compression/模型压缩-量化算法详解.md)
+5. [模型压缩-量化算法详解](./4-model_compression/模型压缩-网络量化概述.md)
 
 ## 五，深度学习推理框架
 

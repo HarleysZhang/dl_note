@@ -20,14 +20,14 @@
 
 1，**神经网络基础部件**：
 
-1. [神经网络基础部件-参数初始化详解](./2-deep_learning_basic/神经网络基础部件-参数初始化详解.md)
-2. [神经网络基础部件-卷积层详解](./2-deep_learning_basic/神经网络基础部件-卷积层详解.md)
-3. [神经网络基础部件-BN 层详解](./2-deep_learning_basic/神经网络基础部件-BN层详解.md)
-4. [神经网络基础部件-激活函数详解](./2-deep_learning_basic/神经网络基础部件-激活函数详解.md)
-5. [神经网络基础部件-Transformer 详解](./2-deep_learning_basic/神经网络基础部件-Transformer详解.md)
+1. [神经网络基础部件-卷积层详解](./2-deep_learning_basic/神经网络基础部件-卷积层详解.md)
+2. [神经网络基础部件-BN 层详解](./2-deep_learning_basic/神经网络基础部件-BN层详解.md)
+3. [神经网络基础部件-激活函数详解](./2-deep_learning_basic/神经网络基础部件-激活函数详解.md)
+4. [神经网络基础部件-Transformer 详解](./2-deep_learning_basic/神经网络基础部件-Transformer详解.md)
 
 2，**深度学习基础**：
 - [反向传播与梯度下降详解](2-deep_learning_basic/反向传播与梯度下降详解.md)
+- [深度学习基础-参数初始化详解](./2-deep_learning_basic/深度学习基础-参数初始化详解.md)
 - [深度学习基础-损失函数详解](./2-deep_learning_basic/深度学习基础-损失函数详解.md)
 - [深度学习基础-优化算法详解](./2-deep_learning_basic/深度学习基础-优化算法详解.md)
 

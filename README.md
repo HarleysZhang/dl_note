@@ -3,8 +3,9 @@
 - [二，神经网络基础部件](#二神经网络基础部件)
 - [三，深度学习炼丹](#三深度学习炼丹)
 - [四，深度学习模型压缩](#四深度学习模型压缩)
-- [五，深度学习推理框架](#五深度学习推理框架)
-- [六，进阶课程](#六进阶课程)
+- [五，模型推理部署](#五模型推理部署)
+- [六，异构计算](#六异构计算)
+- [七，进阶课程](#七进阶课程)
 - [参考资料](#参考资料)
 
 ## 项目概述
@@ -41,22 +42,44 @@
 
 ## 四，深度学习模型压缩
 
-1. [深度学习模型压缩算法综述](./4-model_compression/深度学习模型压缩方法综述.md)
+1. [深度学习模型压缩算法综述](./4-model_compression/深度学习模型压缩方法概述.md)
 2. [模型压缩-轻量化网络设计与部署总结](./4-model_compression/模型压缩-轻量化网络详解.md)
 3. [模型压缩-剪枝算法详解](./4-model_compression/模型压缩-剪枝算法详解.md)
 4. [模型压缩-知识蒸馏详解](./4-model_compression/模型压缩-知识蒸馏详解.md)
 5. [模型压缩-量化算法详解](./4-model_compression/模型压缩-网络量化概述.md)
 
-## 五，深度学习推理框架
+## 五，模型推理部署
 
-`gemm` 算法解析与优化、`neon`、`cuda` 编程等内容，以及 `ncnn` 框架代码解析总结。
+1，模型部署：
 
-## 六，进阶课程
+- [卷积神经网络复杂度分析](./5-model_deploy/卷积神经网络复杂度分析.md)
+- [模型压缩部署概述](./5-model_deploy/模型压缩部署概述.md)
+- [FasterTransformer 速览](./5-model_deploy/FasterTransformer速览.md)
 
-推荐几个比较好的深度学习模型压缩与加速的仓库和课程资料：
+2，模型推理：
+
+- [NCNN 框架概述](./5-model_deploy/推理框架NCNN基础概述.md)
+- [矩阵乘法详解](./5-model_deploy/卷积算法优化.md)
+- [模型推理加速技巧-融合卷积和BN层](./5-model_deploy/模型推理加速技巧-融合卷积和BN层.md)
+
+## 六，异构计算
+
+1. 移动端异构计算：`neon` 编程
+2. GPU 端异构计算：`cuda` 编程
+
+通用矩阵乘法 `gemm` 算法解析与优化、`neon`、`cuda` 编程等内容，以及 `ncnn` 框架代码解析总结。
+
+## 七，进阶课程
+
+1，推荐几个比较好的深度学习模型压缩与加速的仓库和课程资料：
 
 1. [awesome-emdl](https://github.com/EMDL/awesome-emdl): 嵌入式与移动端深度学习研究资料合集。
 2. [AI-System](https://github.com/microsoft/AI-System/tree/main/Textbook): 深度学习系统。
+
+2，一些笔记好的博客链接：
+
+- [The Illustrated Transformer](http://jalammar.github.io/illustrated-transformer/): 国内比较好的博客大都参考这篇文章。
+- [C++ 并发编程（从C++11到C++17）](https://paul.pub/cpp-concurrency/): 不错的 C++ 并发编程教程。 
 ## 参考资料
 
 - 《深度学习》

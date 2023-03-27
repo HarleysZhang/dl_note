@@ -24,11 +24,24 @@ class Conv2D:
             for oc in range(self.output_channels):
                 for r in range(height):
                     for c in range(width):
+                        # kernel 矩阵和 input 矩阵的, 默认 array1*array2 就是对应元素的乘积
+                        padded_input[b, :, r: r+self.kernel_size, c: c+self.kernel_size] * self.weights[oc, :, :, :]
                         output[b, oc, r, c] = np.sum(
                             padded_input[b, :, r:r+self.kernel_size, c:c+self.kernel_size]
                             * self.weights[oc]) + self.bias[oc]
         return output
 
+stride = 1
+kernel_size = 3
+for bs in range(batch_size):
+    for oc in range(output_channels):
+        output[bs, oc, oh, ow] += bias[oc]
+        for ic in range(input_channels):
+            for oh in range(height):
+                for ow in range(width):
+                    for kh in range(kernel_size):
+                        for kw in range(kernel_size):
+                            output[bs, oc, oh, ow] += input[bs, ic, oh+kh, ow+kw] * weights[oc, ic, kh, kw]
 batch_size = 32
 input_channels = 3
 output_channels = 16

@@ -58,9 +58,15 @@
 
 2，模型推理：
 
-- [NCNN 框架概述](./5-model_deploy/推理框架NCNN基础概述.md)
 - [矩阵乘法详解](./5-model_deploy/卷积算法优化.md)
 - [模型推理加速技巧-融合卷积和BN层](./5-model_deploy/模型推理加速技巧-融合卷积和BN层.md)
+
+3，`ncnn` 框架源码解析：
+
+- [ncnn 源码解析-sample 运行](5-model_deploy/ncnn源码解析/ncnn源码解析-sample运行.md)
+- [ncnn 源码解析-Net 类](5-model_deploy/ncnn源码解析/ncnn源码解析-Net类.md)
+- [ncnn 源码解析-Layer 层](5-model_deploy/ncnn源码解析/ncnn源码解析-Layer层.md)
+- [ncnn 源码解析-常见算子](../5-model_deploy/ncnn源码解析/ncnn源码解析-常见算子.md)
 
 ## 六，异构计算
 
@@ -80,6 +86,9 @@
 
 - [The Illustrated Transformer](http://jalammar.github.io/illustrated-transformer/): 国内比较好的博客大都参考这篇文章。
 - [C++ 并发编程（从C++11到C++17）](https://paul.pub/cpp-concurrency/): 不错的 C++ 并发编程教程。 
+- [What are Diffusion Models?](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
+- [annotated_deep_learning_paper_implementations
+](https://github.com/labmlai/annotated_deep_learning_paper_implementations)
 ## 参考资料
 
 - 《深度学习》

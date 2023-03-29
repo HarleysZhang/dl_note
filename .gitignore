@@ -2,9 +2,11 @@
 .history/
 .DS_Store
 
+6-interview/
+docs/
+
 code/openai-py/
 code/CGraph
 images/interview/
-docs/
 
-6-interview/
+

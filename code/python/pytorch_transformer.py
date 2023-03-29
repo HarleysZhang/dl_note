@@ -57,35 +57,35 @@ tensor([[ 0.1137, -0.4891, -0.2531, -0.6857, -0.2842],
 """
 
 ################## word embedding ##################
-import torch
-import torch.nn as nn
-from torchtext.vocab import Vocab
+# import torch
+# import torch.nn as nn
+# from torchtext.vocab import Vocab
 
-from collections import Counter
+# from collections import Counter
 
-text = "hello world hello" # 假设我们有一个文本
-counter = Counter(text.split()) # 统计每个单词的出现次数
-vocab = Vocab(counter) # 创建词汇表
+# text = "hello world hello" # 假设我们有一个文本
+# counter = Counter(text.split()) # 统计每个单词的出现次数
+# vocab = Vocab(counter) # 创建词汇表
 
-# 构建嵌入层
-vocab_size = 1000
-embedding_dim = 100
-embedding_layer = nn.Embedding(vocab_size, embedding_dim)
+# # 构建嵌入层
+# vocab_size = 1000
+# embedding_dim = 100
+# embedding_layer = nn.Embedding(vocab_size, embedding_dim)
 
-# 假设我们有一个输入单词列表，每个单词都是从词汇表中随机选择的
-input_words = ["hello", "world", "this", "is", "a", "test"]
+# # 假设我们有一个输入单词列表，每个单词都是从词汇表中随机选择的
+# input_words = ["hello", "world", "this", "is", "a", "test"]
 
-# 将单词转换为索引列表
-word_indexes = [vocab.index(word) for word in input_words]
+# # 将单词转换为索引列表
+# word_indexes = [vocab.index(word) for word in input_words]
 
-# 将索引列表转换为PyTorch张量
-word_indexes_tensor = torch.LongTensor(word_indexes)
+# # 将索引列表转换为PyTorch张量
+# word_indexes_tensor = torch.LongTensor(word_indexes)
 
-# 将索引列表输入嵌入层以获取嵌入向量
-word_embeddings = embedding_layer(word_indexes_tensor)
+# # 将索引列表输入嵌入层以获取嵌入向量
+# word_embeddings = embedding_layer(word_indexes_tensor)
 
-# 输出嵌入向量
-print(word_embeddings)
+# # 输出嵌入向量
+# print(word_embeddings)
 
 ################## 3，ScaleDotProductAttention 层实现 ##################
 class ScaleDotProductAttention(nn.Module):
@@ -192,3 +192,278 @@ class MultiHeadAttention(nn.Module):
         concat_tensor = sa_output.transpose(1, 2).contiguous().view(batch_size, seq_len, d_model)
         
         return concat_tensor
+    
+################## 5, Layer Norm 层实现 ##################
+class LayerNorm(nn.Module):
+    def __init__(self, d_model, eps=1e-5):
+        super(LayerNorm, self).__init__()
+        self.gamma = nn.Parameter(torch.ones(d_model))
+        self.beta = nn.Parameter(torch.zeros(d_model))
+        self.eps = eps
+    
+    def forward(self, x):
+        # 1，计算均值和标准差
+        mean = x.mean(-1, keepdim=True) # '-1' means last dimension. 
+        var = x.var(-1, keepdim=True)
+        # 2，应用缩放和偏移系数
+        out = (x - mean) / torch.sqrt(var + self.eps)
+        out = self.gamma * out + self.beta
+        
+        return out
+
+# NLP Example
+batch, sentence_length, embedding_dim = 20, 5, 10
+embedding = torch.randn(batch, sentence_length, embedding_dim)
+
+# 1，Activate nn.LayerNorm module
+layer_norm1 = nn.LayerNorm(embedding_dim)
+pytorch_ln_out = layer_norm1(embedding)
+
+# 2，Activate my nn.LayerNorm module
+layer_norm2 = LayerNorm(embedding_dim)
+my_ln_out = layer_norm2(embedding)
+
+# 比较结果
+print(torch.allclose(pytorch_ln_out, my_ln_out, rtol=0.1,atol=0.01))  # 输出 True
+################## 6, Positionwise Feed Forward 层实现 ##################
+class PositionwiseFeedForward(nn.Module):
+    def __init__(self, d_model, ffn_hidden, drop_prob=0.1):
+        super(PositionwiseFeedForward, self).__init__()
+        self.fc1 = nn.Linear(d_model, ffn_hidden)
+        self.fc2 = nn.Linear(ffn_hidden, d_model)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(drop_prob)
+    
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.fc2(x)
+        
+        return x
+
+################## 7, TransformerEmbedding 层实现 ##################
+class PositionalEncoding(nn.Module):
+    """
+    compute sinusoid encoding.
+    """
+    def __init__(self, d_model, max_len, device):
+        """
+        constructor of sinusoid encoding class
+
+        :param d_model: dimension of model
+        :param max_len: max sequence length
+        :param device: hardware device setting
+        """
+        super(PositionalEncoding, self).__init__()
+
+        # same size with input matrix (for adding with input matrix)
+        self.encoding = torch.zeros(max_len, d_model, device=device)
+        self.encoding.requires_grad = False  # we don't need to compute gradient
+
+        pos = torch.arange(0, max_len, device=device)
+        pos = pos.float().unsqueeze(dim=1)
+        # 1D => 2D unsqueeze to represent word's position
+
+        _2i = torch.arange(0, d_model, step=2, device=device).float()
+        # 'i' means index of d_model (e.g. embedding size = 50, 'i' = [0,50])
+        # "step=2" means 'i' multiplied with two (same with 2 * i)
+
+        self.encoding[:, 0::2] = torch.sin(pos / (10000 ** (_2i / d_model)))
+        self.encoding[:, 1::2] = torch.cos(pos / (10000 ** (_2i / d_model)))
+        # compute positional encoding to consider positional information of words
+
+    def forward(self, x):
+        # self.encoding
+        # [max_len = 512, d_model = 512]
+
+        batch_size, seq_len = x.size()
+        # [batch_size = 128, seq_len = 30]
+
+        return self.encoding[:seq_len, :]
+        # [seq_len = 30, d_model = 512]
+        # it will add with tok_emb : [128, 30, 512]         
+
+class TokenEmbedding(nn.Embedding):
+    """
+    Token Embedding using torch.nn
+    they will dense representation of word using weighted matrix
+    """
+
+    def __init__(self, vocab_size, d_model):
+        """
+        class for token embedding that included positional information
+        :param vocab_size: size of vocabulary
+        :param d_model: dimensions of model
+        """
+        super(TokenEmbedding, self).__init__(vocab_size, d_model, padding_idx=1)
+
+class TransformerEmbedding(nn.Module):
+    """
+    token embedding + positional encoding (sinusoid)
+    positional encoding can give positional information to network
+    """
+
+    def __init__(self, vocab_size, max_len, d_model, drop_prob, device):
+        """
+        class for word embedding that included positional information
+        :param vocab_size: size of vocabulary
+        :param d_model: dimensions of model
+        """
+        super(TransformerEmbedding, self).__init__()
+        self.tok_emb = TokenEmbedding(vocab_size, d_model)
+        self.pos_emb = PositionalEncoding(d_model, max_len, device)
+        self.drop_out = nn.Dropout(p=drop_prob)
+
+    def forward(self, x):
+        tok_emb = self.tok_emb(x)
+        pos_emb = self.pos_emb(x)
+        return self.drop_out(tok_emb + pos_emb)
+
+################## 8, EncoderLayer 层实现 ##################
+class EncoderLayer(nn.Module):
+    def __init__(self, d_model, ffn_hidden, n_head, drop_prob=0.1):
+        super(EncoderLayer, self).__init__()
+        self.mha = MultiHeadAttention(d_model, n_head)
+        self.ffn = PositionwiseFeedForward(d_model, ffn_hidden)
+        self.ln1 = LayerNorm(d_model)
+        self.ln2 = LayerNorm(d_model)
+        self.dropout1 = nn.Dropout(drop_prob)
+        self.dropout2 = nn.Dropout(drop_prob)
+    
+    def forward(self, x, mask=None):
+        x_residual1 = x
+        
+        # 1, compute multi-head attention
+        x = self.mha(q=x, k=x, v=x, mask=mask)
+        
+        # 2, add residual connection and apply layer norm
+        x = self.ln1( x_residual1 + self.dropout1(x) )
+        x_residual2 = x
+        
+        # 3, compute position-wise feed forward
+        x = self.ffn(x)
+        
+        # 4, add residual connection and apply layer norm
+        x = self.ln2( x_residual2 + self.dropout2(x) )
+        
+        return x
+
+################## 9, Encoder 实现 ##################
+class Encoder(nn.Module):
+    def __init__(self, enc_voc_size, seq_len, d_model, ffn_hidden, n_head, n_layers, drop_prob=0.1, device='cpu'):
+        super().__init__()
+        self.emb = TransformerEmbedding(vocab_size = enc_voc_size,
+                                        max_len = seq_len,
+                                        d_model = d_model,
+                                        drop_prob = drop_prob,
+                                        device=device)
+        self.layers = nn.ModuleList([EncoderLayer(d_model, ffn_hidden, n_head, drop_prob) 
+                                     for _ in range(n_layers)])
+    
+    def forward(self, x, mask=None):
+        
+        x = self.emb(x)
+        
+        for layer in self.layers:
+            x = layer(x, mask)
+        return x
+
+################## 10, DecoderLayer 层实现 ##################
+class DecoderLayer(nn.Module):
+    def __init__(self, d_model, ffn_hidden, n_head, drop_prob=0.1):
+        super(EncoderLayer, self).__init__()
+        self.mha = MultiHeadAttention(d_model, n_head)
+        self.ln1 = LayerNorm(d_model)
+        self.dropout1 = nn.Dropout(drop_prob)
+        
+        
+        self.ffn = PositionwiseFeedForward(d_model, ffn_hidden)
+        self.ln2 = LayerNorm(d_model)
+        self.dropout2 = nn.Dropout(drop_prob)
+    
+    def forward(self, x, mask=None):
+        x_residual1 = x
+        
+        # 1, compute multi-head attention
+        x = self.mha(q=x, k=x, v=x, mask=mask)
+        
+        # 2, add residual connection and apply layer norm
+        x = self.ln1( x_residual1 + self.dropout1(x) )
+        x_residual2 = x
+        
+        # 3, compute position-wise feed forward
+        x = self.ffn(x)
+        
+        # 4, add residual connection and apply layer norm
+        x = self.ln2( x_residual2 + self.dropout2(x) )
+        
+        return x
+    
+class DecoderLayer(nn.Module):
+
+    def __init__(self, d_model, ffn_hidden, n_head, drop_prob):
+        super(DecoderLayer, self).__init__()
+        self.mha1 = MultiHeadAttention(d_model, n_head)
+        self.ln1 = LayerNorm(d_model)
+        self.dropout1 = nn.Dropout(p=drop_prob)
+        
+        self.mha2 = MultiHeadAttention(d_model, n_head)
+        self.ln2 = LayerNorm(d_model)
+        self.dropout2 = nn.Dropout(p=drop_prob)
+        
+        self.ffn = PositionwiseFeedForward(d_model, ffn_hidden)
+        self.ln3 = LayerNorm(d_model)
+        self.dropout3 = nn.Dropout(p=drop_prob)
+    
+    def forward(self, dec_out, enc_out, trg_mask, src_mask):
+        x_residual1 = dec_out
+        
+        # 1, compute multi-head attention
+        x = self.mha1(q=dec_out, k=dec_out, v=dec_out, mask=trg_mask)
+        
+        # 2, add residual connection and apply layer norm
+        x = self.ln1( x_residual1 + self.dropout1(x) )
+        
+        if enc_out is not None:
+            # 3, compute encoder - decoder attention
+            x_residual2 = x
+            x = self.mha2(q=x, k=enc_out, v=enc_out, mask=src_mask)
+    
+            # 4, add residual connection and apply layer norm
+            x = self.ln2( x_residual2 + self.dropout2(x) )
+        
+        # 5. positionwise feed forward network
+        x_residual3 = x
+        x = self.ffn(x)
+        # 6, add residual connection and apply layer norm
+        x = self.ln3( x_residual3 + self.dropout3(x) )
+        
+        return x
+    
+class Decoder(nn.Module):
+    def __init__(self, dec_voc_size, max_len, d_model, ffn_hidden, n_head, n_layers, drop_prob, device):
+        super().__init__()
+        self.emb = TransformerEmbedding(d_model=d_model,
+                                        drop_prob=drop_prob,
+                                        max_len=max_len,
+                                        vocab_size=dec_voc_size,
+                                        device=device)
+
+        self.layers = nn.ModuleList([DecoderLayer(d_model=d_model,
+                                                  ffn_hidden=ffn_hidden,
+                                                  n_head=n_head,
+                                                  drop_prob=drop_prob)
+                                     for _ in range(n_layers)])
+
+        self.linear = nn.Linear(d_model, dec_voc_size)
+
+    def forward(self, trg, src, trg_mask, src_mask):
+        trg = self.emb(trg)
+
+        for layer in self.layers:
+            trg = layer(trg, src, trg_mask, src_mask)
+
+        # pass to LM head
+        output = self.linear(trg)
+        return output

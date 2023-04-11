@@ -125,21 +125,21 @@ class TransformerEmbedding(nn.Module):
 
 论文中给出用于中英文翻译任务的 `Transformer` 整体架构如下图所示：
 
-![transformer_architecture.png](../images/transfomer/transformer.png)
+![transformer_architecture.png](../../images/transfomer/transformer.png)
 
 可以看出 Transformer 架构**由 Encoder 和 Decoder 两个部分组成**：其中 Encoder 和 Decoder 都是由 N=6 个相同的层堆叠而成。**Multi-Head Attention** 结构是 Transformer 架构的核心结构，其由多个 **Self-Attention** 组成的。
 
 Transformer 架构更详细的可视化图如下所示:
 
-![transformer_encoder_decoder_stack](../images/transfomer/The_transformer_encoder_decoder_stack.png)
+![transformer_encoder_decoder_stack](../../images/transfomer/The_transformer_encoder_decoder_stack.png)
 
-![transformer_resideual_layer_norm](../images/transfomer/transformer_resideual_layer_norm_3.png)
+![transformer_resideual_layer_norm](../../images/transfomer/transformer_resideual_layer_norm_3.png)
 
 ### 2.1，Transformer 发展史
 
 以下是 Transformer 模型（简短）历史中的一些关键节点：
 
-![transformers_chrono](../images/transfomer/transformers_chrono.svg)
+![transformers_chrono](../../images/transfomer/transformers_chrono.svg)
 
 [Transformer 架构](https://arxiv.org/abs/1706.03762) 于 2017 年 6 月推出。原本研究的重点是翻译任务。随后推出了几个有影响力的模型，包括
 
@@ -158,7 +158,7 @@ Transformer 架构更详细的可视化图如下所示:
 
 Transformer 是大模型，除了一些特例（如 DistilBERT）外，实现更好性能的一般策略是增加模型的大小以及预训练的数据量。其中，GPT-2 是使用「transformer 解码器模块」构建的，而 BERT 则是通过「transformer 编码器」模块构建的。
 
-![transformers model_parameters](../images/transfomer/model_parameters.png)
+![transformers model_parameters](../../images/transfomer/model_parameters.png)
 
 | 模型  | 发布时间     | 参数量   | 预训练数据量 |
 | ----- | ------------ | -------- | ------------ |
@@ -170,13 +170,13 @@ Transformer 是大模型，除了一些特例（如 DistilBERT）外，实现更
 
 Encoder 和 Decoder 结构中公共的 `layer` 之一是 `Multi-Head Attention`，其是由多个 `Self-Attention` 并行组成的。Encoder block 只包含一个 Multi-Head Attention，而 Decoder block 包含两个 Multi-Head Attention (其中有一个用到 Masked)。
 
-<img src="../images/transfomer/multi-head-attention2.png" alt="multi-head-attention" style="zoom:60%;" />
+<img src="../../images/transfomer/multi-head-attention2.png" alt="multi-head-attention" style="zoom:60%;" />
 
 ### 3.1，Self-Attention 结构
 
 `Self-Attention` 中文翻译为**自注意力机制**，论文中叫作 `Scale Dot Product Attention`，它是 Transformer 架构的核心，其结构如下图所示：
 
-![../images/transfomer/scale_dot_product_attention.jpeg](../images/transfomer/scale_dot_product_attention.jpeg)
+![../../images/transfomer/scale_dot_product_attention.jpeg](../../images/transfomer/scale_dot_product_attention.jpeg)
 
 那么重点来了，第一个问题：Self-Attention 结构的最初输入 **Q(查询), K(键值), V(值)** 这三个矩阵怎么理解呢？其代表什么，通过什么计算而来？
 
@@ -247,7 +247,7 @@ Multi-Head Attention (`MHA`) 是基于 Self-Attention (`SA`) 的一种变体。M
 
 下图是论文中 Multi-Head Attention 的结构图。
 
-![multi_head_attention](../images/transfomer/multi-head-attention3.png)
+![multi_head_attention](../../images/transfomer/multi-head-attention3.png)
 
 从图中可以看出， `MHA` 结构的计算过程可总结为下述步骤:
 
@@ -337,7 +337,7 @@ class MultiHeadAttention(nn.Module):
 
 Encoder 结构由 $\text{N} = 6$ 个相同的 encoder block 堆叠而成，每一层（ layer）主要有两个子层（sub-layers）: 第一个子层是多头注意力机制（`Multi-Head Attention`），第二个是简单的位置全连接前馈网络（`Positionwise Feed Forward`）。
 
-<img src="../images/transfomer/transformer_architecture.png" style="zoom:50%;" />
+<img src="../../images/transfomer/transformer_architecture.png" style="zoom:50%;" />
 
 上图红色框框出的部分是 Encoder block，很明显其是 Multi-Head Attention、Add&Norm、Feed Forward、Add & Norm 层组成的。另外在论文中 Encoder 组件由 $\text{N} = 6$ 个相同的 encoder block 堆叠而成，且 encoder block 输入矩阵和输出矩阵维度是一样的。
 
@@ -349,7 +349,7 @@ $$
 $$
 Add 比较简单，这里重点讲下 Layer Norm 层。Layer Norm 是一种常用的神经网络归一化技术，可以使得模型训练更加稳定，收敛更快。它的主要作用是对每个样本**在特征维度上进行归一化**，减少了不同特征之间的依赖关系，提高了模型的泛化能力。Layer Norm 层的计算可视化如下图所示:
 
-![Layer Norm](../images/transfomer/layer_norm.jpeg)
+![Layer Norm](../../images/transfomer/layer_norm.jpeg)
 
 Layer Norm 层的 Pytorch 实现代码如下所示:
 
@@ -388,7 +388,7 @@ print(torch.allclose(pytorch_ln_out, my_ln_out, rtol=0.1,atol=0.01))  # 输出 T
 
 ### 4.2，Feed Forward
 
-<img src="../images/transfomer/fpn.png" alt="fpn" style="zoom:50%;" />
+<img src="../../images/transfomer/fpn.png" alt="fpn" style="zoom:50%;" />
 
 Feed Forward 层全称是 Position-wise Feed-Forward Networks，其本质是一个**两层的全连接层**，第一层的激活函数为 Relu，第二层不使用激活函数，计算过程用数学公式可表达为：
 $$
@@ -420,7 +420,7 @@ class PositionwiseFeedForward(nn.Module):
 
 基于前面 Multi-Head Attention, Feed Forward, Add & Norm 的内容我们可以完整的实现 Encoder 结构。
 
-<img src="../images/transfomer/decoders.png" alt="decoders" style="zoom: 50%;" />
+<img src="../../images/transfomer/decoders.png" alt="decoders" style="zoom: 50%;" />
 
 Encoder 组件的 Pytorch 实现代码如下所示:
 
@@ -475,7 +475,7 @@ class Encoder(nn.Module):
 
 ## 五，Decoder 结构
 
-<img src="../images/transfomer/decoders2.png" alt="Decoder" style="zoom:50%;" />
+<img src="../../images/transfomer/decoders2.png" alt="Decoder" style="zoom:50%;" />
 
 上图右边红框框出来的是 Decoder block，Decoder 组件也是由 $\text{N} = 6$ 个相同的 Decoder block 堆叠而成。Decoder block 与 Encoder block 相似，但是存在一些区别：
 

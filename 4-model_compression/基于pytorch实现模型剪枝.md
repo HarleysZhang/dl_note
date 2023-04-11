@@ -336,6 +336,7 @@ Global sparsity: 20.00%
 
 虽然 PyTorch 提供了内置剪枝 `API` ，也支持了一些非结构化和结构化剪枝方法，但是 `API` 比较混乱，对应文档描述也不清晰，所以后面我还会结合微软的开源 `nni` 工具来实现模型剪枝功能。
 
+更多剪枝方法实践，可以参考这个 `github` 仓库：[Model-Compression](https://github.com/tangchen2/Model-Compression)。
 ## 参考资料
 
 1. [How to Prune Neural Networks with PyTorch](https://towardsdatascience.com/how-to-prune-neural-networks-with-pytorch-ebef60316b91)

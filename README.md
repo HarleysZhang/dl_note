@@ -81,6 +81,7 @@
 
 1. [awesome-emdl](https://github.com/EMDL/awesome-emdl): 嵌入式与移动端深度学习研究资料合集。
 2. [AI-System](https://github.com/microsoft/AI-System/tree/main/Textbook): 深度学习系统。
+3. [pytorch-deep-learning](https://github.com/mrdbourke/pytorch-deep-learning)
 
 2，一些笔记好的博客链接：
 

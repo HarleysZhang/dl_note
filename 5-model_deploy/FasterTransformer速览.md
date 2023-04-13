@@ -1,16 +1,19 @@
 - [一，框架介绍](#一框架介绍)
 - [二，FasterTransformer 中的优化](#二fastertransformer-中的优化)
-  - [2.1，**OP融合（也叫算子融合）**](#21op融合也叫算子融合)
+  - [2.1，OP融合（也叫算子融合）](#21op融合也叫算子融合)
   - [2.2，自回归模型/激活缓存的推理优化](#22自回归模型激活缓存的推理优化)
   - [2.3，使用 MPI 和 NCCL 实现节点间通信并支持模型并行性](#23使用-mpi-和-nccl-实现节点间通信并支持模型并行性)
   - [2.4，低精度推理](#24低精度推理)
 - [三，代码速览](#三代码速览)
+  - [3.1，模型部署流程总结](#31模型部署流程总结)
 - [四，性能表现](#四性能表现)
 - [五，如何编译](#五如何编译)
 - [六，如何使用](#六如何使用)
   - [6.1，bert 模型评测](#61bert-模型评测)
 - [七，GPT 性能测试](#七gpt-性能测试)
   - [Performance of GPT-175B](#performance-of-gpt-175b)
+  - [Performance of ViT-B16](#performance-of-vit-b16)
+- [八，LLM 训练推理框架总结](#八llm-训练推理框架总结)
 - [参考资料](#参考资料)
 
 ## 一，框架介绍
@@ -29,7 +32,7 @@
 - Tensor 并行
 - Pipeline 并行
 
-值得注意的是，FasterTransformer 框架都是在 `C++` 层面支持大模型，因为这些大模型都是通过 c++ 来实现的。
+值得注意的是，FasterTransformer 框架都是在 `C++/CUDA` 层面支持大模型，因为这些大模型都是通过 c++ 来实现的。
 
 FasterTransformer 的工作流程分成两个部分:
 
@@ -46,7 +49,7 @@ FasterTransformer 的工作流程分成两个部分:
 
 ## 二，FasterTransformer 中的优化
 
-### 2.1，**OP融合（也叫算子融合）**
+### 2.1，OP融合（也叫算子融合）
 
 CNN 模型中也有类似的技术，通过将 OP（算子）**合并**成一个 OP（算子），来减少 `Kernel` 的调用。因为每一个基本 OP 都会对应一次 GPU kernel 的调用，和多次显存读写，这些都会增加大量额外的开销。
 
@@ -54,9 +57,7 @@ TensorFlow XLA 可以在一定程度上缓解这个问题，它会对一些基�
 
 在 FT 框架内部，将除矩阵乘法以外的所有 kernel 都进行了尽可能的融合，单层 Transformer 的计算流程如下图所示：
 
-![BERT中Transformer Layer的计算流程图](https://img2023.cnblogs.com/blog/2989634/202304/2989634-20230407211120663-119069844.png)
-
-
+![BERT中Transformer Layer的计算流程图](../images/ft/transformer_process.png)
 
 如上图所示，Faster Transformer 只用了 `14` 个 kernel 就完成了原来将近 `60` 个 kernel 的计算逻辑。这其中，8 个 kernel 是通过调用 cuBLAS 接口计算矩阵乘法（绿色框），其余 6 个是自定义 kernel （蓝色框）。另外，不同大小的 `batch_size` 优化结果不太一样：
 
@@ -67,7 +68,7 @@ TensorFlow XLA 可以在一定程度上缓解这个问题，它会对一些基�
 
 为了防止通过 Transformer 重新计算每个新 token 生成器的先前键和值，FT 分配一个**缓冲区**来在每一步存储它们。虽然需要一些额外的内存使用，但 FT **可以节省重新计算的成本**、在每一步分配缓冲区以及连接的成本，相同的缓存机制会用于 NN 的多个部分。该过程的方案下图所示：
 
-![*NVIDIA Faster transformer 库中缓存机制的演示*](https://img2023.cnblogs.com/blog/2989634/202304/2989634-20230407211121213-787274352.png)
+![*NVIDIA Faster transformer 库中缓存机制的演示*](../images/ft/cache.png)
 
 ### 2.3，使用 MPI 和 NCCL 实现节点间通信并支持模型并行性
 
@@ -81,7 +82,26 @@ FT 的内核支持使用 `fp16` 和 `int8` 中的低精度输入数据进行推�
 
 ## 三，代码速览
 
+### 3.1，模型部署流程总结
 
+`FT` 框架做模型部署的一些流程总结:
+
+1. `FT` 框架可以使用 C++、Pytorch、TensorFlow 编译。但新手建议 build with PyTorch！如果是跑 C++ 的 example，你会发现模型配置参数解析、模型输入获取、模型输入文本转 `tokens`、模型输出 `tokens` 转换为文本等问题会很难解决。
+2. Pytorch 后端做模型推理，有两种情况: 
+   - 第一种是直接使用 transformers 库做端到端 huggingface 模型推理；
+   - 第二种是先进行模型转换，转成 `FT` 模型格式，转换模型的过程可配置张量并行、`pipeline` 并行等参数，然后编写相应 example 代码。**这种情况速度更快**。
+
+3. 建议先生成最佳 `gemm` 配置，再做推理。单机多卡使用 mpirun -n 8 --allow-run-as-root xxx 命令运行，需要满足以下条件:
+   - **进程数必须等于** tensor_para_size * pipeline_para_size。
+   - `head_num` 必须是 tensor_para_size 的倍数。（`Bloom` 模型 `head_num=32`，所以 tensor_para_size 只能等于 2/4/8）
+
+```python
+mpirun -n 8 --allow-run-as-root \
+python ../examples/pytorch/gpt/bloom_example.py \
+--tensor_para_size=8 \
+--pipeline_para_size=1 
+--ckpt_path="./BelleGroup/BELLE-7B-2M/c-model/8-gpu"
+```
 
 ## 四，性能表现
 
@@ -89,10 +109,9 @@ FT 的内核支持使用 `fp16` 和 `int8` 中的低精度输入数据进行推�
 
 从 `benchmark` 性能测试结果看，`PyTorch` 模型上的加速比更高，推测是 `TensorFlow XLA` 本身已经做了些图优化工作。对于大批量（large batch size）和更长的序列长度（sequence length），使用具有 `INT8-v2` 量化的 Effective FasterTransformer 可以带来 5 倍的加速，这也是加速比最大的情况。
 
-![faster_transformer](https://img2023.cnblogs.com/blog/2989634/202304/2989634-20230407211121667-973465326.png)
+![faster_transformer](../images/ft/Py_Encoder_T4.png)
 
-> TensorFlow XLA (Accelerated Linear Algebra) 是一种编译器和执行引擎，能够优化 TensorFlow 模型在 CPU、GPU 和 TPU 硬件平台上的性能。其优化技术包括：常量折叠、公共子表达式消除和死代码删除等。
-
+> `TensorFlow XLA` (Accelerated Linear Algebra) 是一种编译器和执行引擎，能够优化 TensorFlow 模型在 CPU、GPU 和 TPU 硬件平台上的性能。其优化技术包括：常量折叠、公共子表达式消除和死代码删除等。
 
 ## 五，如何编译
 
@@ -255,6 +274,56 @@ After inference     : free: 13.94 GB, total: 14.76 GB, used:  0.82 GB
 | 4          | 512          | 32            | 3658.65               | 2092.56         | 1.75       |
 | 8          | 512          | 32            | 6238.79               | 2629.97         | 2.37       |
 | 16         | 512          | 32            | 11409.53              | 3706.23         | 3.08       |
+
+### Performance of ViT-B16
+
+`T4` 卡上在 FT 框架上跑 `ViT-B_16` 模型的性能测试结果，输入图像尺寸和模型参数如下:
+
+* img_size = 224
+* patches = 16
+* head_num = 12
+* embed_dim = 768
+* num_of_layers = 12
+* with_cls_token = 1
+* 默认 gemm 配置
+
+**FP32**
+
+| Batch_size | torch <br/> latency(ms) | torch op <br/> latency(ms) | speedup |
+| :--------: | :---------------------: | :------------------------: | :-----: |
+|     1      |         13.55ms         |          13.39ms           |  1.01   |
+|     8      |         81.44ms         |          79.77ms           |  1.02   |
+|     16     |        166.39ms         |          157.93ms          |  1.05   |
+|     32     |        337.48ms         |          322.70ms          |  1.04   |
+
+**FP16**
+
+| Batch_size | torch <br/> latency(ms) | torch op <br/> latency(ms) | speedup |
+| :--------: | :---------------------: | :------------------------: | :-----: |
+|     1      |         6.19ms          |           3.32ms           |  1.86   |
+|     8      |         27.34ms         |          16.69ms           |  1.63   |
+|     16     |         55.92ms         |          33.43ms           |  1.67   |
+|     32     |        113.05ms         |          67.61ms           |  1.67   |
+
+## 八，LLM 训练推理框架总结
+
+1，**Megatron-DeepSpeed**
+
+一个用于大规模分布式训练的框架。其由两部分组成：
+
+- Megatron-LM: 提供 Transformer 实现、张量并行和数据加载原语。
+- `DeepSpeed`: 提供 ZeRO 优化器、模型流水线、通过分布式训练组件。
+
+这个框架允许我们使用 **3D 并行**来高效训练---融合了三种互补的分布式深度学习方法。
+
+- 数据并行(Data parallelism, DP)
+  复制多份模型，每个副本被放置在不同设备上，并输入数据分片。该过程是并行完成的，所有模型副本在每个训练step结束时同步。
+- 张量并行(Tensor parallelism, TP)
+  将模型的各个层分配到多个设备上。这样，我们将激活或梯度张量的片段放置在不同的 GPU 上，而不是将整个张量都放在单个 GPU 上。该技术有时被称为水平并行或者层内模型并行。
+- 流水线并行(Pipeline parallelism, PP)
+  在多个 GPU 上划分模型的层，每个 GPU 仅放置模型层的一小部分。这有时也称为垂直并行。
+
+![3d_parallelism](../images/faster_transformer/3d_parallelism.png)
 
 ## 参考资料
 

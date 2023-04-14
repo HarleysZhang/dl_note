@@ -63,3 +63,4 @@ ViT 网络中的 MSA 通过 Self-Attention 使得每一个像素点都可以和�
 
 1. [浅析Swin transformer模型(通俗易懂版)](https://mp.weixin.qq.com/s/stjN0V32obq0mA0F1FDeRQ)
 2. [ViT（Vision Transformer）解析](https://zhuanlan.zhihu.com/p/445122996)
+3. [Implementing Vision Transformer (ViT) in PyTorch](https://towardsdatascience.com/implementing-visualttransformer-in-pytorch-184f9f16f632)

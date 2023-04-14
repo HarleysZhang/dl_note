@@ -8,7 +8,7 @@
 - [个人感想](#个人感想)
 - [参考资料](#参考资料)
 
-> 本文主要从模型推理角度去总结论文，因此没有涉及到数据集处理、模型训练及试验报告的细节，只介绍了 LLaMA 模型的主要思想以及模型结构的细节，最后介绍一些基于 LLaMA finetune 的模型
+> 本文主要从模型推理角度去总结论文，因此没有涉及到数据集处理、模型训练及试验报告的细节，只介绍了 LLaMA（羊驼）模型的主要思想以及模型结构的细节，最后介绍一些基于 LLaMA finetune 的模型
 
 ## 摘要
 
@@ -36,7 +36,7 @@ LLaMA **优势**在于其**只使用公开可用的数据**，这可以保证论
 
 不同模型的超参数详细信息在表2中给出。
 
-![llama_parameters](../../images/llm_model/llama_parameters.png)
+![llama_parameters](../../images/llama/llama_parameters.png)
 
 ## SwiGLU
 
@@ -118,7 +118,7 @@ print(out.shape) # torch.Size([1, 128])
 
 ## 代码分析
 
-LLaMA 官方代码只提供了模型结构和推理 sample 代码，没有提供模型训练代码，另外看了官方提供的下载脚本，是没有直接提供下载链接，是需要自己申请！原版 `LLaMA` 模型需要去 [`LLaMA` 项目申请使用](https://github.com/facebookresearch/llama)或参考这个 [PR](https://github.com/facebookresearch/llama/pull/73/files)。因版权问题本项目无法提供下载链接。
+**LLaMA [官方代码](https://github.com/facebookresearch/llama) 只提供了模型结构和推理代码，没有提供模型训练代码**。另外看了官方提供的下载脚本，是没有直接提供下载链接，是需要自己申请！原版 `LLaMA` 模型需要去 [`LLaMA` 项目申请使用](https://github.com/facebookresearch/llama)或参考这个 [PR](https://github.com/facebookresearch/llama/pull/73/files)。因版权问题本项目无法提供下载链接。
 
 > 下载链接说明信息来源 `Alpaca` 仓库。
 
@@ -162,9 +162,11 @@ model = fairscale.nn.Pipe(model, balance=[2, 2], devices=[0, 1], chunks=8)
 
 **2，Vicuna**
 
-[Vicuna](https://chat.lmsys.org/)) 是一款从 LLaMA 模型中对用户分享的对话进行了精细调优的聊天助手，根据的评估，这款聊天助手在 LLaMA 子孙模型中表现最佳，能达到  ChatGPT 90% 的效果。 
+[Vicuna](https://chat.lmsys.org/) 是一款从 LLaMA 模型中对用户分享的对话进行了精细调优的聊天助手，根据的评估，这款聊天助手在 LLaMA 子孙模型中表现最佳，能达到  ChatGPT 90% 的效果。 
 
-![Vicuna-demo](../../images/llm_model/Vicuna-demo.png)**3，Koala**(考拉)
+![Vicuna-demo](../../images/llama/Vicuna-demo.png)
+
+**3，Koala**(考拉)
 
 一款从 `LLaMA` 模型中对用户分享的对话和开源数据集进行了**精细调优**的聊天机器人，其表现与`Vicuna` 类似。 
 
@@ -184,7 +186,7 @@ model = fairscale.nn.Pipe(model, balance=[2, 2], devices=[0, 1], chunks=8)
 
 另外，中文 LLM 的有影响力的模型还有 `ChatGLM`，通常指 `ChatGLM-6B`， 一个由清华团队开源的、支持中英双语的对话语言模型，基于 [General Language Model (GLM)](https://github.com/THUDM/GLM) 架构，具有 62 亿参数。结合模型量化技术，用户可以在消费级的显卡上进行本地部署 ChatGLM（INT4 量化级别下最低只需 6GB 显存）。
 
-整体使用下来，其基本任务没问题，但是涌现能力还是有限的，且会有事实性/数学逻辑错误，另外，Close QA 问题也很一般。`GLM` 模型架构与 BERT、GPT4、T5 等预训练模型模型架构不同，它采用了一种**自回归**的空白填充方法。
+整体使用下来，其基本任务没问题，但是涌现能力还是有限的，且会有事实性/数学逻辑错误，另外，Close QA 问题也很一般。`GLM` 模型架构与 BERT、T5 等预训练模型模型架构不同，它采用了一种**自回归**的空白填充方法,。
 
 ## 个人感想
 

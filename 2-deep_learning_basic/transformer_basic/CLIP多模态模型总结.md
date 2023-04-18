@@ -119,7 +119,6 @@ class VisionTransformer(nn.Module):
 #### text encoder 代码分析
 
 
-
 ## 参考资料
 
 - [clip code](https://github.com/openai/CLIP)

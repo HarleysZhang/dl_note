@@ -157,7 +157,7 @@ $$
 
 论文中给出的 Batch Normalizing Transform 算法计算过程如下图所示。其中输入是一个考虑一个大小为 $m$ 的小批量数据 $\cal B$。
 
-<img src="../images/bn/bn_algorithm.png" alt="Batch Normalizing Transform" style="zoom:50%;" />
+![Batch Normalizing Transform](../images/bn/bn_algorithm.png)
 
 论文中的公式不太清晰，下面我给出更为清晰的  Batch Normalizing Transform 算法计算过程。
 
@@ -191,7 +191,7 @@ z_i &= \gamma n_i + \beta = \frac{\gamma}{\sqrt{\sigma^2_B + \epsilon}}x_i + (\b
 
 在论文中，训练一个带 `BN` 层的网络， `BN` 算法步骤如下图所示:
 
-<img src="../images/bn/algorithm2.png" alt="Training a Batch-Normalized Network" style="zoom:50%;" />
+![Training a Batch-Normalized Network](../images/bn/algorithm2.png)
 
 在训练期间，我们一次向网络提供一小批数据。在前向传播过程中，网络的每一层都处理该小批量数据。 `BN` 网络层按如下方式执行前向传播计算：
 

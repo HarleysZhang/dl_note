@@ -99,3 +99,25 @@
 - [《AI-System》](https://github.com/microsoft/AI-System/tree/main/Textbook)
 - [《PyTorch_tutorial_0.0.5_余霆嵩》](https://github.com/TingsongYu/PyTorch_Tutorial)
 - [《动手编写深度学习推理框架 Planer》](https://github.com/Image-Py/planer)
+
+**chatglm-6b 模型**
+
+- 单机单卡
+- 测试设备 T4
+- 测试框架：HuggingFace + Transformers + DeepSpeed 
+- 测试 promot: 
+    - 你是现代诗人，用'红包、美好、表白、夕阳、月光、慢慢'关键词生成2首表白唯美打油诗
+    - 写一篇500字的武侠小说，主角名字为李纯白
+
+|Batch_size|数据类型|显存占用|GPU使用率|性能（tokens per second）
+|-----------|--------|--------|--------|-----------------------|
+| 1 | `FP16` | 13046MiB | 83% |14.0~14.7|
+
+测试框架：HuggingFace + **Transformers**
+
+使用 chatglm 自带的量化函数进行量化，虽然对显存的要求低了，但是性能 `tps` 下降了很多，原因还在分析。
+
+|Batch_size|数据类型|显存占用|GPU使用率|性能（tokens per second）
+|-----------|--------|--------|--------|-----------------------|
+| 1 | `INT8` | 7008MiB | 89% |5.9|
+| 1 | `INT4` | 4370MiB | 87% |5.45|

@@ -2,6 +2,8 @@
   - [deepspeed.init\_inference](#deepspeedinit_inference)
   - [DeepSpeedInferenceConfig](#deepspeedinferenceconfig)
 - [DeepSpeed + LLM 在 T4 卡的性能测试](#deepspeed--llm-在-t4-卡的性能测试)
+  - [推理速度性能指标](#推理速度性能指标)
+  - [LLM benchmark 测试结果](#llm-benchmark-测试结果)
   - [BELLE-7B-2M](#belle-7b-2m)
   - [chatglm-6b](#chatglm-6b)
   - [llama-13b-hf](#llama-13b-hf)
@@ -25,6 +27,16 @@
 
 ## DeepSpeed + LLM 在 T4 卡的性能测试
 
+### 推理速度性能指标
+
+- Max Throughput per GPU
+- Memory Allocated per GPU	
+- Max Batch Size
+- 文本生成速度（TPS, token per second）
+- per Token Latency: (ms/token)
+
+### LLM benchmark 测试结果
+
 BELLE-7B-2M chatglm-6b chatglm-6b-int8 llama-13b-hf GPT-NeoXT-Chat-Base-20B ft-monochat
 
 - 中文: 帮忙写一篇散文诗，主题为扎根，终有一天，我们会变成参天大树, 字数500字
@@ -40,7 +52,7 @@ BELLE-7B-2M chatglm-6b chatglm-6b-int8 llama-13b-hf GPT-NeoXT-Chat-Base-20B ft-m
 |        ft-monochat-int8        |     1      |  `FP16`  |  12191MiB  |    80%    |              ～12              |
 |          BELLE-7B-2M           |     1      |  `FP16`  |  13933MiB  |    99%    |              ～18              |
 |       BELLE-7B-2M + TP=2       |     1      |  `FP16`  |  8129MiB   |    96%    |              ～28              |
-|       BELLE-7B-2M + TP=4       |     1      |  `FP16`  |  5261MiB   |    96%    |              ～33              |
+|       BELLE-7B-2M + TP=4       |     1      |  `FP16`  |  5261MiB   |    96%    |              ～34              |
 | GPT-NeoXT-Chat-Base-20B + TP=4 |     1      |  `FP16`  |  11880MiB  |    97%    |              ～17              |
 |      llama-13b-hf + TP=2       |     1      |  `FP16`  |  15103MiB  |    97%    |              ～13              |
 |      llama-13b-hf + TP=4       |     1      |  `FP16`  | 8193.00MiB |    97%    |              ～21              |

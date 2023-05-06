@@ -46,7 +46,7 @@
 2. [模型压缩-轻量化网络设计与部署总结](./4-model_compression/模型压缩-轻量化网络详解.md)
 3. [模型压缩-剪枝算法详解](./4-model_compression/模型压缩-剪枝算法详解.md)
 4. [模型压缩-知识蒸馏详解](./4-model_compression/模型压缩-知识蒸馏详解.md)
-5. [模型压缩-量化算法详解](./4-model_compression/模型压缩-网络量化概述.md)
+5. [模型压缩-量化算法详解](./4-model_compression/模型压缩-量化算法概述.md)
 
 ## 五，模型推理部署
 

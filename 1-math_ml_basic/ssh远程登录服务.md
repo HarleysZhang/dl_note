@@ -126,7 +126,7 @@ VSCode 也支持远程连接，可以通过 `Remote-SSH` 插件来实现，具�
 # Read more about SSH config files: https://linux.die.net/man/5/ssh_config
 
 Host JumpMachine
-    HostName jump-vscode.sensetime.com
+    HostName xxx.xxx.xxx.xxx
     # 你跳板机的用户名
     User username
 

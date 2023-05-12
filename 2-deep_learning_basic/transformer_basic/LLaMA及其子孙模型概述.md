@@ -128,6 +128,19 @@ LLaMA 模型结构也只使用 `Decoder` 结构。
 
 LLaMA 模型的线性计算层都是使用了 FairScale 库的 `ColumnParallelLinear` 层，它是一个并行的线性层，可以在多个 GPU 上**并行计算**，这个计算速度比 Linear 的 nn.Linear 层速度更快。
 
+### 模型推理
+
+`HuggingFace` 格式的 `LLaMA` 模型权重，可按照如下所示方式加载模型权重。
+
+```python
+from transformers import LlamaForCausalLM, LlamaTokenizer
+
+tokenizer = LlamaTokenizer.from_pretrained("/output/path")
+model = LlamaForCausalLM.from_pretrained("/output/path")
+```
+
+加载 float16 精度的模型权重需要足够的 CPU RAM，对于 65B 参数模型，需要 130GB 的 RAM。
+
 ### 高性能 PyTorch 库-FairScale
 
 1，`FairScale`: 用于在一台或多台机器/节点上进行高性能和大规模训练的 PyTorch库，由 Meta 发布。示例代码：

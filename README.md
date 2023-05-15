@@ -34,8 +34,8 @@
 
 3，**Transformer 基础**：
 
-- [Transformer 原理详解.md](。/2-deep_learning_basic/transformer_basic/Transformer模型详解及代码实现.md)
-- [ransformer 视觉模型详解](./2-deep_learning_basic/transformer_basic/Transformer视觉模型概述.md)
+- [Transformer 原理详解](./2-deep_learning_basic/transformer_basic/Transformer模型详解及代码实现.md)
+- [Transformer 基础视觉模型详解](./2-deep_learning_basic/transformer_basic/Transformer视觉模型概述.md)
 - [LLaMA 及其子孙模型详解](./2-deep_learning_basic/transformer_basic/LLaMA及其子孙模型概述.md)
 
 ## 三，深度学习炼丹

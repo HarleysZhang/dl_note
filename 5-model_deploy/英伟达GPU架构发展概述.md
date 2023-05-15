@@ -41,6 +41,10 @@
 
 总结：NVDIA GPU 用到的 `SIMT` 基本编程模型都是一致的，每一代相对前代基本都会在 SM 数量、SM 内部各个处理单元的流水线结构等等方面有一些升级和改动。
 
+### Tensor 算力和 FP32 算力
+
+Tensor Core 专注于矩阵计算，是专门用于深度学习的混合精度计算单元。
+
 ## Volta（伏特）架构
 
 > 本文对 Volta 架构的总结是基于 Volta 架构白皮书资料总结而来，该[白皮书](https://images.nvidia.com/content/volta-architecture/pdf/volta-architecture-whitepaper.pdf)介绍了 Tesla V100 加速器和 Volta GV100 GPU 架构。

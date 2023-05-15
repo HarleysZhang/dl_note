@@ -95,6 +95,7 @@
 - 《深度学习》
 - 《机器学习》
 - 《动手学深度学习》
+- [《机器学习系统：设计和实现》](https://openmlsys.github.io/index.html)
 - [《AI-EDU》](https://microsoft.github.io/ai-edu/index.html)
 - [《AI-System》](https://github.com/microsoft/AI-System/tree/main/Textbook)
 - [《PyTorch_tutorial_0.0.5_余霆嵩》](https://github.com/TingsongYu/PyTorch_Tutorial)

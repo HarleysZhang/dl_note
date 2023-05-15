@@ -113,6 +113,10 @@ python ../examples/pytorch/gpt/bloom_example.py \
 
 > `TensorFlow XLA` (Accelerated Linear Algebra) 是一种编译器和执行引擎，能够优化 TensorFlow 模型在 CPU、GPU 和 TPU 硬件平台上的性能。其优化技术包括：常量折叠、公共子表达式消除和死代码删除等。
 
+其中 FasterFormer 和 TensorRT 框架的性能对比如下所示，可以看出在 bert 模型上，FasterFormer 性能优于 TensorRT 框架。
+
+![FasterFormer 和 TensorRT 框架的性能对比](../images/ft/ft_tensorrt.drawio.png)
+
 ## 五，如何编译
 
 1. Install `Docker`（开发机默认安装好了）

@@ -241,7 +241,7 @@ print(f"attn_weights shape: {attn_weights.shape}") # torch.Size([5, 10, 10])
 
 ### 3.3，Multi-Head Attention
 
-Multi-Head Attention (`MHA`) 是基于 Self-Attention (`SA`) 的一种变体。MHA 在 SA 的基础上引入了**“多头”机制**，将输入拆分为多个子空间，每个子空间分别执行 `SA`，最后将多个子空间的输出拼接在一起并进行线性变换，从而得到最终的输出。
+Multi-Head Attention (`MHA`) 是基于 Self-Attention (`SA`) 的一种变体。MHA 在 SA 的基础上引入了“多头”机制，将输入拆分为多个子空间，每个子空间分别执行 `SA`，最后将多个子空间的输出拼接在一起并进行线性变换，从而得到最终的输出。
 
 对于 `MHA`，之所以需要对 Q、K、V 进行多头（`head`）划分，其目的是为了增强模型对不同信息的关注。具体来说，多组 Q、K、V 分别计算 Self-Attention，每个头自然就会有独立的 Q、K、V 参数，从而让模型同时关注多个不同的信息，这有些类似 `CNN` 架构模型的**多通道机制**。
 
@@ -256,7 +256,7 @@ Multi-Head Attention (`MHA`) 是基于 Self-Attention (`SA`) 的一种变体。M
 3. 每个子张量并行**计算注意力分数**，即执行 dot-product attention 层，输出张量尺寸为 [batch_size, n_head, seq_len, d_model//n_head]；
 4. 将这些子张量进行拼接 `concat` ，并经过线性变换得到最终的输出张量，尺寸为 [batch_size, seq_len, d_model]。
 
-总结：因为 `GPU` 的并行计算特性，步骤2中的**张量拆分**和步骤4中的**张量拼接**，其实都是通过 `review` 算子来实现的。同时，也能发现`SA` 和 `MHA` 模块的输入输出矩阵维度都是一样的。
+总结：因为 `GPU` 的并行计算特性，步骤2中的**张量拆分**和步骤 4 中的**张量拼接**，其实都是通过 `review` 算子来实现的。同时，也能发现`SA` 和 `MHA` 模块的输入输出矩阵维度都是一样的。
 
 ### 3.4，Multi-Head Attention 实现
 

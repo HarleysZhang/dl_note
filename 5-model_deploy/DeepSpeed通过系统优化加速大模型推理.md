@@ -41,6 +41,7 @@ LLM 的高效推理是实现 LLM工程应用的关键技术。和 LLM 训练环�
 `Progressive Layer Dropping`（渐进式层丢弃）是一种用于深度神经网络的正则化方法，旨在减少模型容量和提高泛化能力。
 
 它通过在训练过程中逐渐丢弃网络的一部分层来实现（思想上很像模型剪枝），具体来说：
+
 1. 渐进式层丢弃首先训练模型的所有层，并计算每个层的重要性得分。这些得分可以通过各种指标进行计算，例如梯度范数、参数敏感度等
 2. 然后，根据得分对层进行排序，从得分较低的层开始逐步丢弃。在每个训练迭代中，一定比例的低重要性层将被随机选择并从网络中移除，使得网络逐渐变浅。
 
@@ -55,6 +56,7 @@ LLM 的高效推理是实现 LLM工程应用的关键技术。和 LLM 训练环�
 我们都知道大语言模型（LLM）的计算成本极高，且在许多实际场景中都会有响应速度太慢的问题，总结起来就是 LLM 的推理的有两个主要挑战：延迟（lateny）和成本（cost）。为了适应更大的模型，并实现更快、更便宜的推理，deepspeed 框架添加了 DeepSpeed Inference-具有高性能多 GPU 推理功能。
 
 DeepSpeed 支持 chatglm-6b 到 GPT-3 175B 等规模大模型，其用于优化推理成本和延迟的新技术主要包括：
+
 1. **推理自适应并行性**（`Inference-adapted parallelism`）：允许用户通过适应多 GPU 推理的最佳并行策略来有效地服务大型模型，同时考虑推理延迟和成本。
 2. **针对推理优化的 CUDA 内核**（`Inference-optimized CUDA kernels`）：通过深度融合和新颖的内核调度充分利用 GPU 资源，从而提高每个 GPU 的效率。
 3. **有效的量化感知训练**（`Effective quantize-aware training`）：支持量化后的模型推理，如 INT8 推理，模型量化可以节省内存（memory）和减少延迟（latency），同时不损害准确性。
@@ -62,6 +64,7 @@ DeepSpeed 支持 chatglm-6b 到 GPT-3 175B 等规模大模型，其用于优化�
 与现有工作相比，`DeepSpeed Inference` 模块同时带来了约 1.9–4.4 倍的延迟加速（latency speedups）和 3.4–6.2 倍的吞吐量增益和成本降低（throughput gain and cost reduction）。
 
 在 LLM 工作中，研究员和工程师的除了模型推理的低延迟和低成本诉求，另一个关键诉求就是在不增加额外硬件的前提下减少大模型的训练时间，为此 deepspeed 框架提供了三种技术：
+
 1. **新的压缩训练策略**：大模型训练期间，通过 `Progressive Layer Dropping` 利用 Transformer 层中粗粒度的**稀疏性**来降低训练成本，从而在不影响准确性的情况下使收敛速度提高 2.8 倍。
 2. **1 bit 的 LAMB**：实现了大模型训练的高效通信，通信量减少 4.6 倍，即使在具有低带宽互连的集群中也能加速大型模型的训练。
 3. **DeepSpeed Profiler 性能工具**：通过显示模型复杂性和训练效率，以帮助用户识别性能瓶颈。
@@ -69,6 +72,7 @@ DeepSpeed 支持 chatglm-6b 到 GPT-3 175B 等规模大模型，其用于优化�
 ## 三， DeepSpeed 多 GPU 推理优化
 
 虽然 DeepSpeed 支持高级大规模模型多训练，但是目前（2021年）的推理解决方案有三大局限性：
+
 1. 对大规模模型缺乏多 GPU 支持并满足延迟要求；
 2. 在小批量（small batch size）推理时，GPU 内核性能有限；
 3. 难以利用量化，既包括量化模型来减少模型大小，以及支持量化模型的高性能推理且无需专门硬件来减少延迟。
@@ -84,6 +88,7 @@ DeepSpeed 支持 chatglm-6b 到 GPT-3 175B 等规模大模型，其用于优化�
 ### 3.2，推理优化内核（Inference-optimized kernels）
 
 对于小批量的模型的高效率推理，主要有两个挑战：
+
 1. 内核调用时间和主内存延迟成为主要瓶颈；
 2.  默认的 `GeMM`（通用矩阵乘法）库没有针对极小的批量大小进行很好的调整，导致性能不佳。
 
@@ -100,6 +105,7 @@ DeepSpeed Inference 模块为 Transformer 模块提**供推理内核**，并通�
 #### 3.2.1，通用和专用 Transformer 内核
 
 DeepSpeed Inference 由两组包含上述优化的 Transformer 内核组成：
+
 - `Generic Transformer` ：使用深度融合技术，将 Transformer 中的各个 PyTorch 操作（如 LayerNorm、Softmax 和 bias-add）替换为高度优化的 DeepSpeed 版本。
 - `Specialized Transformer` ： 进一步利用深度融合技术，创建了融合调度，不仅在PyTorch的宏操作符（如Softmax）内部融合微操作符，还在多个宏操作符（如 Softmax 和 LayerNorm，以及转置操作和甚至GeMM）之间进行融合。专门的 Transformer 内核的融合结构如图 1 所示。
 

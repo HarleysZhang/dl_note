@@ -6,6 +6,7 @@
 - [五，模型推理部署](#五模型推理部署)
 - [六，异构计算](#六异构计算)
 - [七，进阶课程](#七进阶课程)
+- [八，其他](#八其他)
 - [参考资料](#参考资料)
 
 ## 项目概述
@@ -24,13 +25,18 @@
 1. [神经网络基础部件-卷积层详解](./2-deep_learning_basic/神经网络基础部件-卷积层详解.md)
 2. [神经网络基础部件-BN 层详解](./2-deep_learning_basic/神经网络基础部件-BN层详解.md)
 3. [神经网络基础部件-激活函数详解](./2-deep_learning_basic/神经网络基础部件-激活函数详解.md)
-4. [神经网络基础部件-Transformer 详解](./2-deep_learning_basic/神经网络基础部件-Transformer详解.md)
 
 2，**深度学习基础**：
 - [反向传播与梯度下降详解](2-deep_learning_basic/反向传播与梯度下降详解.md)
 - [深度学习基础-参数初始化详解](./2-deep_learning_basic/深度学习基础-参数初始化详解.md)
 - [深度学习基础-损失函数详解](./2-deep_learning_basic/深度学习基础-损失函数详解.md)
 - [深度学习基础-优化算法详解](./2-deep_learning_basic/深度学习基础-优化算法详解.md)
+
+3，**Transformer 基础**：
+
+- [Transformer 原理详解.md](。/2-deep_learning_basic/transformer_basic/Transformer模型详解及代码实现.md)
+- [ransformer 视觉模型详解](./2-deep_learning_basic/transformer_basic/Transformer视觉模型概述.md)
+- [LLaMA 及其子孙模型详解](./2-deep_learning_basic/transformer_basic/LLaMA及其子孙模型概述.md)
 
 ## 三，深度学习炼丹
 
@@ -68,6 +74,9 @@
 - [ncnn 源码解析-Layer 层](5-model_deploy/ncnn源码解析/ncnn源码解析-Layer层.md)
 - [ncnn 源码解析-常见算子](../5-model_deploy/ncnn源码解析/ncnn源码解析-常见算子.md)
 
+**4，大规模模型的推理优化**
+
+- [DeepSpeed 加速大模型推理](./5-model_deploy/DeepSpeed通过系统优化加速大模型推理.md)
 ## 六，异构计算
 
 1. 移动端异构计算：`neon` 编程
@@ -90,6 +99,12 @@
 - [What are Diffusion Models?](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
 - [annotated_deep_learning_paper_implementations
 ](https://github.com/labmlai/annotated_deep_learning_paper_implementations)
+
+## 八，其他
+
+感兴趣的，**欢迎扫码关注我的公众号-嵌入式视觉**，记录 CV 算法工程师成长之路，分享技术总结、读书笔记和个人感悟。
+
+![qcode](images/others/qcode.png)
 ## 参考资料
 
 - 《深度学习》

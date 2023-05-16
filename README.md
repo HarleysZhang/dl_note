@@ -77,6 +77,10 @@
 **4，大规模模型的推理优化**
 
 - [DeepSpeed 加速大模型推理](./5-model_deploy/DeepSpeed通过系统优化加速大模型推理.md)
+
+**5，AI/NPU/GPU 芯片特性**：
+
+- [英伟达 GPU 架构特性详解](5-model_deploy/英伟达GPU架构详解.md)
 ## 六，异构计算
 
 1. 移动端异构计算：`neon` 编程

@@ -1,10 +1,31 @@
+- [一，背景知识](#一背景知识)
+  - [1.1，LLM 应用的难点](#11llm-应用的难点)
+  - [1.2，LLM 加速-混合并行训练](#12llm-加速-混合并行训练)
+  - [1.3，Progressive Layer Dropping](#13progressive-layer-dropping)
+  - [1.4，LAMB](#14lamb)
+- [二，DeepSpeed 框架的推理优化概述](#二deepspeed-框架的推理优化概述)
+  - [2.1，DeepSpeed 推理模块概述和特性](#21deepspeed-推理模块概述和特性)
+- [三， DeepSpeed 多 GPU 推理优化](#三-deepspeed-多-gpu-推理优化)
+  - [3.1，推理适应性并行（Inference-adapted parallelism）](#31推理适应性并行inference-adapted-parallelism)
+  - [3.2，推理优化内核（Inference-optimized kernels）](#32推理优化内核inference-optimized-kernels)
+    - [3.2.1，通用和专用 Transformer 内核](#321通用和专用-transformer-内核)
+  - [3.3，灵活的量化支持（Flexible quantization support）](#33灵活的量化支持flexible-quantization-support)
+  - [3.4，模型压缩模块（DeepSpeed Compression）](#34模型压缩模块deepspeed-compression)
+- [四，DeepSpeed Inference 模块的特性](#四deepspeed-inference-模块的特性)
+  - [4.1，易用性：从训练到推理的无缝衔接 pipeline](#41易用性从训练到推理的无缝衔接-pipeline)
+  - [4.2，开源模型的 latency 加速效果（可复现）](#42开源模型的-latency-加速效果可复现)
+  - [4.3，提高吞吐量并降低大型 Transformer 模型的推理成本](#43提高吞吐量并降低大型-transformer-模型的推理成本)
+  - [4.4，DeepSpeed 量化对降低推理成本和提高量化模型精度的影响](#44deepspeed-量化对降低推理成本和提高量化模型精度的影响)
+- [参考资料](#参考资料)
+
+
+## 一，背景知识
+
 - 原文地址：[DeepSpeed: Accelerating large-scale model inference and training via system optimizations and compression](https://www.microsoft.com/en-us/research/blog/deepspeed-accelerating-large-scale-model-inference-and-training-via-system-optimizations-and-compression/)
 - 原文作者：DeepSpeed Team  Rangan Majumder , Vice President  Andrey Proskurin , Corporate Vice President of Engineering
 - 译文出自：[dl_system](https://github.com/HarleysZhang/deep_learning_system)
 - 本文永久链接：[DeepSpeed 通过系统优化加速大模型推理](https://github.com/HarleysZhang/deep_learning_system)
 - 译者：zhanghonggaozhang，译者对原文有所删改和优化。
-
-## 一，背景知识
 
 ### 1.1，LLM 应用的难点
 
@@ -69,6 +90,32 @@ DeepSpeed 支持 chatglm-6b 到 GPT-3 175B 等规模大模型，其用于优化�
 2. **1 bit 的 LAMB**：实现了大模型训练的高效通信，通信量减少 4.6 倍，即使在具有低带宽互连的集群中也能加速大型模型的训练。
 3. **DeepSpeed Profiler 性能工具**：通过显示模型复杂性和训练效率，以帮助用户识别性能瓶颈。
 
+### 2.1，DeepSpeed 推理模块概述和特性
+
+1，`DeepSpeed` 推理无缝支持以下训练的基于 `transformer` 结构的模型：
+
+- DeepSpeed
+- Megatron 
+- HuggingFace
+
+2，`DeepSpeed` 推理目前支持以下 transformer 模型，即兼容模型列表如下：
+- HFGPT2LayerPolicy
+- HFBertLayerPolicy
+- BLOOMLayerPolicy
+- HFGPTNEOLayerPolicy
+- GPTNEOXLayerPolicy
+- HFGPTJLayerPolicy
+- MegatronLayerPolicy
+- HFOPTLayerPolicy
+- HFCLIPLayerPolicy
+- HFDistilBertLayerPolicy
+- LLAMALayerPolicy
+
+3，DeepSpeed 在多 GPU 推理模型的方式有两种：
+
+- 提供模型并行度和模型权重目录，deepspeed 完成模型加载和推理
+- 直接提供加载好的模型（nn.module 类型，transformer 加载模型），deepspeed 只做推理
+
 ## 三， DeepSpeed 多 GPU 推理优化
 
 虽然 DeepSpeed 支持高级大规模模型多训练，但是目前（2021年）的推理解决方案有三大局限性：
@@ -92,7 +139,7 @@ DeepSpeed 支持 chatglm-6b 到 GPT-3 175B 等规模大模型，其用于优化�
 1. 内核调用时间和主内存延迟成为主要瓶颈；
 2.  默认的 `GeMM`（通用矩阵乘法）库没有针对极小的批量大小进行很好的调整，导致性能不佳。
 
-DeepSpeed Inference 模块为 Transformer 模块提**供推理内核**，并通过以下**两种内核优化技术**来显著减少延迟和提高吞吐量。
+DeepSpeed Inference 模块为 Transformer 模块提**供推理内核**（推理是用的算子内核和训练不一样），并通过以下**两种内核优化技术**来显著减少延迟和提高吞吐量。
 
 **深度融合**（Deep fusion）：`DeepSpeed Inference` 可以将多个运算符融合到一个内核中（算子融合），以减少内核调用次数和跨内核访问主内存的延迟。虽然内核融合是 PyTorch JIT 编译器、Tensorflow XLA 等常用技术，但 DeepSpeed 中的深度融合是不同的。与主要融合逐元素运算的现有融合技术不同，DeepSpeed 中的深度融合**可以将逐元素运算、矩阵乘法、转置和归约（reductions）融合到一个内核中**，显着减少内核调用次数以及主内存访问次数以减少主存访问延迟。
 

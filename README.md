@@ -63,7 +63,6 @@
 
 - [卷积神经网络复杂度分析](./5-model_deploy/卷积神经网络复杂度分析.md)
 - [模型压缩部署概述](./5-model_deploy/模型压缩部署概述.md)
-- [FasterTransformer 速览](./5-model_deploy/FasterTransformer速览.md)
 
 2，模型推理：
 
@@ -77,9 +76,11 @@
 - [ncnn 源码解析-Layer 层](5-model_deploy/ncnn源码解析/ncnn源码解析-Layer层.md)
 - [ncnn 源码解析-常见算子](../5-model_deploy/ncnn源码解析/ncnn源码解析-常见算子.md)
 
-**4，大规模模型的推理优化**
+**4，大规模模型的推理优化及部署总结**
 
-- [DeepSpeed 加速大模型推理](./5-model_deploy/DeepSpeed通过系统优化加速大模型推理.md)
+- [FasterTransformer 框架速览](./5-model_deploy/大型语言模型部署/FasterTransformer速览.md)
+- [DeepSpeed 加速大模型推理](5-model_deploy/大型语言模型部署/DeepSpeed通过系统优化加速大模型推理.md)
+- [LLM 训练的并行策略详解](./5-model_deploy/大型语言模型部署/LLM训练的并行策略详解.md)
 
 **5，AI/NPU/GPU 芯片特性**：
 

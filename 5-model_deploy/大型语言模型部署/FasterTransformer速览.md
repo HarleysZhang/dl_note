@@ -57,7 +57,7 @@ TensorFlow XLA 可以在一定程度上缓解这个问题，它会对一些基�
 
 在 FT 框架内部，将除矩阵乘法以外的所有 kernel 都进行了尽可能的融合，单层 Transformer 的计算流程如下图所示：
 
-![BERT中Transformer Layer的计算流程图](../images/ft/transformer_process.png)
+![BERT中Transformer Layer的计算流程图](../../images/ft/transformer_process.png)
 
 如上图所示，Faster Transformer 只用了 `14` 个 kernel 就完成了原来将近 `60` 个 kernel 的计算逻辑。这其中，8 个 kernel 是通过调用 cuBLAS 接口计算矩阵乘法（绿色框），其余 6 个是自定义 kernel （蓝色框）。另外，不同大小的 `batch_size` 优化结果不太一样：
 
@@ -68,7 +68,7 @@ TensorFlow XLA 可以在一定程度上缓解这个问题，它会对一些基�
 
 为了防止通过 Transformer 重新计算每个新 token 生成器的先前键和值，FT 分配一个**缓冲区**来在每一步存储它们。虽然需要一些额外的内存使用，但 FT **可以节省重新计算的成本**、在每一步分配缓冲区以及连接的成本，相同的缓存机制会用于 NN 的多个部分。该过程的方案下图所示：
 
-![*NVIDIA Faster transformer 库中缓存机制的演示*](../images/ft/cache.png)
+![*NVIDIA Faster transformer 库中缓存机制的演示*](../../images/ft/cache.png)
 
 ### 2.3，使用 MPI 和 NCCL 实现节点间通信并支持模型并行性
 
@@ -97,7 +97,7 @@ FT 的内核支持使用 `fp16` 和 `int8` 中的低精度输入数据进行推�
 
 ```python
 mpirun -n 8 --allow-run-as-root \
-python ../examples/pytorch/gpt/bloom_example.py \
+python ../../examples/pytorch/gpt/bloom_example.py \
 --tensor_para_size=8 \
 --pipeline_para_size=1 
 --ckpt_path="./BelleGroup/BELLE-7B-2M/c-model/8-gpu"
@@ -109,13 +109,13 @@ python ../examples/pytorch/gpt/bloom_example.py \
 
 从 `benchmark` 性能测试结果看，`PyTorch` 模型上的加速比更高，推测是 `TensorFlow XLA` 本身已经做了些图优化工作。对于大批量（large batch size）和更长的序列长度（sequence length），使用具有 `INT8-v2` 量化的 Effective FasterTransformer 可以带来 5 倍的加速，这也是加速比最大的情况。
 
-![faster_transformer](../images/ft/Py_Encoder_T4.png)
+![faster_transformer](../../images/ft/Py_Encoder_T4.png)
 
 > `TensorFlow XLA` (Accelerated Linear Algebra) 是一种编译器和执行引擎，能够优化 TensorFlow 模型在 CPU、GPU 和 TPU 硬件平台上的性能。其优化技术包括：常量折叠、公共子表达式消除和死代码删除等。
 
 其中 FasterFormer 和 TensorRT 框架的性能对比如下所示，可以看出在 bert 模型上，FasterFormer 性能优于 TensorRT 框架。
 
-![FasterFormer 和 TensorRT 框架的性能对比](../images/ft/ft_tensorrt.drawio.png)
+![FasterFormer 和 TensorRT 框架的性能对比](../../images/ft/ft_tensorrt.drawio.png)
 
 ## 五，如何编译
 
@@ -327,7 +327,7 @@ After inference     : free: 13.94 GB, total: 14.76 GB, used:  0.82 GB
 - 流水线并行(Pipeline parallelism, PP)
   在多个 GPU 上划分模型的层，每个 GPU 仅放置模型层的一小部分。这有时也称为垂直并行。
 
-![3d_parallelism](../images/faster_transformer/3d_parallelism.png)
+![3d_parallelism](../../images/faster_transformer/3d_parallelism.png)
 
 ## 参考资料
 

@@ -7,7 +7,7 @@
 - [二，Transformers 功能](#二transformers-功能)
   - [API 概述](#api-概述)
 - [三，快速上手](#三快速上手)
-  - [3.1，transformer 模型类型](#31transformer-模型类型)
+  - [3.1，transformer 模型类别](#31transformer-模型类别)
   - [3.2，Pipeline](#32pipeline)
   - [3.3，AutoClass](#33autoclass)
     - [3.3.1，AutoTokenizer](#331autotokenizer)
@@ -102,7 +102,7 @@ tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 
 ### 1.4，decoder models
 
-decoder 模型也称为自回归（autoregressive）模型、causal language models，其按顺序阅读输入文本并必须预测下一个单词，在训练中会阅读**添加掩码的句子**。
+decoder 模型也称为自回归（auto-regressive）模型、causal language models，其按顺序阅读输入文本并必须预测下一个单词，在训练中会阅读**添加掩码的句子**。
 
 ### 1.5，架构与参数
 
@@ -259,6 +259,7 @@ pt_outputs = pt_model(**pt_batch) # ** 可解包 pt_batch 字典
 pt_predictions = nn.functional.softmax(pt_outputs.logits, dim=-1) # 在 logits上应用softmax函数来查询概率
 
 print(pt_predictions)
+print(pt_model.config.id2label) # {0: '1 star', 1: '2 stars', 2: '3 stars', 3: '4 stars', 4: '5 stars'}
 ```
 
 程序运行结果输出如下所示。

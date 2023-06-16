@@ -119,7 +119,7 @@
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=HarleysZhang/cv_note&type=Date)](https://star-history.com/#HarleysZhang/cv_note&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=HarleysZhang/deep_learning_system&type=Date)](https://star-history.com/#HarleysZhang/deep_learning_system&Date)
 
 ## 参考资料
 

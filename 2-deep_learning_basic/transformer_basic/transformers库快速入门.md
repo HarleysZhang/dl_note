@@ -100,11 +100,19 @@ tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 
 ![attention_mask](../../images/transformers_basic/attention_mask.png)
 
-### 1.4，decoder models
+### 1.4，eop_token、pad_token、bos_token、eos_token
+
+我们在模型的 checkpoints 目录下的配置文件中，经常能看到 eop_token、pad_token、bos_token、eos_token 这些与文本序列处理相关的特殊 `token`，它们代表的意义如下:
+
+1. `bos_token`（开始标记）：它表示**文本序列的起始位置**。在某些文本生成任务中，可能需要在序列的开头添加一个开始标记，以指示生成文本的起始点。
+2. `eop_token`（结束标记）：它表示文本序列的结束位置。在某些文本生成任务中，可能需要在序列中指定一个结束标记以表示文本的结束。
+3. `pad_token`（填充标记）：它用于将文本序列填充到相同长度时使用的特殊 `token`。在处理变长文本序列时，较短的序列可能需要通过添加填充标记来与较长的序列对齐。填充标记通常是一个特殊的 `token`，用于填充序列中的空白位置，使得所有序列具有相同的长度。
+
+### 1.5，decoder models
 
 decoder 模型也称为自回归（auto-regressive）模型、causal language models，其按顺序阅读输入文本并必须预测下一个单词，在训练中会阅读**添加掩码的句子**。
 
-### 1.5，架构与参数
+### 1.6，架构与参数
 
 - **架构**：模型的骨架，包含每个层的类别及定义、各个层的连接方式等等内容。
 - **Checkpoints**：给定架构中会被加载的权重。
@@ -236,7 +244,7 @@ pt_batch = tokenizer(
 
 ### 3.3.2，AutoModel
 
-Transformers 提供了一种简单统一的方式来加载预训练的模型实例，即可以像加载 `AutoTokenizer` 一样加载 `AutoModel`，我们所需要提供的必须参数只有模型名称或者 `checkpoints` 路径。示例代码如下所示:
+Transformers 提供了一种简单统一的方式来加载预训练的模型实例，即可以像加载 `AutoTokenizer` 一样加载 `AutoModel`，我们所需要提供的必须参数只有模型名称或者 `checkpoints` 路径，即只需输入初始化的 checkpoint(检查点)或者模型名称就可以返回正确的模型体系结构。示例代码如下所示:
 
 ```python
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -245,8 +253,9 @@ from torch import nn
 model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
 tokenizer = AutoTokenizer.from_pretrained(model_name) # 会下载 vocab.txt 词表
 
+# ["We are very happy to show you the 🤗 Transformers library.", "We hope you don't hate it."],
 pt_batch = tokenizer(
-    ["We are very happy to show you the 🤗 Transformers library.", "We hope you don't hate it."],
+    "We are very happy to show you the 🤗 Transformers library.", "We hope you don't hate it.",
     padding=True,
     truncation=True,
     max_length=512,
@@ -261,6 +270,8 @@ pt_predictions = nn.functional.softmax(pt_outputs.logits, dim=-1) # 在 logits�
 print(pt_predictions)
 print(pt_model.config.id2label) # {0: '1 star', 1: '2 stars', 2: '3 stars', 3: '4 stars', 4: '5 stars'}
 ```
+
+> 注意，Transformers 模型默认情况下需要多个句子，虽然这里输入是一个句子，但 tokenizer 不仅会将输入ID列表转换为张量，还在其顶部添加了一个维度。
 
 程序运行结果输出如下所示。
 

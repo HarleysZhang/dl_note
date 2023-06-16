@@ -7,6 +7,7 @@
 - [六，异构计算](#六异构计算)
 - [七，进阶课程](#七进阶课程)
 - [八，其他](#八其他)
+- [Star History](#star-history)
 - [参考资料](#参考资料)
 
 ## 项目概述
@@ -20,7 +21,6 @@
 - [随机梯度下降法的数学基础](./1-math_ml_basic/随机梯度下降法的数学基础.md)
 - [Python 编程思维导航](./1-math_ml_basic/python_learn_xmind)
 
-
 ## 二，神经网络基础部件
 
 1，**神经网络基础部件**：
@@ -30,6 +30,7 @@
 3. [神经网络基础部件-激活函数详解](./2-deep_learning_basic/神经网络基础部件-激活函数详解.md)
 
 2，**深度学习基础**：
+
 - [反向传播与梯度下降详解](2-deep_learning_basic/反向传播与梯度下降详解.md)
 - [深度学习基础-参数初始化详解](./2-deep_learning_basic/深度学习基础-参数初始化详解.md)
 - [深度学习基础-损失函数详解](./2-deep_learning_basic/深度学习基础-损失函数详解.md)
@@ -76,7 +77,7 @@
 - [ncnn 源码解析-Layer 层](5-model_deploy/ncnn源码解析/ncnn源码解析-Layer层.md)
 - [ncnn 源码解析-常见算子](../5-model_deploy/ncnn源码解析/ncnn源码解析-常见算子.md)
 
-**4，大规模模型的推理优化及部署总结**
+**4，大规模模型的推理优化及部署总结:**
 
 - [FasterTransformer 框架速览](./5-model_deploy/大型语言模型部署/FasterTransformer速览.md)
 - [DeepSpeed 加速大模型推理](5-model_deploy/大型语言模型部署/DeepSpeed通过系统优化加速大模型推理.md)
@@ -85,6 +86,7 @@
 **5，AI/NPU/GPU 芯片特性**：
 
 - [英伟达 GPU 架构特性详解](5-model_deploy/英伟达GPU架构详解.md)
+
 ## 六，异构计算
 
 1. 移动端异构计算：`neon` 编程
@@ -114,6 +116,10 @@
 > 公众号不会写标题党文章，也不输出给大家带来的焦虑的内容！
 
 ![qcode](images/others/qcode.png)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=HarleysZhang/cv_note&type=Date)](https://star-history.com/#HarleysZhang/cv_note&Date)
 
 ## 参考资料
 

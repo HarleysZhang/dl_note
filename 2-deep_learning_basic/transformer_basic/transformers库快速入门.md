@@ -100,7 +100,7 @@ tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 
 ![attention_mask](../../images/transformers_basic/attention_mask.png)
 
-### 1.4，eop_token、pad_token、bos_token、eos_token
+### 1.4，bos_token、eop_token、pad_token、eos_token
 
 我们在模型的 checkpoints 目录下的配置文件中，经常能看到 eop_token、pad_token、bos_token、eos_token 这些与文本序列处理相关的特殊 `token`，它们代表的意义如下:
 

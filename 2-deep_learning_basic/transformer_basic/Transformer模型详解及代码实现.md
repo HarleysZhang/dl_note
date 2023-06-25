@@ -21,7 +21,7 @@
 
 ## 一，Transformer 输入
 
-Transformer 中单词的输入表示 **x** 由**单词 Embedding** 和**位置 Embedding** （Positional Encoding）相加得到，通常定义为 TransformerEmbedding 层，其代码实现如下所示:
+Transformer 中单词的输入表示 **x** 由**单词 Embedding** 和**位置 Embedding** （Positional Encoding）相加得到，通常定义为 TransformerEmbedding 层。`Embedding` 层的作用是将输入的离散化表示（例如 token）转换为连续的低维向量表示。
 
 ### 1.1，单词 Embedding
 
@@ -31,7 +31,7 @@ Transformer 中单词的输入表示 **x** 由**单词 Embedding** 和**位置 E
 
 Transformer 中除了单词的 Embedding，还需要使用位置 Embedding 表示单词出现在句子中的位置。因为 Transformer 不采用 RNN 的结构，而是使用全局信息，不能利用单词的顺序信息，而这部分信息对于 NLP 来说非常重要。所以 Transformer 中使用位置 Embedding 保存单词在序列中的相对或绝对位置。
 
-位置 Embedding 用 PE 表示，PE 的维度与单词 Embedding 是一样的。PE 可以通过训练得到，也可以使用某种公式计算得到。在 Transformer 中采用了后者，计算公式如下：
+位置 Embedding 用 `PE` 表示，PE 的维度与单词 Embedding 是一样的。PE 可以通过训练得到，也可以使用某种公式计算得到。在 Transformer 中采用了后者，计算公式如下：
 
 $$
 PE_{(pos, 2i)} = sin(pos/10000^{2i/d_{model}}) \\

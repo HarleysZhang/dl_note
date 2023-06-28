@@ -2,8 +2,9 @@
   - [1.1，token、tokenization 和 tokenizer](#11tokentokenization-和-tokenizer)
   - [1.2，input IDs](#12input-ids)
   - [1.3，attention mask](#13attention-mask)
-  - [1.4，decoder models](#14decoder-models)
-  - [1.5，架构与参数](#15架构与参数)
+  - [1.4，bos\_token、eop\_token、pad\_token、eos\_token](#14bos_tokeneop_tokenpad_tokeneos_token)
+  - [1.5，decoder models](#15decoder-models)
+  - [1.6，架构与参数](#16架构与参数)
 - [二，Transformers 功能](#二transformers-功能)
   - [API 概述](#api-概述)
 - [三，快速上手](#三快速上手)
@@ -18,11 +19,11 @@
 
 ### 1.1，token、tokenization 和 tokenizer
 
-`token` 可以理解为最小语义单元，翻译的话可以是词元、令牌、词，也可以是 word/char/subword，单理解就是单词和标点。
+`token`: 可以理解为最小语义单元，翻译的话可以是词元、令牌、词，也可以是 word/char/subword，单理解就是单词和标点。
 
-`tokenization` 是指**分词**过程，目的是将输入序列划分成一个个词元（`token`），保证各个词元拥有相对完整和独立的语义，以供后续任务（比如学习 embedding 或作为 LLM 的输入）使用。
+`tokenization`: 是指**分词**过程，目的是将输入序列划分成一个个词元（`token`），保证各个词元拥有相对完整和独立的语义，以供后续任务（比如学习 embedding 或作为 LLM 的输入）使用。
 
-在 transformers 库中，`tokenizer` 就是实现 `tokenization` 的对象，每个 tokenizer 会有不同的 vocabulary。在代码中，tokenizer 用以将输入文本序列划分成 tokenizer vocabulary 中可用的 `tokens`。
+`Tokenizer`: 在 transformers 库中，`tokenizer` 就是实现 `tokenization` 的对象，每个 tokenizer 会有不同的 vocabulary。在代码中，tokenizer 用以将输入文本序列划分成 tokenizer vocabulary 中可用的 `tokens`。
 
 举两个 tokenization 例子：
 
@@ -104,9 +105,10 @@ tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 
 我们在模型的 checkpoints 目录下的配置文件中，经常能看到 eop_token、pad_token、bos_token、eos_token 这些与文本序列处理相关的特殊 `token`，它们代表的意义如下:
 
-1. `bos_token`（开始标记）：它表示**文本序列的起始位置**。在某些文本生成任务中，可能需要在序列的开头添加一个开始标记，以指示生成文本的起始点。
-2. `eop_token`（结束标记）：它表示文本序列的结束位置。在某些文本生成任务中，可能需要在序列中指定一个结束标记以表示文本的结束。
-3. `pad_token`（填充标记）：它用于将文本序列填充到相同长度时使用的特殊 `token`。在处理变长文本序列时，较短的序列可能需要通过添加填充标记来与较长的序列对齐。填充标记通常是一个特殊的 `token`，用于填充序列中的空白位置，使得所有序列具有相同的长度。
+1. `bos_token`（ Beginning of Sentence Token）：序列开始标记，它表示文本序列的起始位置。
+2. `eos_token`（ End of Sentence Token）：序列结束标记，它表示文本序列的结束位置。
+3. `eop_token`（End of Paragraph Token）段落的结束标志，是用于表示段落结束的特殊标记。
+4. `pad_token`（Padding Token）：填充标记，它用于将文本序列填充到相同长度时使用的特殊 token。
 
 ### 1.5，decoder models
 

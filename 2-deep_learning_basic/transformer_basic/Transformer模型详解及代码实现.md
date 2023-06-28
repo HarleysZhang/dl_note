@@ -21,7 +21,7 @@
 
 ## 一，Transformer 输入
 
-Transformer 中单词的输入表示 **x** 由**单词 Embedding** 和**位置 Embedding** （Positional Encoding）相加得到，通常定义为 TransformerEmbedding 层。`Embedding` 层的作用是将输入的离散化表示（例如 token）转换为连续的低维向量表示。
+Transformer 中单词的输入表示 **x** 由**单词 Embedding** 和**位置 Embedding** （Positional Encoding）相加得到，通常定义为 TransformerEmbedding 层。`Embedding` 层的作用是将输入的离散化表示（例如 token ids）转换为连续的低维向量表示。
 
 ### 1.1，单词 Embedding
 

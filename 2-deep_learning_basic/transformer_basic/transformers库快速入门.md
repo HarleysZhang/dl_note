@@ -85,7 +85,7 @@ sentence_list = ["We are very happy to show you the 🤗 Transformers library.",
 model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-padded_sequences = tokenizer(sentence_list, padding=True, return_tensors="pt")
+padded_sequences = tokenizer(sentence_list, padding=True, return_tensors="pt") # 字典类型
 
 print(padded_sequences["input_ids"])
 print(padded_sequences["attention_mask"])

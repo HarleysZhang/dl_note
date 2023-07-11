@@ -87,25 +87,19 @@ GPT 中的 Decoder 与原始的相比，去掉了 Encoder-Decoder self attention
 
 Self-Attention 层的内部计算过程用数学公式可表达为:
 
-$$
-\text{Attention}(Q, K, V) = \text{softmax} (\frac{QK^T}{\sqrt{d_k}})V \nonumber
-$$
+$$\text{Attention}(Q, K, V) = \text{softmax} (\frac{QK^T}{\sqrt{d_k}})V$$
 
 Masked Multi-Head Attention 层的权重参数包括 $Q$、$K$、$V$ 的权重矩阵 $W_Q$、$W_K$、$W_V$ 及其偏置，以及输出权重矩阵 $W_O$，这些权重矩阵的大小都是 $[\text{d}_\text{model}, \text{d}_\text{model}]$。另外，`concat` 算子无参数，**self-attention 层都是计算 Kernel，内部执行的操作也不涉及权重参数**。
 
 2，`Add & Norm` 层由 Add 和 Norm 两部分组成。这里的 Add 指 X + MultiHeadAttention(X)，是一种残差连接。Norm 是 Layer Normalization。Add & Norm 层计算过程用数学公式可表达为:
 
-$$
-\text{Layer Norm}(X + \text{MultiHeadAttention}(X)) \nonumber
-$$
+$$\text{Layer Norm}(X + \text{MultiHeadAttention}(X))$$
 
 Add 比较简单，执行的是逐元素相加操作，该算子没有参数。
 
 3，Feed Forward 层全称是 Position-wise Feed-Forward Networks，其本质是一个**两层的全连接层**（线性层），第一层的激活函数为 Relu，第二层不使用激活函数，计算过程用数学公式可表达为：
 
-$$
-\text{FFN}(X) = \text{max}(0, XW_1 + b_1 )W_2 + b_2 \nonumber
-$$
+$$\text{FFN}(X) = \text{max}(0, XW_1 + b_1 )W_2 + b_2$$
 
 一般地，第一个线性层是先将维度从 $\text{d\_{model}}$ 映射到 $\text{4d\_{model}}$，第二个线性层再将维度从 $\text{4d\_{model}}$ 映射到 $\text{d\_{model}}$。
 
@@ -113,9 +107,7 @@ $$
 
 模型总的参数量计算公式可抽象如下:
 
-$$
-\text{totoal param} = \text{param}_\text{embedding} + \text{param}_\text{decoder layer} \cdot \text{n}_\text{layers} \nonumber
-$$
+$$\text{totoal param} = \text{param}_\text{embedding} + \text{param}_\text{decoder layer} \cdot \text{n}_\text{layers}$$
 
 注意，很多 `decoder-only` 架构的自回归模型的全连接层的偏置 `bias` 都设置为 False，故这里的计算公式中没有考虑偏置参数。
 
@@ -139,82 +131,68 @@ $$\text{param}_\text{TE} = \text{vocab\_size} \cdot \text{d}_\text{model}$$
 
 故，(MHA) 层参数量为:
 
-$$
-\begin{align} 
+$$\begin{align} 
 \text{param}_\text{MHA} 
 &= \text{param}_\text{Q} + \text{param}_\text{K} + \text{param}_\text{V} + \text{param}_\text{output} \nonumber \\
 &= \text{d}_\text{model}\cdot \text{d}_\text{model} + \text{d}_\text{model}\cdot \text{d}_\text{model} + \text{d}_\text{model}\cdot \text{d}_\text{model} + \text{d}_\text{model}\cdot \text{d}_\text{model} \nonumber \\
 &= 4\cdot {\text{d}_\text{model}}^{2} \nonumber
-\end{align}
-$$
+\end{align}$$
 
 ### 2.3，Add & Norm 层参数量
 
 `Add & Norm` 层由 Add 和 Norm 两部分组成。这里的 Add 指 X + MultiHeadAttention(X)，是一种残差连接。Norm 是 Layer Normalization。Add & Norm 层计算过程用数学公式可表达为:
-$$
-\text{Layer Norm}(X + \text{MultiHeadAttention}(X)) \nonumber
-$$
+
+$$\text{Layer Norm}(X + \text{MultiHeadAttention}(X))$$
+
 Add 比较简单，执行的是逐元素相加操作，该算子没有参数。重点讲下 Layer Norm 层。Layer Norm 是一种常用的神经网络归一化技术，可以使得模型训练更加稳定，收敛更快。它的主要作用是对每个样本**在特征维度上进行归一化**，减少了不同特征之间的依赖关系，提高了模型的泛化能力。Layer Norm 层的计算可视化如下图所示:
 
 ![Layer Norm](../../images/transfomer/layer_norm.jpeg)
 
 从上图可以看出，layer norm 层主要有两个参数: $\mu_{\beta}$ 和 $\sigma_{\beta}$（scale factor and offset），这两个参数的大小都是 $[\text{d}_\text{model}]$，因此一个 `Layer Norm` 层的参数量为:
 
-$$
-\text{param}_\text{LN}  = (\text{d}_\text{model} + \text{d}_\text{model}) \nonumber
-$$
+$$\text{param}_\text{LN}  = (\text{d}_\text{model} + \text{d}_\text{model})$$
 
 又因为 `MHA` 块和 `FFN` 块各有一个 `layer normalization` 层，故每个 decoder layer 中的总的 Layer Norm 参数量为:
 
-$$
-\text{param}_\text{LN}  = 2\cdot(\text{d}_\text{model} + \text{d}_\text{model}) = 4\cdot \text{d}_\text{model} \nonumber
-$$
+$$\text{param}_\text{LN}  = 2\cdot(\text{d}_\text{model} + \text{d}_\text{model}) = 4\cdot \text{d}_\text{model}$$
 
 ### 2.4，FeedForward Layer (FFN)/MLP 层参数量
 
 FFN 层由 2 个参数权重矩阵组成：MLP Expansion 和 MLP Contraction，其大小分别是 
 
-- $W_1 \in [\text{d}_\text{model}, 4\text{d}_\text{model}]$
-- $W_2 \in [4\text{d}_\text{model}, \text{d}_\text{model}]$
+- 权重 $W_1 \in [\text{d}_\text{model}, 4\text{d}_\text{model}]$
+- 权重 $W_2 \in [4\text{d}_\text{model}, \text{d}_\text{model}]$
 
 因此，FFN 层的参数量为:
 
-$$
-\begin{align} 
+$$\begin{align} 
 \text{param}_\text{FFN} &= \text{param}_\text{fc1} +  \text{param}_\text{fc2} \nonumber \\
 &= \text{d}_\text{model} \cdot 4\text{d}_\text{model} + 4\text{d}_\text{model}\cdot\text{d}_\text{model} \nonumber \\
 &= 8\cdot {\text{d}_\text{model}}^{2} \nonumber
-\end{align}
-$$
+\end{align}$$
 
 ### 2.5，总的公式
 
 1，单个 decoder Layer 参数量
 
-$$
-\begin{align} 
+$$\begin{align} 
 \text{param}_\text{decoder\_layer} 
 &= \text{param}_\text{MHA}  + \text{param}_\text{LN} + \text{param}_\text{FFN} \nonumber \\
 &= 4\cdot {\text{d}_\text{model}}^{2} + 4\cdot \text{d}_\text{model} + 8\cdot {\text{d}_\text{model}}^{2} \nonumber \\
 &= 12\cdot {\text{d}_\text{model}}^{2} + 4\cdot \text{d}_\text{model} \nonumber
-\end{align}
-$$
+\end{align}$$
 
 2，**模型总的参数量计算公式**
 
-$$
-\begin{align}
+$$\begin{align}
 \text{param}_\text{decoder-only-model} 
 &= \text{param}_\text{TE} + \text{param}_\text{decoder layer} \cdot \text{n}_\text{layers} \nonumber \\
 &= (12\cdot {\text{d}_\text{model}}^{2} + 4\cdot \text{d}_\text{model}) \cdot \text{n}_\text{layers} + \text{vocab\_size} \cdot \text{d}_\text{model} \nonumber \\
-\end{align}
-$$
+\end{align}$$
 
 如果用 $h$ 代替 $\text{d}_\text{model}$，$n$ 代替 $\text{n}_\text{layers}$，$V$ 代替 $\text{vocab\_size}$，则**自回归模型总的参数量计算公式**可简化为:
 
-$$
-n(12h^2 + 4h) + Vh \nonumber
-$$
+$$n(12h^2 + 4h) + Vh$$
 
 有了以上理论公式，我们就能估计不同版本 `LLaMA` 模型的理论参数量：
 

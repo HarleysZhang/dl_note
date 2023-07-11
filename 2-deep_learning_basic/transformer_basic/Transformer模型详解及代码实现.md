@@ -1,4 +1,3 @@
-
 - [一，Transformer 输入](#一transformer-输入)
   - [1.1，单词 Embedding](#11单词-embedding)
   - [1.2，位置 Embedding](#12位置-embedding)

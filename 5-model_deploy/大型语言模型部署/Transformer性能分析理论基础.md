@@ -17,7 +17,9 @@
   - [5.3，训练过程中显存占用量理论计算](#53训练过程中显存占用量理论计算)
   - [5.4，推理过程中显存占用量理论计算](#54推理过程中显存占用量理论计算)
   - [5.5，显存占用的定性分析和定量分析](#55显存占用的定性分析和定量分析)
-- [六，推理 Latency 理论计算](#六推理-latency-理论计算)
+- [六，推理 Latency 估算](#六推理-latency-估算)
+  - [6.1，Roofline Performance Model](#61roofline-performance-model)
+  - [6.2，推理 Latency 估算](#62推理-latency-估算)
 - [七，并发支持估算](#七并发支持估算)
 - [参考资料](#参考资料)
   - [LLM 推理加速](#llm-推理加速)
@@ -97,13 +99,13 @@ $$\text{Layer Norm}(X + \text{MultiHeadAttention}(X))$$
 
 Add 比较简单，执行的是逐元素相加操作，该算子没有参数。
 
-3，Feed Forward 层全称是 Position-wise Feed-Forward Networks，其本质是一个**两层的全连接层**（线性层），第一层的激活函数为 Relu，第二层不使用激活函数，计算过程用数学公式可表达为：
+3，Feed Forward 层全称是 Position-wise Feed-Forward Networks（`FFN`），其本质是一个**两层的全连接层**（线性层），第一层的激活函数为 Relu，第二层不使用激活函数，计算过程用数学公式可表达为：
 
 $$\text{FFN}(X) = \text{max}(0, XW_1 + b_1 )W_2 + b_2$$
 
 一般地，第一个线性层是先将维度从 $\text{d\_{model}}$ 映射到 $\text{4d\_{model}}$，第二个线性层再将维度从 $\text{4d\_{model}}$ 映射到 $\text{d\_{model}}$。
 
-另外，最底层的 decoder layer 的输入是 Embedding 层（Token Embedding + Positional Embedding），其他 decoder layer 的输入是上一层的输出。  
+另外，最底层的 `decoder layer` 的输入是 `Embedding` 层（Token Embedding + Positional Embedding），其他 decoder layer 的输入是上一层的输出。  
 
 模型总的参数量计算公式可抽象如下:
 
@@ -373,7 +375,13 @@ $$\text{memory\_kv-cache} = b(s+o)h*n * 2*2 = 4bnh(s+o)$$
 
 以 A100-40G GPU 为例，llama-13b 模型参数占用了 26GB，如果忽略中间显存，那么剩下的 14GB 显存中大约可以容纳 14,000 个 token。在部署项目中，如果将输入序列长度限制为 512，那么该硬件下最多只能同时处理大约 `28` 个序列。
 
-## 六，推理 Latency 理论计算
+## 六，推理 Latency 估算
+
+### 6.1，Roofline Performance Model
+
+参考 ppt: [《Introduction to the Roofline Model》](https://www.nersc.gov/assets/Uploads/Tutorial-ISC2019-Intro-v2.pdf)
+
+### 6.2，推理 Latency 估算
 
 对于小 `batch` 的模型推理，单个 token 的推理 `latency` 受限于 gpu 的内存带宽；对于大 `batch`，单个 token 的推理 `latency` 受限于 gpu 的算力，同时将忽略卡与卡之间的通信延迟因素。
 

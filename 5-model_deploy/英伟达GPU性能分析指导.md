@@ -84,7 +84,7 @@ $$\frac{\text{\#ops}}{\#bytes} > \frac{\text{BW\_math}}{\text{BW\_mem}}$$
 - 右边是**处理器的数学带宽与内存带宽的比值**，有时被称为**操作：字节比率**（`ops:byte ratio`）。
 
 算术强度通俗理解就是计算量除以访存量后的值，表示此模型/网络层**在计算过程中，每 `Byte` 内存交换到底用于进行多少次浮点运算**，单位是 FLOPs/Byte。可以看到，**模型计算强度越大，其内存使用效率越高**。因此，对于给定的 gpu：
-- 如果算法的算术强度高于 gpu 的 `ops:byte ratio`，那么该算法在该处理器上是受数学限制的，也称 `math bound`，即**性能受算力 `FLOPS` 限制**。
+- 如果算法的算术强度高于 gpu 的 `ops:byte ratio`，那么该算法受算力限制的，也称 `math bound`，即**性能受算力 `FLOPS` 限制**。
 - 相反，如果算法的算术强度低于 gpu 的 `ops:byte ratio`，则该算法受内存限制，也称 `memory bound`，即**性能受内存带宽限制**。
 
 ![Figure 4: Roofline Model](../images/gpu_performance_basic/roof_line_model.png)
@@ -145,17 +145,20 @@ $$
 
 ![arithmetic-intensity](../images/gpu_performance_basic/arithmetic-intensity.svg)
 
-那么内存带宽限制和模型算力 FLOPS 限制会有什么影响呢？
+那么内存带宽限制和算力 FLOPS 限制会有什么影响呢？
 
-以 A100 GPU 为例，该硬件的字节比例是 $208$（V100 是 $138.9$），这意味着如果我们计算一个 token 的 `kv` 值，与计算多达 `208` 个 token 的时间将是相同的！即低于这个数，会受到内存带宽的限制；高于这个数，我们会受到算力 `FLOPS` 的限制。
+以 A100 GPU 为例，该硬件的操作:字节比例是 $208$（V100 是 $138.9$），这意味着如果我们计算一个 token 的 `kv` 值，与计算多达 `208` 个 token 的时间几乎是相同的！即低于这个数，会受到内存带宽的限制；高于这个数，我们会受到算力 `FLOPS` 的限制。
 
-在实际场景中，我们可以通过 `batch_size` 来控制模型的算术强度，从而控制模型是受到内存带宽限制还是算力 `FLOPS` 限制。从经验上看，因为有着 `kv` cache 的存在，模型的算术强度和 batch_size 并不完全成正比，且从实验测试结果看，**使用 8 个 V100 硬件做模型推理（张量并行），输入长度固定，在 batch_size < 一定值内，其 latency 不会变**。
+在实际场景中，我们可以通过 `batch_size` 来控制模型的算术强度，从而控制模型是受到内存带宽限制还是算力 `FLOPS` 限制。从经验上看，因为有着 `kv` cache 的存在，模型的算术强度和 batch_size 并不完全成正比.
 
+在 batch_size = 1 的情况下，权重为 `fp16` 的 decoder-only 模型推理时的算术强度是约为 $2$。**随着 batch_size 的增加，模型的算术强度会随之增加**，因为 flops 和 batch_size 是成正比的，而内存访问字节数中只有 kv cache 部分是和 batch_size 成正比的，且模型权重所访问内存是固定值。
+
+对于自回归模型的推理来说就是，**固定 seq_len**， 如果 seq_len * bs < ops:byte ratio * gpu_num，即**小 `batch_size` 范围 的 latency 不明显增加的**。从实验测试结果看，**使用 4/8 个 V100 硬件做模型推理（张量并行），输入长度固定，在 batch_size < 16/32，其 latency 不明显增加**。
+
+理论分析：**固定 seq_len**，batch_size 较小时，模型的算术强度较低，模型受到内存带宽限制，`Latency` 取决于内存搬运时间，而 `batch_size ` 较小时，kv cache 读写时间也较小，而模型权重读取时间又是固定的，故 latency 不明显增加；当 batch_size 增加到一定程度，模型的算术强度增加，模型受到算力 `FLOPS` 限制，故此时 `Latency` 与 batch_size 几乎成正比。
+
+![bs_latency2](../images/gpu_performance_basic/bs_latency2.png)
 ![bs_latency](../images/gpu_performance_basic/bs_latency.png)
-
-在 batch_size = 1 的情况下，权重为 `fp16` 的 decoder-only 模型推理时的算术强度是约为 $2$。**随着 batch_size 的增加，模型的算术强度会随之增加**，因为 flops 和 batch_size 是成正比的，而内存访问字节数中只有 kv cache 部分是和 batch_size 成正比的，模型权重所访问内存是固定值。
-
-**对于自回归模型来说就是，固定 seq_len， 如果 seq_len * bs < 操作：字节比率（随硬件而定），则这个范围内 的 batch_size 的 latency 是几乎不变的**。
 
 ## 五，DNN 操作类别 
 

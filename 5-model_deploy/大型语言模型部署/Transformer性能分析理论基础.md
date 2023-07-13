@@ -381,15 +381,19 @@ $$\text{memory\_kv-cache} = b(s+o)h*n * 2*2 = 4bnh(s+o)$$
 
 参考 ppt: [《Introduction to the Roofline Model》](https://www.nersc.gov/assets/Uploads/Tutorial-ISC2019-Intro-v2.pdf)
 
+![roofline_time](../../images/decoder-only-profiling/roofline_time.png)
+
 ### 6.2，推理 Latency 估算
 
 对于小 `batch` 的模型推理，单个 token 的推理 `latency` 受限于 gpu 的内存带宽；对于大 `batch`，单个 token 的推理 `latency` 受限于 gpu 的算力，同时将忽略卡与卡之间的通信延迟因素。
 
 本章 Latency 的计算忽略了**预填充阶段**中计算和**读取 kv cache 的时间、读取 unembedding vector 并计算 logits 的时间**。预填充阶段对应的就是生成第一个 `token` 的过程，这个时候需要计算 `kv cache`，所以第一个 `token` 的 `latency` 会比后面的 `token` 大很多。
 
-模型推理的**解码阶段** Latency 的理论计算公式如下所示：
+对于自回归模型的推理来说就是，**固定 seq_len**， 如果 seq_len * bs < ops:byte ratio * gpu_num，即**小 `batch_size` 范围 的 latency 不明显增加的**。
 
-1，小 batch：
+且模型推理的**解码阶段** Latency 的理论计算公式如下所示：
+
+1，前提：**内存读取时间 > 计算时间**，一般是小 batch：
 
 $$
 \begin{align}
@@ -398,7 +402,7 @@ $$
 \end{align}
 $$
 
-2，大 batch：
+2，前提：内存读取时间 < 计算时间，一般是大 batch：
 
 $$
 \begin{align}

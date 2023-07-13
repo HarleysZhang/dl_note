@@ -150,11 +150,11 @@ Add 比较简单，执行的是逐元素相加操作，该算子没有参数。�
 
 从上图可以看出，layer norm 层主要有两个参数: $\mu_{\beta}$ 和 $\sigma_{\beta}$（scale factor and offset），这两个参数的大小都是 $[\text{d}_\text{model}]$，因此一个 `Layer Norm` 层的参数量为:
 
-$$\text{param}_\text{LN}  = (\text{d}_\text{model} + \text{d}_\text{model})$$
+$$\text{param}_\text{LN} = (\text{d}_\text{model} + \text{d}_\text{model})$$
 
 又因为 `MHA` 块和 `FFN` 块各有一个 `layer normalization` 层，故每个 decoder layer 中的总的 Layer Norm 参数量为:
 
-$$\text{param}_\text{LN}  = 2\cdot(\text{d}_\text{model} + \text{d}_\text{model}) = 4\cdot \text{d}_\text{model}$$
+$$\text{param}_\text{LN} = 2\cdot(\text{d}_\text{model} + \text{d}_\text{model}) = 4\cdot \text{d}_\text{model}$$
 
 ### 2.4，FeedForward Layer (FFN)/MLP 层参数量
 
@@ -333,7 +333,7 @@ total_memory = memory_modal + 2 * memory_activations + memory_optimizer
 
 1，存储模型所有参数所需的显存计算公式（params 是模型参数量）：
 
-$$\text{memory\_modal} = \text{params} * 2 = [n(12h^2 + 4h) + Vh] * 2$$
+$$\text{memory\_model} = \text{params} * 2 = [n(12h^2 + 4h) + Vh] * 2$$
 
 2，中间结果显存占用
 
@@ -379,7 +379,7 @@ $$\text{memory\_kv-cache} = b(s+o)h*n * 2*2 = 4bnh(s+o)$$
 
 本章 Latency 的计算忽略了**预填充阶段**中计算和**读取 kv cache 的时间、读取 unembedding vector 并计算 logits 的时间**。预填充阶段对应的就是生成第一个 `token` 的过程，这个时候需要计算 `kv cache`，所以第一个 `token` 的 `latency` 会比后面的 `token` 大很多。
 
-模型推理解码阶段 Latency 的理论计算公式如下所示：
+模型推理的**解码阶段** Latency 的理论计算公式如下所示：
 
 1，小 batch：
 

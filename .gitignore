@@ -2,8 +2,7 @@
 .history/
 .DS_Store
 
-6-interview/
-2-deep_learning_basic/transformer_basic/LLM推理优化总结.md
+7-interview/
 docs/
 
 code/openai-py/

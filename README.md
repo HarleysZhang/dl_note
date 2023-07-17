@@ -7,13 +7,13 @@
 - [六，异构计算](#六异构计算)
 - [七，大语言模型推理及服务化](#七大语言模型推理及服务化)
 - [八，进阶课程](#八进阶课程)
-- [八，其他](#八其他)
+- [九，其他](#九其他)
 - [Star History](#star-history)
 - [参考资料](#参考资料)
 
 ## 项目概述
 
-本仓库项目是个人总结的深度学习炼丹、优化及部署落地笔记，包含深度学习数学基础知识、深度学习基础知识、神经网络基础部件详解、构建 `CNN` 网络总结、深度学习炼丹策略、深度学习模型压缩算法、以及深度学习推理框架代码解析及动手实战。
+本仓库项目是个人总结的计算机视觉和大语言模型学习笔记，包含深度学习基础知识、神经网络基础部件详解、深度学习炼丹策略、深度学习模型压缩算法、深度学习推理框架代码解析及动手实战，以及 `LLM` 基础及推理优化的专栏笔记。
 
 ## 一，数学基础专栏
 
@@ -89,7 +89,7 @@
 
 - [transformers 库快速入门](./6-llm_note/transformer_basic/transformers库快速入门.md)
 - [LLM 背景知识总结](./6-llm_note/transformer_basic/LLM背景知识总结.md)
-- 
+
 **2，Transformer 模型基础**：
 
 - [Transformer 原理详解](./6-llm_note/transformer_basic/Transformer模型详解及代码实现.md)
@@ -117,7 +117,7 @@
 
 1. [awesome-emdl](https://github.com/EMDL/awesome-emdl): 嵌入式与移动端深度学习研究资料合集。
 2. [AI-System](https://github.com/microsoft/AI-System/tree/main/Textbook): 深度学习系统。
-3. [pytorch-deep-learning](https://github.com/mrdbourke/pytorch-deep-learning)
+3. [pytorch-deep-learning](https://github.com/mrdbourke/pytorch-deep-learning)：很好的 pytorch 深度学习教程。
 
 2，一些笔记好的博客链接：
 
@@ -127,7 +127,7 @@
 - [annotated_deep_learning_paper_implementations
 ](https://github.com/labmlai/annotated_deep_learning_paper_implementations)
 
-## 八，其他
+## 九，其他
 
 最后，持续高质量创作不易，有 `5` 秒空闲时间的，**可以扫码关注我的公众号-嵌入式视觉**，记录 CV 算法工程师成长之路，分享技术总结、读书笔记和个人感悟。
 > 公众号不会写标题党文章，也不输出给大家带来的焦虑的内容！

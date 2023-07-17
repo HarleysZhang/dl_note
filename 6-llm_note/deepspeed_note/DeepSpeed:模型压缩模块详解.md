@@ -27,8 +27,6 @@
 
 ### 如何使用 ZeroQuant
 
-
-
 ## 参考资料
 
 - [DeepSpeed Compression: A composable library for extreme compression and zero-cost quantization](https://www.microsoft.com/en-us/research/blog/deepspeed-compression-a-composable-library-for-extreme-compression-and-zero-cost-quantization/)

@@ -1,5 +1,3 @@
-
-
 ### 背景知识
 
 2021 年见证了 vision transformer 的大爆发，随着谷歌提出 `ViT` 之后，一大批的 vision transformer 的工作席卷计算机视觉任务。除了 vision transformer，另外一个对计算机视觉影响比较大的工作就是 Open AI 在 2021 年1 月份发布的 **DALL-E** 和 **CLIP**，这两个都属于结合图像和文本的多模态模型，其中 **DALL-E 是基于文本来生成图像的模型**，而 **CLIP 是用文本作为监督信号来训练可迁移的视觉模型**。

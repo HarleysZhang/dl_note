@@ -5,7 +5,6 @@
   - [4.1，数学（算力 FLOPS）带宽 vs 内存带宽](#41数学算力-flops带宽-vs-内存带宽)
   - [4.2，矩阵乘法的算术强度计算及优化](#42矩阵乘法的算术强度计算及优化)
   - [4.3，如何分析模型推理的性能](#43如何分析模型推理的性能)
-  - [4.4，decoder-only 模型的数学（算力 FLOPS）带宽 vs 内存带宽](#44decoder-only-模型的数学算力-flops带宽-vs-内存带宽)
 - [五，DNN 操作类别](#五dnn-操作类别)
   - [5.1，逐元素操作](#51逐元素操作)
   - [5.2，减少操作](#52减少操作)
@@ -107,9 +106,9 @@ $$\frac{2MKN}{2(MK + KN + MN)}$$
 
 ![tiled_matrix_multiplication](../images/gpu_performance_basic/tiled_matrix_multiplication.webp)
 
-具体示例在下表 1 中。对于这些例子，我们将比较算法的算术强度与 NVIDIA Volta V100 PCle GPU 的 ops:byte ratio。V100 PCle GPU  的峰值数学速率为 112 FP16 Tensor TFLOPS，**片外内存带宽**约为 900 GB/s，芯片上 L2 缓存的带宽为 3.1 TB/s，因此其 `ops:byte ratio` 在 40 到 124.4 之间，取决于操作数据的来源（片内或片外存储器）。
+具体示例在下表 1 中。对于这些例子，我们将比较算法的算术强度与 NVIDIA Volta V100 PCle GPU 的 ops:byte ratio。V100 PCle GPU  的峰值算力为 112 FP16 Tensor TFLOPS，**片外内存带宽**约为 900 GB/s，芯片上 L2 缓存的带宽为 3.1 TB/s，因此其 `ops:byte ratio` 在 40 到 124.4 之间，取决于操作数据的来源（片内或片外存储器）。
 
-假设 GPU 在 FP16 输入上进行 Tensor Core 操作，并使用 FP32 累积，如果数据从 GPU 的内存加载，则 `FLOPS：B`（**操作：字节比率**）为 `124.4 = 112 / 0.9`。下表显示了一些常见网络层的算术强度。
+假设 GPU 在 FP16 输入上进行 Tensor Core 操作，并使用 FP32 累积，如果数据从 GPU 的内存加载，则 `FLOPS：B`（**ops:byte ratio**）为 `124.4 = 112 / 0.9`。下表显示了一些常见网络层的算术强度。
 
 ![memory_math_bound](../images/gpu_performance_basic/memory_math_bound.png)
 
@@ -121,44 +120,17 @@ $$
 
 即该线性层（矩阵乘法）的算术强度为 $315$，大于 V100 PCle 的 $124.4$。因此，在 V100 PCle 上，**该矩阵乘法受到算术限制，即 GPU 将被充分利用**。
 
-另外，从表格可以看出，大部分 layer 的算术强度都较低，比如第二行对应于批量大小为 $1$ 的线性层。在这种情况下，线性层变为受内存限制而不是算术限制，这就是为什么深度学习模型通常尽可能不使用批量大小为 $1$ 进行训练或推理的原因，因为这种情况下 GPU 无法被充分利用。
+另外，从表格可以看出，大部分 layer 的算术强度都较低，比如第二行对应于批量大小为 $1$ 的线性层。在这种情况下，线性层变为受内存限制而不是算术限制，这就是为什么**深度学习模型通常尽可能不使用批量大小为 $1$ 进行训练或推理的原因，因为这种情况下 GPU 无法被充分利用**。
 
 当然，这是一种简化的分析，毕竟我们只考虑了算法中使用的算法操作，在实践中，函数还包含了对算法中未明确表示的操作的指令，如**内存访问指令、地址计算指令、控制流指令**等等。
 
 ### 4.3，如何分析模型推理的性能
 
-1. count arithmetic intensity ：ops/bytes
-2. count `ops:byte ratio`: BW_math/BW_mem
+1. count arithmetic intensity ：$ops/bytes$
+2. count `ops:byte ratio`: $BW\_math/BW\_mem$
 3. 比较 (1) 和 (2)
 
 ![analyzing_performance](../images/gpu_performance_basic/analyzing_performance.webp)
-
-### 4.4，decoder-only 模型的数学（算力 FLOPS）带宽 vs 内存带宽
-> 网络层/模型的算术强度 < GPU 的 `ops:byte ratio`，即内存带宽限制；反之，则是模型算力 FLOPS 限制。
-
-类 `gpt` 的 decoder-only 模型推理过程中涉及到的内存访问字节数包括：
-1. 模型参数量所消耗内存；
-2. kv cache 所消耗内存；
-3. 中间激活所消耗内存。
-
-下图是输入输出向量维度都为 `4096` 的全连接层的算术密度。`batch_size` 小于等于 `128` 的情况在 `NVIDIA A100` 加速器上受到**内存带宽限制**。
-
-![arithmetic-intensity](../images/gpu_performance_basic/arithmetic-intensity.svg)
-
-那么内存带宽限制和算力 FLOPS 限制会有什么影响呢？
-
-以 A100 GPU 为例，该硬件的操作:字节比例是 $208$（V100 是 $138.9$），这意味着如果我们计算一个 token 的 `kv` 值，与计算多达 `208` 个 token 的时间几乎是相同的！即低于这个数，会受到内存带宽的限制；高于这个数，我们会受到算力 `FLOPS` 的限制。
-
-在实际场景中，我们可以通过 `batch_size` 来控制模型的算术强度，从而控制模型是受到内存带宽限制还是算力 `FLOPS` 限制。从经验上看，因为有着 `kv` cache 的存在，模型的算术强度和 batch_size 并不完全成正比.
-
-在 batch_size = 1 的情况下，权重为 `fp16` 的 decoder-only 模型推理时的算术强度是约为 $2$。**随着 batch_size 的增加，模型的算术强度会随之增加**，因为 flops 和 batch_size 是成正比的，而内存访问字节数中只有 kv cache 部分是和 batch_size 成正比的，且模型权重所访问内存是固定值。
-
-对于自回归模型的推理来说就是，**固定 seq_len**， 如果 seq_len * bs < ops:byte ratio * gpu_num，即**小 `batch_size` 范围 的 latency 不明显增加的**。从实验测试结果看，**使用 4/8 个 V100 硬件做模型推理（张量并行），输入长度固定，在 batch_size < 16/32，其 latency 不明显增加**。
-
-理论分析：**固定 seq_len**，batch_size 较小时，模型的算术强度较低，模型受到内存带宽限制，`Latency` 取决于内存搬运时间，而 `batch_size ` 较小时，kv cache 读写时间也较小，而模型权重读取时间又是固定的，故 latency 不明显增加；当 batch_size 增加到一定程度，模型的算术强度增加，模型受到算力 `FLOPS` 限制，故此时 `Latency` 与 batch_size 几乎成正比。
-
-![bs_latency2](../images/gpu_performance_basic/bs_latency2.png)
-![bs_latency](../images/gpu_performance_basic/bs_latency.png)
 
 ## 五，DNN 操作类别 
 

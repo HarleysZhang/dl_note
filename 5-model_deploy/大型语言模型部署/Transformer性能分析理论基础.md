@@ -17,9 +17,10 @@
   - [5.3，训练过程中显存占用量理论计算](#53训练过程中显存占用量理论计算)
   - [5.4，推理过程中显存占用量理论计算](#54推理过程中显存占用量理论计算)
   - [5.5，显存占用的定性分析和定量分析](#55显存占用的定性分析和定量分析)
-- [六，推理 Latency 估算](#六推理-latency-估算)
+- [六，推理 Latency 理论估算](#六推理-latency-理论估算)
   - [6.1，Roofline Performance Model](#61roofline-performance-model)
-  - [6.2，推理 Latency 估算](#62推理-latency-估算)
+  - [6.2，推理 Latency 估算公式](#62推理-latency-估算公式)
+  - [6.3，自回归模型的数学（算力 FLOPS）带宽 vs 内存带宽](#63自回归模型的数学算力-flops带宽-vs-内存带宽)
 - [七，并发支持估算](#七并发支持估算)
 - [参考资料](#参考资料)
   - [LLM 推理加速](#llm-推理加速)
@@ -39,12 +40,12 @@ GPT 中的 Decoder 与原始的相比，去掉了 Encoder-Decoder self attention
 
 一个正常的 `Self Attention` 允许一个位置关注到它两边的 tokens，而 masked Self Attention 只让模型看到左边的 tokens：
 
-![masked Self Attention](../../images/decoder-only-profiling/4-mask.png)
+![masked Self Attention](../../images/transformer-performance_basic/4-mask.png)
 > 图： self attention vs mask self attention
 
 `decoder-only` 的 transformer 模型结构图如下图所示：
 
-![decoder-only transformer](../../images/decoder-only-profiling/4-trans-decoder.png)
+![decoder-only transformer](../../images/transformer-performance_basic/4-trans-decoder.png)
 > 图： decoder-only transformer 模型结构图
 
 本文分析的是采用 `decoder-only` 框架的 `transformer` 模型的模型参数量、计算量、理论所需内存以及显存。
@@ -53,7 +54,7 @@ GPT 中的 Decoder 与原始的相比，去掉了 Encoder-Decoder self attention
 
 ### 1.2，LLama 模型结构配置文件
 
-![llama-13b-config](../../images/decoder-only-profiling/llama-13b-config.png)
+![llama-13b-config](../../images/transformer-performance_basic/llama-13b-config.png)
 
 模型配置文件中主要字段解释如下：
 
@@ -75,7 +76,7 @@ GPT 中的 Decoder 与原始的相比，去掉了 Encoder-Decoder self attention
 
 `decoder-only` 框架的 `transformer` 模型整体结构如下图所示:
 
-![decoder-only-model](../../images/decoder-only-profiling/decoder-only-model.png)
+![decoder-only-model](../../images/transformer-performance_basic/decoder-only-model.png)
 > decoder-only 模型的完整结构。
 
 模型由 N 个相同的 decoder layer 串联而成，每个 decoder layer 又由一个带掩码（`mask`）多头注意力（MHA）层、2 个层归一化层、和一个前馈神经网络（FFN）层组成：
@@ -113,7 +114,7 @@ $$\text{totoal param} = \text{param}_\text{embedding} + \text{param}_\text{decod
 
 注意，很多 `decoder-only` 架构的自回归模型的全连接层的偏置 `bias` 都设置为 False，故这里的计算公式中没有考虑偏置参数。
 
-![LlamaForCausalLM architecture](../../images/decoder-only-profiling/llama-model-params.png)
+![LlamaForCausalLM architecture](../../images/transformer-performance_basic/llama-model-params.png)
 
 ### 2.1，Embedding 层参数量
 
@@ -207,6 +208,10 @@ $$n(12h^2 + 4h) + Vh$$
 
 > 该章节主要参考资料 [Transformer Deep Dive: Parameter Counting](https://orenleung.com/transformer-parameter-counting)
 
+另外，推特上有人研究了 `gpt-like` 模型（`opt`）的参数分布，下面是不同大小模型的一些图——随着模型变大，注意力接近 `66%`，MLP 接近 `33%`。
+
+![gpt-like 模型（`opt`）的参数分布](../../images/transformer-performance_basic/opt-prams-dist.png)
+
 ## 三，内存使用量理论分析
 
 1，模型参数内存如何计算？
@@ -282,7 +287,7 @@ $$6 \times 12850 \times 10^6 \times 300 \times 10^9 = 2.313 \times 10^{22}$$
 
 计算结果和下表所示结果相符合。
 
-![llm_params_flops](../../images/decoder-only-profiling/llm_params_flops.png)
+![llm_params_flops](../../images/transformer-performance_basic/llm_params_flops.png)
 
 一次训练迭代包含了前向传播和反向传播计算，反向传播的计算量是前向传播的 $2$ 倍。因此，前向传播 + 后向传播的系数 $= 1+ 2 = 3$。**一次训练**迭代中，对于每个 `token`，每个模型参数，需要进行 `6` 次浮点数运算。
 
@@ -375,15 +380,27 @@ $$\text{memory\_kv-cache} = b(s+o)h*n * 2*2 = 4bnh(s+o)$$
 
 以 A100-40G GPU 为例，llama-13b 模型参数占用了 26GB，如果忽略中间显存，那么剩下的 14GB 显存中大约可以容纳 14,000 个 token。在部署项目中，如果将输入序列长度限制为 512，那么该硬件下最多只能同时处理大约 `28` 个序列。
 
-## 六，推理 Latency 估算
+## 六，推理 Latency 理论估算
 
 ### 6.1，Roofline Performance Model
 
-参考 ppt: [《Introduction to the Roofline Model》](https://www.nersc.gov/assets/Uploads/Tutorial-ISC2019-Intro-v2.pdf)
+参考 `ppt`: 
+- [《Introduction to the Roofline Model》](https://www.nersc.gov/assets/Uploads/Tutorial-ISC2019-Intro-v2.pdf)
+- [《Performance Tuning of Scientific Codes with the Roofline Model》](https://crd.lbl.gov/assets/Uploads/SC18-Roofline-1-intro.pdf)
 
-![roofline_time](../../images/decoder-only-profiling/roofline_time.png)
+![Many components contribute to the kernel run time](../../images/transformer-performance_basic/many_components_time.png)
+![roofline_model](../../images/transformer-performance_basic/roofline_model.png)
+![roofline_time](../../images/transformer-performance_basic/roofline_time.png)
 
-### 6.2，推理 Latency 估算
+总结：
+1. AI 应用的推理时间取决于多个因素，我们应该关注主要因素，比如：内存读写和数学计算时间，而不是次要因素：网络带宽和磁盘读写时间。
+2. `Roofline Model` 有两个区域：**内存带宽受限**和**算力受限**，分别对应两种不同的优化策略。网络层/模型的算术强度 < GPU 的 `ops:byte ratio`，即内存带宽限制；反之，则是模型算力 FLOPS 限制。
+3. AI 模型的推理时间取决于**内存读取时间**和 CPU/GPU **数学（乘加）计算时间**，取决于哪个时间更长。一般来讲，当处于**内存受限**时，内存读取时间长；当处于**算力受限**时，数学计算时间长。
+
+以 A100 GPU 为例，该硬件的 ops:byte ratio 是 $208$（V100 是 $138.9$），这意味着如果我们计算一个 token 的 `kv` 值，与计算多达 `208` 个 token 的时间几乎是相同的！因为低于这个数，会受到内存带宽的限制，且内存时间 > 数学计算时间；高于这个数，我们会受到算力 `FLOPS` 的限制。
+> ops:byte ratio 的计算公式，及 数学带宽 vs 内存带宽的理解，请参考文档《英伟达 GPU 性能分析指导》
+
+### 6.2，推理 Latency 估算公式
 
 对于小 `batch` 的模型推理，单个 token 的推理 `latency` 受限于 gpu 的内存带宽；对于大 `batch`，单个 token 的推理 `latency` 受限于 gpu 的算力，同时将忽略卡与卡之间的通信延迟因素。
 
@@ -419,6 +436,41 @@ $$
 - $B$ 是 `batch size`
 
 注意，上述公式计算得到理论 `Latency` 只是个上限，我们永远不可能达到这个值，而且现实中 GPU 卡的性能也很少能达到其规格所宣称的数字。
+
+### 6.3，自回归模型的数学（算力 FLOPS）带宽 vs 内存带宽
+
+1，类 `gpt` 的 decoder-only 模型（自回归）推理过程中涉及到的内存访问字节数包括：
+
+1. 模型参数量所消耗内存；
+2. kv cache 所消耗内存；
+3. 中间激活所消耗内存。
+
+2，输入输出向量维度都为 `4096` 的全连接层，其算术密度和 batch_size 的关系如下图所示：
+
+![arithmetic-intensity](../../images/gpu_performance_basic/arithmetic-intensity.svg)
+
+`batch_size` 小于等于 `128` 的情况在 `NVIDIA A100` 加速器上受到**内存带宽限制**。
+
+因为类 `gpt` 结构的 `decoder-only` 模型的参数和计算量主要是由全连接层组成的，进一步可推导出，可以通过 `batch_size` 来控制模型的算术强度，从而控制模型是受到内存带宽限制还是算力 `FLOPS` 限制。值得注意的是，因为有着 `kv` cache 的存在，**模型的算术强度和 batch_size 近乎成正比关系**。
+
+> `decoder-only` 模型对算术强度和 batch_size 的关系的另一种解释。在 batch_size = 1 的情况下，权重为 `fp16` 的 decoder-only 模型推理时的算术强度是约为 $2$。**随着 batch_size 的增加，模型的算术强度会随之增加**，因为 flops 和 batch_size 是成正比的，而内存访问字节数中的模型权重内存是固定值，kv cache 部分虽然和 batch_size 成正比的，但 flops 数值 >> kv cache。
+
+那么重点来了，batch_size、内存带宽限制 vs 算力 FLOPS 限制对 Latency 会有什么影响呢？
+
+通过《英伟达 GPU 性能分析指导》文档可知：算术强度通俗理解就是计算量除以访存量后的值，表示此模型/网络层在计算过程中，每 `Byte` 内存交换到底用于进行多少次浮点运算，单位是 `FLOPs/Byte`。即**模型计算强度越大，其内存使用效率越高，因此应该尽可能让算法/网络层的算术强度高于 gpu 的 ops:byte ratio，这样才能充分利用 gpu 的算力**。
+
+**自回归模型的推理实验**。**固定 seq_len=8/20**， 如果 seq_len * bs < ops:byte ratio * gpu_num，即**小 `batch_size` 范围 的 latency 不明显增加的**。从实验测试结果看，**使用 4/8 个 V100 硬件做模型推理（张量并行），输入长度固定，在 batch_size < 16/32，其 latency 不明显增加**。且有以下实验结果：
+
+![bs_latency2](../../images/gpu_performance_basic/bs_latency2.png)
+![bs_latency](../../images/gpu_performance_basic/bs_latency.png)
+
+`Latency` 的理论分析：对于自回归模型的推理，默认推理配置是 `use_cache=True`，**固定 seq_len**，batch_size 较小时，模型的算术强度较低，模型受到内存带宽限制，`Latency` 取决于内存搬运时间，而 `batch_size ` 较小时，kv cache 读写时间也较小，而模型权重读取时间又是固定的，故 latency 不明显增加；当 batch_size 增加到一定程度，模型的算术强度增加，模型受到算力 `FLOPS` 限制，故此时 `Latency` 与 batch_size 几乎成正比。
+
+另外，基于这个理论分析也可知，当 batch_size 和 output_ids_len 比较大时，**迭代生成 token 的过程中，后面 token 的 Latency 会大于前面的**。
+
+![token latency](../../images/transformer-performance_basic/every_token_latency.png)
+![token latency](../../images/transformer-performance_basic/every_token_latency2.png)
+
 ## 七，并发支持估算
 
 以集群上的 1 个节点的 8 卡 V100 机器，llama-13b 模型为例，估算极端情况下聊天系统同时服务 10000 人并发所需要的节点数量。这里的**极端情况是指每个请求的输入长度为 512、输出长度为 1536 且没有 Latency 要求**。

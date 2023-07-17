@@ -26,8 +26,6 @@
   - [LLM 推理加速](#llm-推理加速)
   - [transformer 模型基础](#transformer-模型基础)
 
-作者：章洪高、范泽欣（KV cache 原理）
-
 ## 一，transformer 结构
 
 ### 1.1，因果建模模型结构

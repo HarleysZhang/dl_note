@@ -32,7 +32,7 @@
 
 基于 transformer 架构的语言模型主要有两种：
 - 自编码（`auto-encoder`）语言模型，典型代表 BERT
-- 自回归（`auto-regressive`）语言模型，也叫**因果建模模型** `CausalLM`，典型代表 GPT 系列、Lllama 等。
+- 自回归（`auto-regressive`）语言模型，也叫**因果建模模型** `CausalLM`，典型代表 GPT 系列、Llama 等。
 
 GPT 中的 Decoder 与原始的相比，去掉了 Encoder-Decoder self attention（Decoder 中的第一个 self attention），只保留了 Decoder self attention（masked Self Attention），因此 GPT 系列也被称为 `decoder-only` transformer。
 
@@ -108,7 +108,7 @@ $$\text{FFN}(X) = \text{max}(0, XW_1 + b_1 )W_2 + b_2$$
 
 模型总的参数量计算公式可抽象如下:
 
-$$\text{totoal param} = \text{param}_\text{embedding} + \text{param}_\text{decoder layer} \cdot \text{n}_\text{layers}$$
+$$\text{totoal param} = \text{param}_{\text{embedding}} + \text{param}_\text{decoder layer} \cdot \text{n}_\text{layers}$$
 
 注意，很多 `decoder-only` 架构的自回归模型的全连接层的偏置 `bias` 都设置为 False，故这里的计算公式中没有考虑偏置参数。
 
@@ -245,8 +245,8 @@ $$n(12h^2 + 4h) + Vh$$
 
 2，self-attention 层内部的计算，对输入矩阵进行操作。（其计算公式为: $\text{Attention}(Q, K, V) = \text{softmax} (\frac{QK^T}{\sqrt{d_k}})V$）这里只估算两个矩阵乘法的计算量，`attention_scale`（$/\sqrt(k)$）、`attn_softmax` ($\text{softmax}$) 的计算量忽略不计，因为这两个小算子都是逐元素操作。
 
--  $QK^T$ 矩阵乘法的输入和输出形状为: [n_head, s, h//n_head] * [n_head, h//n_head, s] -> [n_head, s, s]，`Flops` 为 $2\cdot hs^2$。
--  计算在 `score` 上的加权 $score \cdot V$，矩阵乘法的输入和输出形状为: [n_head, s, s] * [n_head, s, d_model//n_head] -> [n_head, s, s, h//n_head]，`Flops` 同样也为 $2\cdot hs^2$。
+-  $QK^T$ 矩阵乘法的输入和输出形状为: [n_head, s, h//n_head] * [n_head, h//n_head, s] -> [n_head, s, s]，`Flops` 为 $2\cdot s^2h$。
+-  计算在 `score` 上的加权 $score \cdot V$，矩阵乘法的输入和输出形状为: [n_head, s, s] * [n_head, s, d_model//n_head] -> [n_head, s, s, h//n_head]，`Flops` 同样也为 $2\cdot s^2h$。
 
 3，`attention` 后的输出乘以输出投影（projection）矩阵。
 
@@ -264,7 +264,7 @@ $$n(12h^2 + 4h) + Vh$$
 - Layer Norm 操作是**逐元素**进行的，因此不存在通用的公式来精确 FLOPs。layer norm 层的两个权重都是一个长度为 $h$ 的向量，计算量预估为: $2h$。
 - 另外，原始的 Transformer 模型使用余弦绝对位置编码方案，它是对 token embedding vector 进行加法操作。
 
-将上述计算量相加，得到每个 decoder 层的计算量大约为: $(6sh^2 + 2sh^2 + 16sh^2) + 4hs^2 = 24sh^2 + 4hs^2$
+将上述计算量相加，得到每个 decoder 层的计算量大约为: $(6sh^2 + 2sh^2 + 16sh^2) + 4hs^2 = 24sh^2 + 4s^2h$
 
 **总结**，对于一个 $n$ 层的自回归模型，输入数据形状为 $[b, s]$ 的情况下，**一次训练/推理迭代的计算量**:
 
@@ -462,7 +462,7 @@ $$
 ![bs_latency2](../../images/gpu_performance_basic/bs_latency2.png)
 ![bs_latency](../../images/gpu_performance_basic/bs_latency.png)
 
-`Latency` 的理论分析：对于自回归模型的推理，默认推理配置是 `use_cache=True`，**固定 seq_len**，batch_size 较小时，模型的算术强度较低，模型受到内存带宽限制，`Latency` 取决于内存搬运时间，而 `batch_size ` 较小时，kv cache 读写时间也较小，而模型权重读取时间又是固定的，故 latency 不明显增加；当 batch_size 增加到一定程度，模型的算术强度增加，模型受到算力 `FLOPS` 限制，故此时 `Latency` 与 batch_size 几乎成正比。
+**`Latency` 的理论分析**：对于自回归模型的推理，默认推理配置是 `use_cache=True`，**固定 seq_len**，batch_size 较小时，模型的算术强度较低，模型受到内存带宽限制，`Latency` 取决于内存搬运时间，而 `batch_size ` 较小时，kv cache 读写时间也较小，而模型权重读取时间又是固定的，故 latency 不明显增加；当 batch_size 增加到一定程度，模型的算术强度增加，模型受到算力 `FLOPS` 限制，故此时 `Latency` 与 batch_size 几乎成正比。
 
 另外，基于这个理论分析也可知，当 batch_size 和 output_ids_len 比较大时，**迭代生成 token 的过程中，后面 token 的 Latency 会大于前面的**。
 
@@ -481,18 +481,18 @@ $$
 $$
 > n_heads * d_heads = d_model
 
-1，对于 llama-13b 模型而言， 其推理时，每个 token 大约消耗 `1MB` 的显存（其实是 kv cache 占用的缓冲），对于输入输出上下文长度（512+1536）和为 2048 的请求，其每个请求需要的显存是 2GB。这里对每个请求所需要显存的估算是没有计算推理中间结果所消耗显存（其比较小，可忽略），另外不同框架支持张量并行所需要的额外显存也各不相同，这里暂时也忽略不计。
+1，**对于 llama-13b 模型而言， 其推理时，每个 token 大约消耗 `1MB` 的显存**（其实是 kv cache 占用的缓冲），对于输入输出上下文长度（512+1536）和为 2048 的请求，其每个请求需要的显存是 2GB。这里对每个请求所需要显存的估算是没有计算推理中间结果所消耗显存（其比较小，可忽略），另外不同框架支持张量并行所需要的额外显存也各不相同，这里暂时也忽略不计。
 
 - 在模型权重为 `float16` 的情况下，支持的理论 batch 上限为 （32*8-24.6）/ 2 = 115.7。
 - 在模型权重为 `int8` 的情况下，支持的理论 batch 上限为 （32*8-24.6/2）/ 2 = 121.85。（deepspeed 框架不支持 llama 模型的 int8 量化）
 
-以上是理论值即上限值，float16  权重的实际 batch 数量会小于 115.7，目前的 deepspeed 框架实测 batch 数量可以达到  100 左右（等待更新）。
+以上是理论值即上限值，float16  权重的实际 batch 数量会小于 115.7，目前的 deepspeed 框架实测 batch 数量可以达到  $50$ 左右（等待更新）。
 
-10000/100 = 100 (台 8 卡 V100 服务器)。
+10000/50 = 200 (台 8 卡 V100 服务器)。
 
-实际场景中的并发请求具有稀疏性，不可能每个请求都是 2048 这么长的上下文长度，因此实际上 100 台 8 卡 V100 服务器能服务的并发请求数目应该远多于 10000，可能是几倍。
+实际场景中的并发请求具有稀疏性，不可能每个请求都是 2048 这么长的上下文长度，因此实际上 200 台 8 卡 V100 服务器能服务的并发请求数目应该远多于 10000，可能是几倍。
 
-2，对于 llama-65b 模型而言， 其推理时，每个 token 大约消耗 `2.5MB` 的显存，因此，极限情况下每个请求需要的显存是 5GB。
+2，**对于 llama-65b 模型而言， 其推理时，每个 token 大约消耗 `2.5MB` 的显存**，因此，极限情况下每个请求需要的显存是 5GB。
 - 在模型权重为 float16 的情况下，支持的理论 batch 上限为 （32*8 - 121.6）/ 5 = 26.88。
 - 在模型权重为 int8 的情况下，支持的理论 batch 上限为 （32*8 - 121.6/2）/ 5 = 39.04。（deepspeed 框架不支持 llama 模型的 int8 量化）
 

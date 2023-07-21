@@ -309,3 +309,50 @@ print(s.reverse_instance_string())
 13
 !dlrow ,olleH
 """
+
+#################################7，dataclass 作用#################################
+from dataclasses import dataclass
+
+@dataclass
+class Person:
+    name: str
+    age: int
+    profession: str
+
+# 创建数据类的实例
+person = Person("John Doe", 30, "Engineer")
+
+# 打印数据类的实例
+print(person)
+
+from functools import total_ordering
+
+#################################7，functools#################################
+from functools import total_ordering
+
+@total_ordering
+class Student:
+    def __init__(self, age):
+        self.age = age
+ 
+    def __lt__(self, other):
+        if isinstance(other, Student):
+            return self.age < other.age
+        else:
+            raise AttributeError("Incorrect attribute!")
+ 
+    def __eq__(self, other):
+        if isinstance(other, Student):
+            return self.age == other.age
+        else:
+            raise AttributeError("Incorrect attribute!")
+ 
+ 
+liming = Student(20)
+lihua = Student(30)
+ 
+print(liming < lihua)
+print(liming <= lihua)
+print(liming > lihua)
+print(liming >= lihua)
+print(liming == lihua)

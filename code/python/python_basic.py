@@ -356,3 +356,25 @@ print(liming <= lihua)
 print(liming > lihua)
 print(liming >= lihua)
 print(liming == lihua)
+
+def get_dict_depth(d, depth=0):
+    if not isinstance(d, dict):
+        return depth
+    if not d:
+        return depth
+
+    return max(get_dict_depth(v, depth + 1) for v in d.values())
+
+# 测试字典
+my_dict = {
+    'a': 1,
+    'b': {
+        'c': 2,
+        'd': {
+            'e': 3
+        }
+    }
+}
+
+depth = get_dict_depth(my_dict)
+print("字典的深度为:", depth)

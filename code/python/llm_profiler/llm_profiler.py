@@ -9,7 +9,6 @@ import json
 import logging
 from pprint import pformat
 import pprint
-import fire
 
 from config import *
 from utils import *
@@ -90,9 +89,9 @@ class CountCausalLMParams(object):
                 
         dict_params_per_layer = {
             "params_per_layer": params_per_layer,
-            "attn": params_per_layer_attn,
-            "mlp": params_per_layer_mlp,
-            "layernorm": params_per_layer_ln,
+            "params_attn": params_per_layer_attn,
+            "params_mlp": params_per_layer_mlp,
+            "params_layernorm": params_per_layer_ln,
         }
         
         return params_per_layer, dict_params_per_layer
@@ -104,7 +103,7 @@ class CountCausalLMParams(object):
         Returns:
             int: the total number of parameters in the model
         """
-        params_per_layer = self.count_params_per_layer()["params_per_layer"]
+        params_per_layer, dict_params_per_layer = self.count_params_per_layer()
         
         return (params_per_layer * self.l
                 + self.count_params_embedding()
@@ -129,9 +128,10 @@ class CountCausalLMFlops(object):
         self.s = seq_len
         
         if not simp_count:
-            self.model_flops = CountCausalLMParams(self.h, self.l, self.V) * 2
+            llm_params = CountCausalLMParams(model_config)
+            self.model_flops = llm_params(self.h, self.l, self.V) * 2
         
-    def count_flops_fwd_per_layer_attn(self,) -> int:
+    def count_flops_fwd_per_layer_attn(self, batch_size: int, seq_len: int) -> int:
         """Get the number of floating point operations (flops) for the forward
         pass of the attention module in a transformer layer, given the batch
         size and sequence length. 
@@ -149,20 +149,20 @@ class CountCausalLMFlops(object):
             int: flops for the forward pass of the attention module in a transformer layer
         """
         return (
-            8 * self.b * self.s * self.h ** 2 
-            + 4 * self.b * self.s ** 2 * self.h
+            8 * batch_size * seq_len * self.h ** 2 
+            + 4 * batch_size * seq_len ** 2 * self.h
         )
         
-    def count_flops_fwd_per_layer_mlp(self,) -> int:
+    def count_flops_fwd_per_layer_mlp(self, batch_size: int, seq_len: int) -> int:
         """Count two flops of matrices multiplication(two linear layers in the MLP module.)
         
         flops_mlp = flops_fc1 + flops_fc2 = 2bs(4h^2) + 2bs(4h^2) = 16bsh^2
         """
-        return 16 * self.b * self.s * self.h ** 2
+        return 16 * batch_size * seq_len * self.h ** 2
         
-    def count_flops_fwd_per_layer(self, ln_ignore=True) -> tuple:
-        flops_fwd_per_layer_attn = self.count_flops_per_layer_attn()
-        flops_fwd_per_layer_mlp = self.count_flops_per_layer_mlp()
+    def count_flops_fwd_per_layer(self, batch_size: int, seq_len: int, ln_ignore=True) -> tuple:
+        flops_fwd_per_layer_attn = self.count_flops_fwd_per_layer_attn(batch_size, seq_len)
+        flops_fwd_per_layer_mlp = self.count_flops_fwd_per_layer_mlp(batch_size, seq_len)
         flops_fwd_per_layer_ln = 0
         
         flops_fwd_per_layer = (
@@ -173,9 +173,9 @@ class CountCausalLMFlops(object):
         
         dict_flops_fwd_per_layer = {
             "flops_fwd_per_layer": flops_fwd_per_layer,
-            "attn": flops_fwd_per_layer_attn,
-            "mlp": flops_fwd_per_layer_mlp,
-            "layernorm": flops_fwd_per_layer_ln,
+            "flops_attn": flops_fwd_per_layer_attn,
+            "flops_mlp": flops_fwd_per_layer_mlp,
+            "flops_layernorm": flops_fwd_per_layer_ln,
         }
                 
         return flops_fwd_per_layer, dict_flops_fwd_per_layer
@@ -184,10 +184,10 @@ class CountCausalLMFlops(object):
         """flops of output token logits layer"""
         return 2 * self.b * self.s * self.h * self.V
     
-    def count_flops_fwd_model(self, ) -> int:
+    def count_flops_fwd_model(self, batch_size: int, seq_len: int) -> int:
         """Count flops of the forward pass of the transformer model, given the batch size and sequence length."""
         num_flops_fwd_model = (
-            self.count_flops_fwd_per_layer() * self.l
+            self.count_flops_fwd_per_layer(batch_size, seq_len)[0] * self.l
             + self.count_flops_logits_layer()
         )
         
@@ -203,10 +203,10 @@ class CountCausalLMFlops(object):
         
         return num_flops_fwd_model
     
-    def count_flops_bwd_model(self, ) -> int:
+    def count_flops_bwd_model(self, batch_size: int, seq_len: int) -> int:
         """Get the number of floating point operations (flops) for the backward
         pass of the entire transformer model, given the batch size and sequence"""
-        return 2 * self.count_flops_fwd_model()
+        return 2 * self.count_flops_fwd_model(batch_size, seq_len)
 
    
 class CountCausalLMMemory(object):
@@ -225,15 +225,15 @@ class CountCausalLMMemory(object):
         
         self.tp_size = llm_configs.parallelism_config.tp_size
         self.pp_size = llm_configs.parallelism_config.pp_size
-        self.num_layers_per_gpu = int(self.l / self.parallelism_config.pp_size)
+        self.num_layers_per_gpu = int(self.l / self.pp_size)
         
-        self.memory_GPU_in_GB = llm_configs.gpu_config.memory_GPU_in_GB
+        self.gpu_memory_in_GB = llm_configs.gpu_config.memory_GPU_in_GB * 10**9  # 单位 GB
         
         self.llm_params = CountCausalLMParams(self.model_config)
             
     def count_memory_weights(self, embedding_dtype_bytes: int = BYTES_FP16):
         """Get the memory of the model weights"""
-        params_per_layer = self.llm_params.count_params_per_layer()
+        params_per_layer, dict_params_per_layer = self.llm_params.count_params_per_layer()
         params_embedding = self.llm_params.count_params_embedding()
         
         memory_weight_per_layer = (
@@ -264,12 +264,13 @@ class CountCausalLMMemory(object):
     def count_memory_activation_per_layer_mlp(
         self,
         is_inference: bool = True,
-        activation_recomputation: ActivationRecomputation = ActivationRecomputation.NONE,
+        activation_recomputation: ActivationRecomputation = ActivationRecomputation.FULL,
     ) -> float:
         """ The `mlp` activations include the input to the two linear layers."""
         if activation_recomputation == ActivationRecomputation.FULL:
             return 0
         
+        return 0
     def count_memory_activation_per_layer_layernorm(
         self,
         is_inference: bool = True,
@@ -278,13 +279,14 @@ class CountCausalLMMemory(object):
     ) -> float:
         if activation_recomputation == ActivationRecomputation.FULL:
             return 0
-        
+        return 0
+    
     def count_memory_activation_per_layer(
         self,
         batch_size: int,
         seq_len: int,
         is_inference: bool = True,
-        activation_recomputation: ActivationRecomputation = ActivationRecomputation.NONE,
+        activation_recomputation: ActivationRecomputation = ActivationRecomputation.FULL,
         layernorm_dtype_bytes: int = BYTES_FP16
     ) -> float:
         
@@ -292,7 +294,8 @@ class CountCausalLMMemory(object):
             return (
                 (batch_size * seq_len * self.h / self.tp_size) * self.bytes_per_param
             )
-                
+        return 0
+          
     def count_memory_kv_cache_per_layer(
         self,
         batch_size: int,
@@ -307,7 +310,7 @@ class CountCausalLMMemory(object):
         memory_kv_cache = 4blh(s+o) unit is byte
         Args:
             batch_size (int): batch size
-            context_len (int): seq_len + num_tokens_to_generate
+            context_len (int): seq_len + generate_len
             
         Returns:
             float: the memory (in bytes) required  to store the key and value cache for a transformer layer in inference
@@ -332,7 +335,7 @@ class CountCausalLMMemory(object):
         # 1, prefill stage count memory and max_batch_size
         
         weight_memory_per_gpu = self.count_memory_weights() # count model weights memory
-        memory_left = self.gpu_config.memory_GPU_in_GB - weight_memory_per_gpu
+        memory_left = self.gpu_memory_in_GB - weight_memory_per_gpu
 
         prefill_activation_memory_batch_size_1 = ( # count model activations and kv cache memory of prefill stage
             self.count_memory_activation_per_layer(
@@ -346,20 +349,20 @@ class CountCausalLMMemory(object):
         )
 
         prefill_activation_memory_per_gpu = (
-            self.llm_memory.count_memory_activation_per_layer(
+            self.count_memory_activation_per_layer(
                 batch_size, seq_len, is_inference, ActivationRecomputation.FULL, layernorm_dtype_bytes
             )
             * self.num_layers_per_gpu
         )
         
         assert memory_left > prefill_activation_memory_per_gpu, (
-            f"activation memory is too large can't fit in GPU memory!"
+            f"weight_memory_per_gpu {num_to_string(weight_memory_per_gpu)}, activation memory {num_to_string(prefill_activation_memory_per_gpu)} is too large can't fit in GPU memory! memory_left is {num_to_string(memory_left)}!"
         )
         
         # 2, decode stage count memory and max_batch_size
         if use_kv_cache:
             kv_cache_memory_batch_size_1 = (
-                self.llm_memory.count_memory_kv_cache_per_layer(
+                self.count_memory_kv_cache_per_layer(
                     1,
                     seq_len + generate_len,
                     kv_cache_dtype_bytes
@@ -368,7 +371,7 @@ class CountCausalLMMemory(object):
             )
             
             kv_cache_memory_per_gpu = (
-                self.llm_memory.count_memory_kv_cache_per_layer(
+                self.count_memory_kv_cache_per_layer(
                     batch_size,
                     seq_len + generate_len,
                     kv_cache_dtype_bytes
@@ -378,7 +381,7 @@ class CountCausalLMMemory(object):
             
             decode_activation_memory_batch_size_1 = (
                 # seq_len 1 is used for decoding
-                self.llm_memory.count_memory_activation_per_layer(
+                self.count_memory_activation_per_layer(
                     1, 1, is_inference, ActivationRecomputation.FULL, layernorm_dtype_bytes
                 )
                 * self.num_layers_per_gpu
@@ -386,7 +389,7 @@ class CountCausalLMMemory(object):
             
             decode_activation_memory_per_gpu = (
                 # seq_len 1 is used for decoding
-                self.llm_memory.count_memory_activation_per_layer(
+                self.count_memory_activation_per_layer(
                     batch_size, 1, is_inference, ActivationRecomputation.FULL, layernorm_dtype_bytes
                 )
                 * self.num_layers_per_gpu
@@ -410,7 +413,7 @@ class CountCausalLMMemory(object):
         else:
             # 上下文长度不再是新生成的那个 token，而是 seq_len + generate_len
             decode_activation_memory_batch_size_1 = (
-                self.llm_memory.count_memory_activation_per_layer(
+                self.count_memory_activation_per_layer(
                     1, seq_len + generate_len, True, ActivationRecomputation.FULL, layernorm_dtype_bytes
                 )
                 * self.num_layers_per_gpu
@@ -425,7 +428,7 @@ class CountCausalLMMemory(object):
             )
             
             decode_activation_memory_per_gpu = (
-                self.llm_memory.count_memory_activation_per_layer(
+                self.count_memory_activation_per_layer(
                     batch_size, seq_len + generate_len, True, ActivationRecomputation.FULL, layernorm_dtype_bytes
                 )
                 * self.num_layers_per_gpu
@@ -474,13 +477,15 @@ class CountCausalLMLatency(object):
         self.pp_size = self.parallelism_config.pp_size
         self.num_layers_per_gpu = int(self.l / self.parallelism_config.pp_size)
         
-        self.gpu_hbm_bandwidth = llm_configs.gpu_config.memory_GPU_in_GB * 10**9 # 单位 GB/s
-        self.gpu_intra_node_bandwidth = get_intra_node_bandwidth() * 10**9       # 互连带宽，单位 GB/s
+        self.gpu_hbm_bandwidth = get_gpu_hbm_bandwidth(self.gpu_config) * 10**9 # 单位 GB/s
+        self.gpu_intra_node_bandwidth = get_intra_node_bandwidth(self.gpu_config) * 10**9       # 互连带宽，单位 GB/s
         self.gpu_TFLOPS = get_TFLOPS_per_gpu(self.gpu_config) * 10**12           # 单位 TFLOPS
+        
         self.gpu_memory_in_GB = llm_configs.gpu_config.memory_GPU_in_GB * 10**9  # 单位 GB
         
         self.llm_params = CountCausalLMParams(self.model_config)
-        self.llm_flops = CountCausalLMFlops(llm_configs, self.b, self.o)
+        self.llm_memory = CountCausalLMMemory(llm_configs)
+        self.llm_flops = CountCausalLMFlops(self.model_config, self.b, self.o)
         
     def common_count_latency_for_ops(
         self, 
@@ -504,28 +509,36 @@ class CountCausalLMLatency(object):
         """
         
         if ops_type=="attn":
-            flops = self.llm_flops.count_flops_fwd_per_layer_attn()
+            
+            flops = self.llm_flops.count_flops_fwd_per_layer_attn(batch_size, seq_len)
             weight_memory = self.llm_params.count_params_per_layer_attn() * self.bytes_per_param
-            activation_memory = self.get_memory_activation_per_layer_attn(
+            activation_memory = self.llm_memory.count_memory_activation_per_layer_attn(
                                 batch_size, seq_len, is_inference, activation_recomputation
             )
         elif ops_type=="mlp":
-            flops = self.llm_flops.count_flops_fwd_per_layer_mlp()
+            flops = self.llm_flops.count_flops_fwd_per_layer_mlp(batch_size, seq_len)
             weight_memory = self.llm_params.count_params_per_layer_mlp() * self.bytes_per_param
-            activation_memory = self.get_memory_activation_per_layer_mlp(
-                                batch_size, seq_len, is_inference, activation_recomputation
-            )
+            activation_memory = self.llm_memory.count_memory_activation_per_layer_mlp(is_inference, activation_recomputation)
         elif ops_type=="layernorm":
-            activation_memory = self.count_memory_activation_per_layer_layernorm(batch_size, seq_len) # activation_memory
+            activation_memory = self.llm_memory.count_memory_activation_per_layer_layernorm(
+                                is_inference, activation_recomputation) # activation_memory
             weight_memory = 0   # layernorm has no matrix weight, only vector weight, is ignored
             flops = 0   # layernorm is not compute bound, flops is very small
+        else:    
             print("error! unsupported ops_type")
+        
+        activation_memory = 0
         
         memory = weight_memory + activation_memory
         
         compute_latency = flops / (self.tp_size * self.gpu_TFLOPS) # 单位秒
         memory_latency = memory / (self.tp_size * self.gpu_hbm_bandwidth)
         
+        if memory_latency > compute_latency:
+            print(f"memory_latency {latency_to_string(memory_latency)} > compute_latency {latency_to_string(compute_latency)}, this {ops_type} layer is memory bound!")
+        else:
+            print(f"memory_latency {latency_to_string(memory_latency)} <= compute_latency {latency_to_string(compute_latency)}, this {ops_type} layer is compute bound!")
+            
         return max(compute_latency, memory_latency)
     
     def count_latency_fwd_per_layer_tp_comm(self, batch_size: int, seq_len: int) -> float:
@@ -541,7 +554,7 @@ class CountCausalLMLatency(object):
         # \phi is communication data, if tp_size is large enough num_data_per_all_reduce can be 2bsh
         num_data_per_all_reduce = (
             2 * batch_size * seq_len * self.h * 
-            self.tp_size * (self.tp_size - 1)
+            (self.tp_size - 1) / (self.tp_size)
         )
 
         latency_per_all_reduce = (
@@ -563,9 +576,9 @@ class CountCausalLMLatency(object):
         activation_recomputation: ActivationRecomputation = ActivationRecomputation.FULL,
         layernorm_dtype_bytes: int = BYTES_FP16
     ) -> tuple:
-        latency_fwd_per_layer_attn = self.common_count_latency_for_ops(batch_size, seq_len, is_inference, "attn")
-        latency_fwd_per_layer_mlp = self.common_count_latency_for_ops(batch_size, seq_len, is_inference, "mlp")
-        latency_fwd_per_layer_layernorm = self.common_count_latency_for_ops(batch_size, seq_len, is_inference, ActivationRecomputation.FULL, "layernorm")
+        latency_fwd_per_layer_attn = self.common_count_latency_for_ops(batch_size, seq_len, is_inference, activation_recomputation, ops_type="attn")
+        latency_fwd_per_layer_mlp = self.common_count_latency_for_ops(batch_size, seq_len, is_inference, activation_recomputation, ops_type="mlp")
+        latency_fwd_per_layer_layernorm = self.common_count_latency_for_ops(batch_size, seq_len, is_inference, activation_recomputation, "layernorm")
         
         latency_fwd_per_layer_tp_comm = self.count_latency_fwd_per_layer_tp_comm(batch_size, seq_len)
     
@@ -577,11 +590,11 @@ class CountCausalLMLatency(object):
         )
     
         dict_latency_per_layer = {
-            "latency_per_layer": latency_per_layer,
-            "attn": latency_fwd_per_layer_attn,
-            "mlp": latency_fwd_per_layer_mlp,
-            "layernorm": 2 * latency_fwd_per_layer_layernorm,
-            "tp_comm": 2 * latency_fwd_per_layer_tp_comm,
+            "latency_per_layer": (latency_per_layer),
+            "latency_attn": (latency_fwd_per_layer_attn),
+            "latency_mlp": (latency_fwd_per_layer_mlp),
+            "latency_layernorm": (2 * latency_fwd_per_layer_layernorm),
+            "latency_tp_comm": (2 * latency_fwd_per_layer_tp_comm),
         }
 
         return latency_per_layer, dict_latency_per_layer
@@ -608,7 +621,7 @@ class CountCausalLMLatency(object):
             / (self.gpu_hbm_bandwidth)
         )
         comm_latency = self.count_latency_fwd_per_layer_tp_comm(
-            batch_size, seq_len, self.bytes_per_param
+            batch_size, seq_len
         )
         return memory_latency + comm_latency
     
@@ -686,7 +699,7 @@ class CountCausalLMLatency(object):
         layernorm_dtype_bytes: int = BYTES_FP32,
         breakdown_prefix: str = "",
     ) -> tuple:
-        latency_fwd_per_layer, breakdown_per_layer = self.get_latency_fwd_per_layer(
+        latency_fwd_per_layer, breakdown_per_layer = self.count_latency_fwd_per_layer(
             batch_size,
             seq_len,
             is_inference,
@@ -699,23 +712,23 @@ class CountCausalLMLatency(object):
         latency_fwd_input_embedding = self.count_latency_fwd_input_embedding(batch_size, seq_len)
         latency_fwd_output_embedding_loss = self.count_latency_fwd_output_embedding_loss(batch_size, seq_len)
         
-        total_latency = (
+        model_latency = (
             latency_fwd_all_layers
             + latency_fwd_input_embedding
             + latency_fwd_output_embedding_loss
         )
         
-        total_breakdown = {
+        model_latency_breakdown = {
             breakdown_prefix + "latency_fwd_per_layer": breakdown_per_layer,
-            breakdown_prefix + "latency_fwd_attn": breakdown_per_layer["attn"] * num_layers_per_gpu,
-            breakdown_prefix + "latency_fwd_mlp": breakdown_per_layer["mlp"] * num_layers_per_gpu,
-            breakdown_prefix + "latency_fwd_layernorm": breakdown_per_layer["layernorm"] * num_layers_per_gpu,
-            breakdown_prefix + "latency_fwd_tp_comm": breakdown_per_layer["tp_comm"] * num_layers_per_gpu,
-            breakdown_prefix + "latency_fwd_input_embedding": latency_fwd_input_embedding,
-            breakdown_prefix + "latency_fwd_output_embedding_loss": latency_fwd_output_embedding_loss,
+            breakdown_prefix + "latency_fwd_attn": (breakdown_per_layer["latency_attn"] * num_layers_per_gpu),
+            breakdown_prefix + "latency_fwd_mlp": (breakdown_per_layer["latency_mlp"] * num_layers_per_gpu),
+            breakdown_prefix + "latency_fwd_layernorm": (breakdown_per_layer["latency_layernorm"] * num_layers_per_gpu),
+            breakdown_prefix + "latency_fwd_tp_comm": (breakdown_per_layer["latency_tp_comm"] * num_layers_per_gpu),
+            breakdown_prefix + "latency_fwd_input_embedding": (latency_fwd_input_embedding),
+            breakdown_prefix + "latency_fwd_output_embedding_loss": (latency_fwd_output_embedding_loss),
         }
         
-        return total_latency, total_breakdown
+        return model_latency, model_latency_breakdown
     
     def count_latency_fwd(
         self,
@@ -751,7 +764,8 @@ class CountCausalLMLatency(object):
             use_kv_cache,
             kv_cache_dtype_bytes
         ) 
-        decode_latency, decode_latency_breakdown = self.count_latency_fwd_model(
+        
+        decode_model_latency, decode_latency_breakdown = self.count_latency_fwd_model(
             batch_size,
             1 if use_kv_cache else (seq_len + generate_len) * (2/3), # k、v cache 占 2/3，重新计算
             is_inference=is_inference,
@@ -760,14 +774,15 @@ class CountCausalLMLatency(object):
             breakdown_prefix="decode_",
         )
         
-        decode_avg_latency += kv_cache_avg_latency
-        decode_peak_latency += kv_cache_peak_latency
+        decode_avg_latency = decode_model_latency + kv_cache_avg_latency
+        decode_peak_latency = decode_model_latency + kv_cache_peak_latency
+        
         decode_latency_breakdown.update(
             {
-                "decode_avg_latency": decode_latency,
-                "decode_peak_latency": decode_peak_latency,
-                "kv_cache_avg_latency": kv_cache_avg_latency,
-                "kv_cache_peak_latency": kv_cache_peak_latency
+                "kv_cache_avg_latency": (kv_cache_avg_latency),
+                "kv_cache_peak_latency": (kv_cache_peak_latency),
+                "decode_avg_latency": (decode_avg_latency),
+                "decode_peak_latency": (decode_peak_latency)
             }
         )
         
@@ -779,7 +794,7 @@ class LLMProfiler(object):
     def __init__(self, llm_configs: LLMConfigs) -> None:
         self.model_config = llm_configs.model_config
         self.gpu_config = llm_configs.gpu_config
-        self.inference_config = llm_configs.InferenceConfig
+        self.inference_config = llm_configs.inference_config
         self.parallelism_config = llm_configs.parallelism_config
         self.gpu_efficiency_config = llm_configs.gpu_efficiency_config
         
@@ -796,14 +811,15 @@ class LLMProfiler(object):
         self.pp_size = self.parallelism_config.pp_size
         self.num_layers_per_gpu = int(self.l / self.parallelism_config.pp_size)
         
-        self.gpu_hbm_bandwidth = llm_configs.gpu_config.memory_GPU_in_GB * 10**9 # 单位 GB/s
-        self.gpu_intra_node_bandwidth = get_intra_node_bandwidth() * 10**9       # 互连带宽，单位 GB/s
+        self.gpu_hbm_bandwidth = get_gpu_hbm_bandwidth(self.gpu_config) * 10**9 # 单位 GB/s
+        self.gpu_intra_node_bandwidth = get_intra_node_bandwidth(self.gpu_config) * 10**9       # 互连带宽，单位 GB/s
         self.gpu_TFLOPS = get_TFLOPS_per_gpu(self.gpu_config) * 10**12           # 单位 TFLOPS
+        
         self.gpu_memory_in_GB = llm_configs.gpu_config.memory_GPU_in_GB * 10**9  # 单位 GB
         
         self.llm_params = CountCausalLMParams(self.model_config)
-        self.llm_flops = CountCausalLMFlops(self.model_config, self.batch_size, self.seq_len)
-        self.llm_memory = CountCausalLMMemory(self.model_config, self.inference_config, self.parallelism_config)
+        self.llm_flops = CountCausalLMFlops(self.model_config, self.b, self.s)
+        self.llm_memory = CountCausalLMMemory(llm_configs)
         self.llm_latency = CountCausalLMLatency(llm_configs)
     
     def infer_profile(
@@ -823,7 +839,7 @@ class LLMProfiler(object):
         """LLM inference analysis given the llm configs and inputs.
 
         Args:
-            num_tokens_to_generate (int, optional): number of tokens to generate for generative models. Defaults to 100.
+            generate_len (int, optional): number of tokens to generate for generative models. Defaults to 100.
             use_kv_cache (bool, optional): whether to use kv_cache. Defaults to True.
             layernorm_dtype_bytes (int, optional): number of bytes in the data type for the layernorm activations. Defaults to BYTES_FP32. 
                 Often has to be at least FP16 in inference to maintain model accuracy.
@@ -841,26 +857,56 @@ class LLMProfiler(object):
                 "Warning: the number of layers is not divisible by pp_size, please taking the floor!"
             )
         
-        print("\n-------------------------- LLM Params Flops analysis --------------------------")
+        print("\n-------------------------- LLM main infer config --------------------------")
+        infer_config_dict = {
+            "inference_config":{
+                "model_name": self.model_config.model_name,
+                "batch_size_per_gpu": batch_size_per_gpu,
+                "seq_len": seq_len,
+                "tp_size": self.tp_size,
+                "pp_size": self.pp_size,
+                "generate_len": generate_len,
+                "use_kv_cache": use_kv_cache,
+            },
+            "gpu_config": {
+                "name": self.gpu_config.name,
+                "memory_GPU_in_GB": f"{self.gpu_config.memory_GPU_in_GB} GB",
+                "gpu_hbm_bandwidth": f"{get_gpu_hbm_bandwidth(self.gpu_config)} GB/s",
+                "gpu_intra_node_bandwidth": f"{get_intra_node_bandwidth(self.gpu_config)} GB/s",
+                "gpu_TFLOPS": f"{get_TFLOPS_per_gpu(self.gpu_config)} TFLOPS",
+            }
+        }
+        pprint.pprint(infer_config_dict, indent=4, sort_dicts=False)
+        
+        print("\n---------------------------- LLM Params analysis ----------------------------")
         params_per_layer, dict_params_per_layer = self.llm_params.count_params_per_layer()
-        flops_fwd_per_layer, dict_flops_fwd_per_layer = self.llm_flops.count_flops_fwd_per_layer()
-        
         num_params_model = self.llm_params.count_params_model()
-        num_flops_fwd_model = self.llm_flops.count_flops_fwd_model()
         
-        print("\n-------------------------- LLM Memory analysis --------------------------")
+        self.print_format_summary_dict(dict_params_per_layer, get_dict_depth(dict_params_per_layer))
+        pprint.pprint({"params_model": num_to_string(num_params_model)}, indent=4, sort_dicts=False)
+        
+        print("\n---------------------------- LLM Flops analysis -----------------------------")
+        flops_fwd_per_layer, dict_flops_fwd_per_layer = self.llm_flops.count_flops_fwd_per_layer(self.b, self.s)
+        num_flops_fwd_model = self.llm_flops.count_flops_fwd_model(self.b, self.s)
+        
+        self.print_format_summary_dict(dict_flops_fwd_per_layer, get_dict_depth(dict_flops_fwd_per_layer))
+        pprint.pprint({"flops_model": num_to_string(num_flops_fwd_model)}, indent=4, sort_dicts=False)
+        
+        print("\n---------------------------- LLM Memory analysis -----------------------------")
         memory_prefill_summary_dict, memory_decode_summary_dict = self.llm_memory.count_memory_per_gpu(
             batch_size_per_gpu,
             seq_len,
             generate_len,
-            is_infer=True,
+            is_inference=True,
             use_kv_cache=use_kv_cache,
             activation_recomputation=activation_recomputation,
             layernorm_dtype_bytes=layernorm_dtype_bytes,
             kv_cache_dtype_bytes=kv_cache_dtype_bytes
         )
+        self.print_format_summary_dict(memory_prefill_summary_dict, get_dict_depth(memory_prefill_summary_dict))
+        self.print_format_summary_dict(memory_decode_summary_dict, get_dict_depth(memory_decode_summary_dict))
         
-        print("\n-------------------------- LLM Latency analysis --------------------------")
+        print("\n-------------------------- LLM infer performance analysis --------------------------")
         prefill_latency_breakdown, decode_latency_breakdown = self.llm_latency.count_latency_fwd(
             batch_size_per_gpu,
             seq_len,
@@ -871,38 +917,49 @@ class LLMProfiler(object):
             kv_cache_dtype_bytes=kv_cache_dtype_bytes
         )
         
-        pprint.pprint([params_per_layer, dict_params_per_layer,
-                       flops_fwd_per_layer, dict_flops_fwd_per_layer,
-                       num_params_model, num_flops_fwd_model,
-                       memory_prefill_summary_dict, memory_decode_summary_dict,
-                       prefill_latency_breakdown, decode_latency_breakdown], indent=4
-                    )
-        
-        infer_config_dict = {
-            "batch_size_per_gpu": batch_size_per_gpu,
-            "seq_len": seq_len,
-            "tp_size": self.tp_size,
-            "pp_size": self.pp_size,
-            "num_tokens_to_generate": generate_len,
-            "use_kv_cache": use_kv_cache
-        }
-        
         infer_result_dict = {
             "model_params": num_params_model,
             "model_flops": num_flops_fwd_model,
             "prefill_first_token_latency": prefill_latency_breakdown["prefill_latency"],
             "decode_per_token_latency": decode_latency_breakdown["decode_avg_latency"],
             "kv_cache_latency": decode_latency_breakdown["kv_cache_avg_latency"],
-            "total_latency": prefill_latency_breakdown["prefill_latency"] + decode_latency_breakdown["decode_avg_latency"] * generate_len,
+            "total_infer_latency": prefill_latency_breakdown["prefill_latency"] + decode_latency_breakdown["decode_avg_latency"] * generate_len,
         }
         
-        pprint.pprint([infer_config_dict, infer_result_dict], indent=4)  
-        # logger.info(self.get_readable_summary_dict(infer_result_dict))
+        self.print_format_summary_dict(infer_result_dict, get_dict_depth(infer_result_dict))
         
+        print("\n-------------------------- LLM detailed's latency analysis --------------------------")
+        
+        # pprint.pprint([prefill_latency_breakdown, decode_latency_breakdown], indent=4, sort_dicts=False)
+        
+        # print("prefill_latency_breakdown depth is ", get_dict_depth(prefill_latency_breakdown), prefill_latency_breakdown)
+        self.print_format_summary_dict(prefill_latency_breakdown, get_dict_depth(prefill_latency_breakdown))
+        self.print_format_summary_dict(decode_latency_breakdown, get_dict_depth(decode_latency_breakdown))
+            
+    def print_format_summary_dict(self, summary_dict: dict, depth:int) -> str:
+        for key, value in summary_dict.items():
+            if "params" in key or "flops" in key:
+                if not isinstance(value, dict):
+                    summary_dict.update({key: num_to_string(value)})
+                else:
+                    self.print_format_summary_dict(value, get_dict_depth(value)-1) # 递归调用函数
+            if "latency" in key:
+                if not isinstance(value, dict):
+                    summary_dict.update({key: latency_to_string(value)})
+                else:
+                    self.print_format_summary_dict(value, get_dict_depth(value)-1)
+            if "memory" in key:
+                if not isinstance(value, dict):
+                    summary_dict.update({key: f"{num_to_string(value)}B"})
+                else:
+                    self.print_format_summary_dict(value, get_dict_depth(value)-1)
+        if depth >= 1:
+            pprint.pprint(summary_dict, indent=4, sort_dicts=False)
+    
 def llm_profile(model_name="llama-13b",
-                gpu_name: str = "v100-sxm2-32gb",
+                gpu_name: str = "v100-sxm-32gb",
                 bytes_per_param: int = BYTES_FP16,
-                batch_size_per_gpu: int = 1,
+                batch_size_per_gpu: int = 3,
                 seq_len: int = 522,
                 generate_len=1526,
                 ds_zero: int = 0,
@@ -971,10 +1028,12 @@ def llm_profile(model_name="llama-13b",
 
     profiler = LLMProfiler(llm_configs)
     
-    profiler.inference(batch_size_per_gpu=batch_size_per_gpu, seq_len=seq_len, 
-                        num_tokens_to_generate=generate_len, use_kv_cache=use_kv_cache,
-                        layernorm_dtype_bytes=layernorm_dtype_bytes,)  
+    profiler.infer_profile(batch_size_per_gpu=batch_size_per_gpu, seq_len=seq_len, 
+                        generate_len=generate_len, use_kv_cache=use_kv_cache,
+                        layernorm_dtype_bytes=layernorm_dtype_bytes,
+                        flops_efficiency=flops_efficiency,
+                        hbm_memory_efficiency=hbm_memory_efficiency)  
     
 if __name__ == "__main__": 
     llm_profile()
-    fire.Fire(serialize=lambda x: json.dumps(x, indent=4))
+    # fire.Fire(serialize=lambda x: json.dumps(x, indent=4))

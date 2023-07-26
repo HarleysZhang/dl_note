@@ -327,7 +327,7 @@ After inference     : free: 13.94 GB, total: 14.76 GB, used:  0.82 GB
 - 流水线并行(Pipeline parallelism, PP)
   在多个 GPU 上划分模型的层，每个 GPU 仅放置模型层的一小部分。这有时也称为垂直并行。
 
-![3d_parallelism](../../images/faster_transformer/3d_parallelism.png)
+![3d_parallelism](../../images/ft/3d_parallelism.png)
 
 ## 参考资料
 

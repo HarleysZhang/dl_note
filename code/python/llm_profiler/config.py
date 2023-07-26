@@ -5,9 +5,9 @@ import math, json
 from constants import *
 from dataclasses import dataclass
 from enum import Enum
-from functools import total_ordering, unique
+from functools import total_ordering
 
-@unique
+
 class ActivationRecomputation(Enum):
     NONE = 0
     """No activation recomputation; requires the most amount of memory."""
@@ -64,8 +64,9 @@ class GPUEfficiencyConfig:
 class InferenceConfig:
     """Inference configuration dataclass."""
     batch_size_per_gpu: int = None      # batch size
-    seq_len: int = None         # input sequence length
-    generate_len: int = None    # number of tokens to generate
+    seq_len: int = 522         # input sequence length
+    generate_len: int = 1526    # number of tokens to generate
+    context_len: int = None     # context length
     use_kv_cache: bool = True   # whether to use key/value cache
     bytes_per_param: int = BYTES_FP16  # model weight bytes
     layernorm_dtype_bytes: int = BYTES_FP16  # layernorm data type bytes
@@ -86,7 +87,6 @@ class ParallelismConfig:
 
 @dataclass
 class ModelConfig:
-    name: str        # model config's key name
     num_layers: int  # number of transformer layers (blocks)
     n_head: int      # number of attention heads
     hidden_dim: int  # hidden dimension
@@ -94,6 +94,7 @@ class ModelConfig:
     max_seq_len: int = None   # max sequence length
     ffn_embed_dim: int = None # hidden dimension of FFN, default to 4 * hidden_dim
     model_type: str = None    # model type as tagged on Hugging Face (e.g., gpt2, opt, llama.)
+    model_name: str = None    # model name as tagged on Hugging Face (e.g., gpt2-xl, opt, llama-13b.)
     
     def __post_init__(self):
         if self.ffn_embed_dim is None:
@@ -108,16 +109,19 @@ class GPUConfig:
     # 2, gpu 显存带宽、节点内带宽、节点间带宽
     hbm_bandwidth_in_GB_per_sec: float  # GPU HBM bandwidth in GB/s
     intra_node_bandwidth_in_GB_per_sec: float  # intra node GPU bandwidth in GB/s.(PCIE/NVLINK)
+    intra_node_min_message_latency: float  # minimum intra node message latency in seconds
+    
     inter_node_bandwidth_in_GB_per_sec: float = 200  # inter node bandwidth in GB/s, assuming Mellanox 200Gbps HDR Infiniband
     
     # 3, 不同精度的 Tensor core 的计算性能
     peak_fp32_TFLOPS: float = None  # peak Tensor TFLOPS for FP32
-    peak_fp16_TFLOPS: float         # peak Tensor TFLOPS for FP16
+    peak_fp16_TFLOPS: float = None         # peak Tensor TFLOPS for FP16
     peak_int8_TFLOPS: float = None  # peak Tensor TFLOPS for INT8
     peak_int4_TFLOPS: float = None  # peak Tensor TFLOPS for INT4
-    
-    intra_node_min_message_latency: float  # minimum intra node message latency in seconds
 
+    FLOPS_EFFICIENCY = 0.7
+    HBM_MEMORY_EFFICIENCY = 0.9
+    
     def __post_init__(self):
         """object creation of DataClass starts with __init__() (constructor-calling) and 
         ends with __post__init__() (post-init processing).
@@ -129,9 +133,17 @@ class GPUConfig:
         if self.peak_int4_TFLOPS is None:
             self.peak_int4_TFLOPS = 4 * self.peak_fp16_TFLOPS
             
+        if self.FLOPS_EFFICIENCY:
+            self.peak_fp32_TFLOPS *= self.FLOPS_EFFICIENCY
+            self.peak_fp16_TFLOPS *= self.FLOPS_EFFICIENCY
+            self.peak_int8_TFLOPS *= self.FLOPS_EFFICIENCY
+            self.peak_int4_TFLOPS *= self.FLOPS_EFFICIENCY
+        if self.HBM_MEMORY_EFFICIENCY:
+            self.hbm_bandwidth_in_GB_per_sec *= self.HBM_MEMORY_EFFICIENCY
+            self.intra_node_bandwidth_in_GB_per_sec *= self.HBM_MEMORY_EFFICIENCY
 class LLMConfigs(object):
-    def __init__(self, gpu_config: GPUConfig = GPUConfig(),
-                 model_config: ModelConfig = ModelConfig(),
+    def __init__(self, gpu_config: GPUConfig,
+                 model_config: ModelConfig,
                  parallelism_config: ParallelismConfig = ParallelismConfig(),
                  inference_config: InferenceConfig = InferenceConfig(),
                  gpu_efficiency_config: GPUEfficiencyConfig = GPUEfficiencyConfig()

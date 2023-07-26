@@ -1,6 +1,14 @@
 from constants import *
 
-def _latency_to_string(latency_in_s, precision=2):
+def get_dict_depth(d, depth=0):
+    if not isinstance(d, dict):
+        return depth
+    if not d:
+        return depth
+
+    return max(get_dict_depth(v, depth + 1) for v in d.values())
+
+def latency_to_string(latency_in_s, precision=2):
     if latency_in_s is None:
         return "None"
     day = 24 * 60 * 60
@@ -21,7 +29,7 @@ def _latency_to_string(latency_in_s, precision=2):
     else:
         return str(round(latency_in_s / us, precision)) + " us"
     
-def _num_to_string(num, precision=2):
+def num_to_string(num, precision=2):
     if num is None:
         return "None"
     if num // 10**12 > 0:
@@ -39,13 +47,13 @@ def get_readable_summary_dict(summary_dict: dict, title="Summary") -> str:
     log_str = f"\n{title.center(PRINT_LINE_WIDTH, '-')}\n"
     for key, value in summary_dict.items():
         if "num_tokens" in key or "num_params" in key or "flops" in key:
-            log_str += f"{key}: {_num_to_string(value)}\n"
+            log_str += f"{key}: {num_to_string(value)}\n"
         elif "gpu_hours" == key:
             log_str += f"{key}: {int(value)}\n"
         elif "memory" in key and "efficiency" not in key:
-            log_str += f"{key}: {_num_to_string(value)}B\n"
+            log_str += f"{key}: {num_to_string(value)}B\n"
         elif "latency" in key:
-            log_str += f"{key}: {_latency_to_string(value)}\n"
+            log_str += f"{key}: {latency_to_string(value)}\n"
         else:
             log_str += f"{key}: {value}\n"
     log_str += f"{'-' * PRINT_LINE_WIDTH}\n"

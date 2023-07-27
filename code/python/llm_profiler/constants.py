@@ -1,5 +1,5 @@
 #########################################
-#######     llm profiling    ############
+#######     llm profiler    ############
 #########################################
 
 FLOPS_EFFICIENCY = 1.0  # FLOPS efficiency achieved by Megatron-LM is ~0.5 for LLM training

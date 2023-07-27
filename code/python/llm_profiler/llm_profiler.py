@@ -5,7 +5,6 @@
 # Description : transformer model(llm) profiling tools, can be used to profile the model's flops, memory, and latency.
 # Reference   : https://github.com/cli99/llm-analysis
 
-import json
 import logging
 from pprint import pformat
 import pprint

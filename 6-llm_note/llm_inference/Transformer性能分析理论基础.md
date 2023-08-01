@@ -36,7 +36,7 @@
 
 GPT 中的 Decoder 与原始的相比，去掉了 Encoder-Decoder self attention（Decoder 中的第一个 self attention），只保留了 Decoder self attention（masked Self Attention），因此 GPT 系列也被称为 `decoder-only` transformer。
 
-一个正常的 `Self Attention` 允许一个位置关注到它两边的 tokens，而 masked Self Attention 只让模型看到左边的 tokens：
+一个正常的 `Self Attention` 允许一个位置关注/看见到它两边的 tokens，而 masked Self Attention 只让模型看到左边的 tokens：
 
 ![masked Self Attention](../../images/transformer-performance_basic/4-mask.png)
 > 图： self attention vs mask self attention

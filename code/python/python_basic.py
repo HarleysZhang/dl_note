@@ -91,6 +91,20 @@ def fibonacci(n):
 print(fibonacci(10))
 print(fibonacci(20))
 
+def my_decorator(func):
+    def wrapper(*args, **kwargs):
+        # 在这里可以访问原函数的参数
+        print("Function arguments:", args[0], args[1])
+        result = func(*args, **kwargs)
+        return result
+    return wrapper
+
+@my_decorator
+def example_function(x, y):
+    return x + y
+
+example_function(2, 3)
+
 ##################### 1，面向对象基础编程-继承和多态 #########################
 import math
 

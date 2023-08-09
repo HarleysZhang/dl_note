@@ -150,3 +150,4 @@
 - [《动手编写深度学习推理框架 Planer》](https://github.com/Image-Py/planer)
 - [distill：知识精要和在线可视化](https://distill.pub/)
 - [LLVM IR入门指南](https://github.com/Evian-Zhang/llvm-ir-tutorial)
+- [nanoPyC](https://github.com/vesuppi/nanoPyC/tree/master)

@@ -115,17 +115,16 @@
 
 1，推荐几个比较好的深度学习模型压缩与加速的仓库和课程资料：
 
-1. [awesome-emdl](https://github.com/EMDL/awesome-emdl): 嵌入式与移动端深度学习研究资料合集。
-2. [AI-System](https://github.com/microsoft/AI-System/tree/main/Textbook): 深度学习系统。
+1. [神经网络基本原理教程](https://github.com/microsoft/ai-edu/blob/master/%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/A2-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/%E7%AC%AC8%E6%AD%A5%20-%20%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/17.1-%E5%8D%B7%E7%A7%AF%E7%9A%84%E5%89%8D%E5%90%91%E8%AE%A1%E7%AE%97%E5%8E%9F%E7%90%86.md)
+2. [AI-System](https://microsoft.github.io/AI-System/): 深度学习系统，主要从底层方向讲解深度学习系统等原理、加速方法、矩阵成乘加计算等。
 3. [pytorch-deep-learning](https://github.com/mrdbourke/pytorch-deep-learning)：很好的 pytorch 深度学习教程。
 
 2，一些笔记好的博客链接：
 
 - [The Illustrated Transformer](http://jalammar.github.io/illustrated-transformer/): 国内比较好的博客大都参考这篇文章。
-- [C++ 并发编程（从C++11到C++17）](https://paul.pub/cpp-concurrency/): 不错的 C++ 并发编程教程。 
+- [C++ 并发编程（从C++11到C++17）](https://paul.pub/cpp-concurrency/): 不错的 C++ 并发编程教程。
 - [What are Diffusion Models?](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
-- [annotated_deep_learning_paper_implementations
-](https://github.com/labmlai/annotated_deep_learning_paper_implementations)
+- [annotated_deep_learning_paper_implementations](https://github.com/labmlai/annotated_deep_learning_paper_implementations)
 
 ## 九，其他
 

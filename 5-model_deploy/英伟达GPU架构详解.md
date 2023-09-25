@@ -475,17 +475,15 @@ NVIDIA H100 GPU 是用于 `HPC`（高性能计算）的**专业卡**，基于 NV
 
 与上一代产品 `A100` 相比，H100 的综合技术创新可以将 `LLM` 训练速度提高 `9` 倍，LLM 推理速度提高 `30` 倍！
 
-另外，NVIDIA H100 是第一款完全异步 GPU。H100 扩展了 A100 跨所有地址空间的全局到共享异步
-传输，并增加了对张量内存存取模式的支持。它使应用能够构建端到端的异步流水线，将数据
-移入和移出芯片，在完成计算同时完全隐藏数据搬运。
+另外，NVIDIA H100 是第一款完全异步 GPU。H100 扩展了 A100 跨所有地址空间的全局到共享异步传输，并增加了对张量内存存取模式的支持。它使应用能够构建端到端的异步流水线，将数据移入和移出芯片，在完成计算同时完全隐藏数据搬运。
 
 ![新 SXM5 模块上的 NVIDIA H100 GPU](../images/nvidia_gpu/H100_hardware.png)
 
-A100 提供了高达 `80GB` 的 GPU 显存和 `3.35TB/s` 的显存带宽，主要规格如下如下表所示。
+H100 提供了高达 `80GB` 的 GPU 显存和 `3.35TB/s`（H100 SXM）的显存带宽，主要规格如下如下表所示。
 
 |           | GPU 架构 | FP64 算力    | FP64 Tensor Core | FP32 算力    | TF32 Tensor Core | BFLOAT16 Tensor Core | FP16 Tensor Core | FP8 Tensor Core | INT8 Tensor Core | GPU 显存   | GPU 显存带宽 |
 | --------- | :------- | :----------- | :--------------- | :----------- | :--------------- | :------------------- | :--------------- | :-------------- | :--------------- | :--------- | :----------- |
-| H100 PCIe | Hopper   | 26 teraFLOPS | 51 teraFLOPS     | 51 teraFLOPS | 56teraFLOPS*     | 1,513 teraFLOPS*     | 1,513 teraFLOPS* | 3026 teraFLOPS* | 3026 teraFLOPS*  | 80GB HBM2e | 2TB/s        |
+| H100 PCIe | Hopper   | 26 teraFLOPS | 51 teraFLOPS     | 51 teraFLOPS | 756 teraFLOPS*   | 1513 teraFLOPS*     | 1513 teraFLOPS* | 3026 teraFLOPS* | 3026 teraFLOPS*  | 80GB HBM2e | 2TB/s        |
 | H100 SXM  | Hopper   | 34 teraFLOPS | 67 teraFLOPS     | 67 teraFLOPS | 989 teraFLOPS*   | 1979 teraFLOPS*      | 1979 teraFLOPS*  | 3958 teraFLOPS* | 3958 teraFLOPS*  | 80GB HBM2e | 3.35TB/s     |
 
 > `*` 表示采用稀疏技术后的算力情况，不使用稀疏技术时，规格降低一半。

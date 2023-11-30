@@ -106,7 +106,7 @@ tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 我们在模型的 checkpoints 目录下的配置文件中，经常能看到 eop_token、pad_token、bos_token、eos_token 这些与文本序列处理相关的特殊 `token`，它们代表的意义如下:
 
 1. `bos_token`（ Beginning of Sentence Token）：序列开始标记，它表示文本序列的起始位置。
-2. `eos_token`（ End of Sentence Token）：序列结束标记，它表示文本序列的结束位置。
+2. `eos_token`（ End of Sentence Token）：**序列结束标记**，它表示文本序列的结束位置。
 3. `eop_token`（End of Paragraph Token）段落的结束标志，是用于表示段落结束的特殊标记。
 4. `pad_token`（Padding Token）：填充标记，它用于将文本序列填充到相同长度时使用的特殊 token。
 

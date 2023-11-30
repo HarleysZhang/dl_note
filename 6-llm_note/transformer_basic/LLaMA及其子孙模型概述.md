@@ -32,11 +32,64 @@ LLaMA **优势**在于其**只使用公开可用的数据**，这可以保证论
 
 1. Pre-normalization [GPT3]. 为了提高训练稳定性，LLaMA 对每个 transformer 子层的输入进行归一化，使用 `RMSNorm` 归一化函数，Pre-normalization 由Zhang和Sennrich（2019）引入。
 2. `SwiGLU` 激活函数 [PaLM]. 将 ReLU 非线性替换为 `SwiGLU` 激活函数，且使用 $\frac{2}{3}4d$ 而不是 PaLM 论文中的 4d，SwiGLU 由 Shazeer（2020）引入以提高性能。
-3. `Rotary Embeddings` [GPTNeo]. 模型的输入不再使用 `positional embeddings`，而是在网络的每一层添加了 positional embeddings (RoPE)，RoPE 方法由Su等人（2021）引入。
+3. `Rotary Embeddings` [GPTNeo]. 模型的输入不再使用 `positional embeddings`，而是在网络的每一层添加了 positional embeddings (`RoPE`)，RoPE 方法由Su等人（2021）引入。
 
 不同模型的超参数详细信息在表2中给出。
 
 ![llama_parameters](../../images/llama/llama_parameters.png)
+
+## RMS Norm
+
+LayerNorm 成功的一个众所周知的解释是它的重新居中和重新缩放不变性。 前者使模型对输入和权重上的噪声变化不敏感，后者在输入和权重随机缩放时保持输出表示完整。 在本文中，我们假设重新缩放不变性是 LayerNorm 成功的原因，而不是重新居中不变性。 有[论文](https://openreview.net/pdf?id=SygkZ3MTJE)提出提出 RMSNorm（Root Mean Square Layer Normalization），它只关注重新缩放不变性，并简单地根据均方根 (RMS) 统计量对输入求和进行归一化:
+$$
+\bar{a} = \frac{a_i}{RMS(a)g_i},\; where RMS(a) = \sqrt(\frac{1}{n}\sum_{i=1}^n a_i^2) \nonumber
+$$
+可以看出与 layerNorm 相比，RMS Norm 的主要区别在于**去掉了减去均值的部分**（re-centering），只保留方差部分（re-scaling）。
+
+官方实现的代码如下所示:
+
+```python
+class RMSNormLayer(lasagne.layers.Layer):
+    def __init__(self, incoming, b=lasagne.init.Constant(0.), g=lasagne.init.Constant(1.),
+                 W=lasagne.init.Normal(0.05), nonlinearity=relu, **kwargs):
+        super(RMSNormLayer, self).__init__(incoming, **kwargs)
+        self.nonlinearity = nonlinearity
+        k = self.input_shape[1]
+        if b is not None:
+            self.b = self.add_param(b, (k,), name="b", regularizable=False)
+        if g is not None:
+            self.g = self.add_param(g, (k,), name="g")
+
+        if len(self.input_shape)==4:
+            self.axes_to_sum = (2,3)
+            self.dimshuffle_args = ['x',0,'x','x']
+        else:
+            self.axes_to_sum = 1
+            self.dimshuffle_args = ['x',0]
+
+    def get_output_for(self, input, **kwargs):
+        meanS = T.mean(input ** 2,axis=self.axes_to_sum,keepdims=True)
+
+        norm_input = input / T.sqrt(meanS + 1e-6)
+
+        if hasattr(self, 'g'):
+            activation = norm_input*self.g.dimshuffle(*self.dimshuffle_args)
+        else:
+            activation = norm_input
+        if hasattr(self, 'b'):
+            activation += self.b.dimshuffle(*self.dimshuffle_args)
+
+        return self.nonlinearity(activation)
+
+def rms_norm(layer, b=lasagne.init.Constant(0.), g=lasagne.init.Constant(1.), **kwargs):
+    nonlinearity = getattr(layer, 'nonlinearity', None)
+    if nonlinearity is not None:
+        layer.nonlinearity = lasagne.nonlinearities.identity
+    if hasattr(layer, 'b'):
+        del layer.params[layer.b]
+        layer.b = None
+    return RMSNormLayer(layer, b, g, nonlinearity=nonlinearity, **kwargs)
+```
 
 ## SwiGLU
 
@@ -115,6 +168,10 @@ x = torch.randn(1, 128)
 out = layer(x)
 print(out.shape) # torch.Size([1, 128])
 ```
+
+## **RoPE旋转位置编码**
+
+`RoPE`（Rotary Position Embedding）旋转位置编码，是苏剑林老师提出的一种旋转位置编码方法，其思想是采用绝对位置编码的形式，实现相对位置编码。
 
 ## 代码分析
 

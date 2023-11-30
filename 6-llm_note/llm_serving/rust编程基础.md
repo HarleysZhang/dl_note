@@ -26,10 +26,10 @@ $ tree
 1. `cargo run release`（默认是 debug），相当于执行了两个命令 cargo build 编译项目，和 ./target/debug/world_hello
 2. 手动编译和运行项目
 
-3，Cargo.toml 和 Cargo.lock
+3，`Cargo.toml` 和 `Cargo.lock`
 
--  Cargo.toml 是 cargo 特有的项目数据描述文件。它存储了项目的所有元配置信息，如果 Rust 开发者希望 Rust 项目能够按照期望的方式进行构建、测试和运行，那么，必须按照合理的方式构建 Cargo.toml。
-- Cargo.lock 文件是 cargo 工具根据同一项目的 toml 文件生成的项目依赖详细清单，因此我们一般不用修改它。
+-  Cargo.toml 是 cargo 特有的项目数据描述文件。它存储了项目的所有元配置信息，如果 `Rust` 开发者希望 Rust 项目能够按照期望的方式进行构建、测试和运行，那么，必须按照合理的方式构建 Cargo.toml。
+- `Cargo.lock` 文件是 `cargo` 工具根据同一项目的 `toml` 文件生成的项目依赖详细清单，因此我们一般不用修改它。
 
 ## 一，宏
 

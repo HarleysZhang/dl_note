@@ -68,7 +68,7 @@ GPT 中的 Decoder 与原始的相比，去掉了 Encoder-Decoder self attention
 
 - `batch_size`：批量大小。
 - `seq_len`：序列长度，一个 prompt 的长度。
-- `d_model`: 序列中每个 `token` 的 `embedding` 向量的维度，也是模型隐藏层的大小，对应 hf 模型配置文件中的 hidden_​​size。
+- `d_model`: 序列中每个 `token` 的 `embedding` 向量的维度，也是模型隐藏层的大小，对应 hf 模型配置文件中的 `hidden_​​size` 关键字。
 - `vocab_size`：词表大小。也就是每个 token 在做 embedding 前的 one-hot 向量维度。
 - `n_layers`：模型中 decoder layer 的个数，对应 hf 模型配置文件中的 num_hidden_layers。
 
@@ -83,7 +83,7 @@ GPT 中的 Decoder 与原始的相比，去掉了 Encoder-Decoder self attention
 (masked)multi_headed_attention --> layer_normalization --> MLP -->layer_normalization
 ```
 
-1，对于每个 `token`，最底层的 Masked Multi-Head Attention 层的输入是输入 token 的 Embedding Vector，它经过 `3` 个线性层的**线性变换**（`Linear` 层）分别得到 Q、K、V 三个向量，并将它们作为 Self-Attention 层的输入。多个 self-attention 层的输出进行 concat 后，再经过 `1` 个线性层进行维度的映射，得到最终的输出。
+1，对于每个 `token`，最底层的 Masked Multi-Head Attention 层的输入是输入 token 的 `Embedding Vector`，它经过 `3` 个线性层的**线性变换**（`Linear` 层）分别得到 Q、K、V 三个向量，并将它们作为 Self-Attention 层的输入。多个 self-attention 层的输出进行 concat 后，再经过 `1` 个线性层进行维度的映射，得到最终的输出。
 > 对于每一个 token，都会生成三个向量 $q$、$k$、$v$，向量大小为 $\text{d\_model}$；对于长度为 seq_len 的输入序列，则生成三个矩阵 $Q$、$K$、$V$，形状为 $[\text{seq\_len}, \text{d\_model}]$。
 
 Self-Attention 层的内部计算过程用数学公式可表达为:
@@ -304,10 +304,10 @@ $$6 \times 12850 \times 10^6 \times 300 \times 10^9 = 2.313 \times 10^{22}$$
 
 结合前面 KV cache 优化的原理，可以总结出一个典型的自回归模型的生成式推理过程包含了两个阶段：
 
-1. **预填充阶段**（prefill phase）：输入一个 prompt 序列，为每个 transformer 层生成 key cache 和 value cache（KV cache）。因为 QKV 矩阵的计算过程是线性的，因此，对于同一个 `seq` 样本，每个 `token` 可以并行计算无时序依赖。简单来说就是，训练、推理的 prefill 阶段（输入 prompt 的计算）过程是**高度并行化的**
+1. **预填充阶段**（prefill phase）：输入一个 prompt 序列，为每个 transformer 层生成 key cache 和 value cache（KV cache）。因为 `QKV` 矩阵的计算过程是线性的，因此，对于同一个 `seq` 样本，每个 `token` 可以并行计算无时序依赖。简单来说就是，训练、推理的 prefill 阶段（输入 prompt 的计算）过程是**高度并行化的**
 2. **解码阶段**（decoding phase）：使用并更新 KV cache，一个接一个地生成词（**无并行性**），当前生成的词依赖于之前已经生成的词。该阶段的推理计算分两部分：更新 KV cache 和计算 decoder layers 的输出。
 
-这两个阶段的差别在于 $Q$ 的维度不同。在第一个阶段时，用户输入的所有 token 都需要参与运算，所以此时 Q 的维度为[batch_size, seq_len, d<sub>model</sub>]。在第二个阶段时，新生成的 token 作为第二次迭代过程的输入，所以此时 Q 的维度为 [batch_size, 1, d<sub>model</sub>]，即**只有新 token 作为 Q**。
+这两个阶段的差别在于 $Q$ 的维度不同。在第一个阶段时，用户输入的所有 token 都需要参与运算，所以此时 Q 的维度为 [batch_size, seq_len, d<sub>model</sub>]。在第二个阶段时，新生成的 token 作为第二次迭代过程的输入，所以此时 Q 的维度为 [batch_size, 1, d<sub>model</sub>]，即**只有新 token 作为 Q**。
 
 > 为什么不缓存 Q ?
 > 这是由 decoder-only 的模型原理决定的。在每次迭代过程中，只有新生成 token 的 Q 需要参与运算（新生成 token 是由前文推理而出，所以其 Q 向量包含了前文信息），之前的 Q 无需再参与运算，所以每次迭代过程结束时就可以将 Q 丢弃。
@@ -362,7 +362,7 @@ memory_intermediate of attention(qk^t output) = 2 * batch_size * n_head * square
 memory_intermediate of mlp(fc1 layer1 output) = 2 * batch_size * s * 4h
 ```
 
-又因为 $h \gg s$，所以 `memory_intermediate of mlp`   
+又因为 $h \gg s$，所以 `memory_intermediate of mlp`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 
 远大于 `memory_intermediate of attention`。所以:
 
@@ -436,7 +436,7 @@ $$
 - $A_c$ 是 GPU 之间通信带宽
 - $A_{bm}$ 是 GPU 内存带宽
 - $A_f$ 是 GPU 算力
-- $P$ 表示模型(float16)参数量
+- $P$ 表示模型(`float16`)参数量
 - $B$ 是 `batch size`
 
 注意，上述公式计算得到理论 `Latency` 只是个上限，我们永远不可能达到这个值，而且现实中 GPU 卡的性能也很少能达到其规格所宣称的数字。

@@ -309,8 +309,6 @@ $ python route_guide_server.py
 $ python route_guide_client.py
 ```
 
-
-
 ## 三，TGI 框架解析
 
 通过 `tree -L 2` 命令，查看 TGI 仓库代码目录结构，核心目录及解析如下所示：
@@ -817,7 +815,7 @@ python -m grpc_tools.protoc -I../proto --python_out=text_generation_server/pb \
 
 2，`--python_out=text_generation_server/pb` ，指定生成 `py` 文件的输出路径，生成了 generate_pb2_grpc.py 和 generate_pb2.py 文件。
 
-3，grpc 客户端和服务器端代码文件介绍。
+3，`grpc` 客户端和服务器端代码文件介绍。
 
 - `generate_pb2.py`: 主要包含 `proto` 文件定义的消息类。
 - `generate_pb2_grpc.py`: **包含服务端和客户端代码**，主要定义的抽象基类
@@ -827,7 +825,7 @@ python -m grpc_tools.protoc -I../proto --python_out=text_generation_server/pb \
 
 4，创建和运行 `TextGeneration` 服务可以分为两个部分：
 
-- 实现服务定义的生成的服务接口：实现服务的实际“工作”的函数。
+- **实现服务定义的生成的服务接口**：实现服务的实际“工作”的函数。
 - 运行一个 gRPC 服务器，监听来自客户端的请求并传输服务的响应。
 
 以上两个功能的实现均在 `server.py` 文件中：
@@ -837,7 +835,7 @@ python -m grpc_tools.protoc -I../proto --python_out=text_generation_server/pb \
 class TextGenerationService(generate_pb2_grpc.TextGenerationServiceServicer):
     # 该类的构造函数 __init__ 接受模型对象 model、缓存对象 cache 和服务器 URL 列表 server_urls 作为参数，并进行初始化。
   	def __init__(self, model: Model, cache: Cache, server_urls: List[str]):
-
+				self.model = model
     async def Prefill(self, request, context):
         batch = self.model.batch_type.from_pb(
             request.batch, self.model.tokenizer, self.model.dtype, self.model.device
@@ -861,7 +859,42 @@ def serve(
 ):
 ```
 
-5，这里的 self.model 是 `text_generation_server/models/model.py` 定义的抽象基类 `class Model(ABC)` 的实例，主要抽象方法： generate_token 和 decode_token。`text_generation_server/models/__init__.py` 文件中的 get_model 函数获取模型实例，器函数定义如下所示:
+5，这里的 `self.model` 是 `text_generation_server/models/model.py` 定义的抽象基类 `class Model(ABC)` 的实例，`Model` 类的主要抽象方法： `generate_token` 和 `decode_token`。
+
+```python
+@abstractmethod
+def generate_token(self, batch: B) -> Tuple[List[GeneratedText], Optional[B]]:
+    raise NotImplementedError
+
+def decode_token(
+    self,
+    all_input_ids: List[int],
+    prefix_offset: int = 0,
+    read_offset: int = 0,
+) -> Tuple[str, int, int]:
+    """Hack to hopefully support generate_stream for the maximum number of tokenizers"""
+
+    # The prefix text is necessary only to defeat cleanup algorithms in the decode
+    # which decide to add a space or not depending on the surrounding ids.
+    prefix_text = self.tokenizer.decode(
+        all_input_ids[prefix_offset:read_offset], skip_special_tokens=False
+    )
+    new_text = self.tokenizer.decode(
+        all_input_ids[prefix_offset:], skip_special_tokens=False
+    )
+
+    if len(new_text) > len(prefix_text) and not new_text.endswith("�"):
+        # utf-8 char at the end means it's a potential unfinished byte sequence
+        # from byte fallback tokenization.
+        # If it's in the middle, it's probably a real invalid id generated
+        # by the model
+        new_text = new_text[len(prefix_text) :]
+        return new_text, read_offset, len(all_input_ids)
+    else:
+        return "", prefix_offset, read_offset
+```
+
+另外，`text_generation_server/models/__init__.py` 文件中的 `get_model` 函数获取模型实例，函数定义如下所示:
 
 ```python
 def get_model(
@@ -900,9 +933,9 @@ def get_model(
             )
 ```
 
-6，自定义的 llama 模型结构定义实现在 `lightllm` 框架中。`LightLLM` 类在 `models/light_llm.py` 文件中定义。
+6，自定义的 `llama` 模型结构定义实现在 `lightllm` 框架中。`LightLLM` 类在 `models/light_llm.py` 文件中定义。
 
-`LightLLM` 调用 `LlamaTpPartModel` 类（lightllm.models.llama.model ），继承 `TpPartBaseModel` 类（`lightllm/common/basemodel/basemodel.py`），主要成员函数有：forward()、_prefill()、_decode()、_context_forward()、_token_forward()。
+`LightLLM` 调用 `LlamaTpPartModel` 类（lightllm.models.llama.model ），继承 `TpPartBaseModel` 类（`lightllm/common/basemodel/basemodel.py`），主要成员函数有：forward()、\_prefill()、\_decode()、\_context_forward()、\_token_forward()。
 
 `_context_forward()` 函数实现如下所示：
 
@@ -917,13 +950,13 @@ def _context_forward(self, input_ids, infer_state: InferStateInfo):
         return predict_logics
 ```
 
-Lightly 框架定义的模型结构，主要分为三 layer，每种 layer 都会定义加载权重函数 `load_hf_weights`。
+Lightllm 框架定义的模型结构，主要分为三种 layer，每种 layer 都会定义加载权重函数 `load_hf_weights`。
 
 - LlamaPostLayerInfer，继承 PostLayerInferTpl。
 - LlamaPreLayerInfer，继承 PreLayerInferTpl。
 - LlamaTransformerLayerInfer，继承 TransformerLayerInferTpl，继承 TransformerLayerInfer。
 
-模型推理的顺序：pre_infer.token_forward() -> *self*.layers_infer[i].token_forward() ->*self*.post_infer.token_forward()。
+模型推理的顺序：pre_infer.token_forward() -> self.layers_infer[i].token_forward() ->self.post_infer.token_forward()。
 
 TransformerLayerInferTpl 类的主要函数定义如下：
 
@@ -965,6 +998,58 @@ class TransformerLayerInferTpl(TransformerLayerInfer):
         input_embding.add_(o.view(-1, self.embed_dim_))
         return
 ```
+
+7，lightllm 框架的核心数据结构 `Batch` 类的定义。
+
+```python
+@dataclass
+class LightLLamaBatch(Batch):
+    batch_id: int
+    requests: List[generate_pb2.Request]
+    # request id -> idx in list mapping
+    requests_idx_mapping: Dict[int, int]
+
+    # Decoder values
+    input_ids: torch.Tensor
+    position_ids: torch.Tensor
+
+    # cumulative sequence lengths
+    # past key values, only used in decode
+    past_key_values: Optional[torch.Tensor]
+    max_seqlen: int
+
+    # Prefill metadata tensors to efficiently compute logprobs
+    prefill_head_indices: Optional[torch.Tensor]
+    prefill_next_token_indices: Optional[torch.tensor]
+    prefill_cu_outlens: Optional[List[int]]
+
+    # All tokens
+    all_input_ids: List[List[int]]
+    all_input_ids_tensor: torch.Tensor
+
+    # Lengths of all generations present in the batch
+    input_lengths: List[int]
+    prefix_offsets: List[Optional[int]]
+    read_offsets: List[Optional[int]]
+
+    # Generation helpers
+    next_token_chooser: HeterogeneousNextTokenChooser
+    stopping_criterias: List[StoppingCriteria]
+
+    # Maximum number of tokens this batch will grow to
+    max_tokens: int
+
+    ###  nopad  
+    nopad_total_token_num: int
+    nopad_max_len_in_batch: int 
+    nopad_b_loc: torch.Tensor
+    nopad_b_start_loc: torch.Tensor
+    nopad_b_seq_len: torch.Tensor
+```
+
+### 3.4，和壁仞推理库的衔接
+
+梳理出 tgi 服务层和 壁仞推理库的衔接流程，router 模块的 rust 代码基本不改动。主要是改动 server/text_generation_server/server.pyserver.py 的代码，将 lightllm 的模型推理接口换成壁仞的，另外就是 GeneratedText 、PrefillResponse 等成员的重新封装。
 
 ## 参考资料
 

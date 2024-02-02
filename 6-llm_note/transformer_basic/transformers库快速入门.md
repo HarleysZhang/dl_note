@@ -32,7 +32,7 @@
 
 ### 1.2，input IDs
 
-`LLM` 唯一必须的输入是 `input ids`，本质是 `tokens` 索引（token indices in tokenizer vocabulary），即数字 ID 数组，从而符合模型输入的要求。
+`LLM` 唯一必须的输入是 `input ids`，本质是 `tokens` 索引（Indices of input sequence tokens in the vocabulary.），即数字 ID 数组，从而符合模型输入的要求。
 
 - 将输入文本序列转换成 tokens，即 tokenized 过程；
 - 将输入文本序列转换成 input ids，即输入编码过程，数值对应的是 tokenizer 词汇表中的索引，

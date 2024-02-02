@@ -193,7 +193,7 @@ $$\begin{align}
 
 如果用 $h$ 代替 $\text{d}_\text{model}$，$n$ 代替 $\text{n}_\text{layers}$，$V$ 代替 $\text{vocab\_size}$，则**自回归模型总的参数量计算公式**可简化为:
 
-$$n(12h^2 + 4h) + Vh$$
+$$910n(12h^2 + 4h) + Vh$$
 
 有了以上理论公式，我们就能估计不同版本 `LLaMA` 模型的理论参数量：
 

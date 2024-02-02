@@ -25,10 +25,10 @@
 
 ## 二，GPU 架构基础
 
-GPU 是一种**高度并行的处理器架构**，由处理元件和内存层次结构组成。在较高层面上，NVIDIA® GPU 由多个流式多处理器（Streaming Multiprocessors，SMs）、片上 L2 缓存和高带宽 DRAM 组成。`SMs` 执行算术和其他指令，数据和代码通过 L2 缓存从 DRAM 中访问。举个例子，NVIDIA A100 GPU 包含 108 个 SMs，一个 40MB 的 L2 缓存，以及 80 GB HBM2 内存并提供高达 2039 GB/s 的带宽。
+GPU 是一种**高度并行的处理器架构**，由处理元件和内存层次结构组成。在较高层面上，NVIDIA® GPU 由多个流式多处理器（Streaming Multiprocessors，`SMs`）、片上 L2 缓存和高带宽 `DRAM` 组成。`SMs` 执行算术和其他指令，数据和代码通过 L2 缓存从 DRAM 中访问。举个例子，NVIDIA A100 GPU 包含 108 个 SMs，一个 40MB 的 L2 缓存，以及 80 GB HBM2 内存并提供高达 2039 GB/s 的带宽。
 
 ![simple-gpu-arch](../images/gpu_performance_basic/simple-gpu-arch.svg)
-图1. GPU架构的简化视图
+图1. GPU 架构的简化视图
 
 每个 `SM` 都有自己的指令调度器和各种指令执行管道。乘加运算是现代神经网络中最常见的运算，是全连接层和卷积层的构建块，这两个层都都可以看作是一组向量点乘的集合。 
 
@@ -83,8 +83,8 @@ $$\frac{\text{\#ops}}{\#bytes} > \frac{\text{BW\_math}}{\text{BW\_mem}}$$
 - 右边是**处理器的数学带宽与内存带宽的比值**，有时被称为**操作：字节比率**（`ops:byte ratio`）。
 
 算术强度通俗理解就是计算量除以访存量后的值，表示此模型/网络层**在计算过程中，每 `Byte` 内存交换到底用于进行多少次浮点运算**，单位是 FLOPs/Bytes。可以看到，**模型计算强度越大，其内存使用效率越高**。因此，对于给定的 GPU：
-- 如果算法的算术强度高于 GPU 的 `ops:byte ratio`，那么该算法受算力限制的，也称 `math bound`，即**性能受算力 `FLOPS` 限制**。
-- 相反，如果算法的算术强度低于 GPU 的 `ops:byte ratio`，则该算法受内存限制，也称 `memory bound`，即**性能受内存带宽限制**。
+- 如果算法的算术强度高于 GPU 的 `ops:byte ratio`，那么该算法受算力限制的，也称 `math bound`，即**性能受算力 `FLOPS` 限制**（算力受限/计算密集型算子）。
+- 相反，如果算法的算术强度低于 GPU 的 `ops:byte ratio`，则该算法受内存限制，也称 `memory bound`，即**性能受内存带宽限制**（内存受限/访存密集型算子）。
 
 ![Figure 4: Roofline Model](../images/gpu_performance_basic/roof_line_model.png)
 

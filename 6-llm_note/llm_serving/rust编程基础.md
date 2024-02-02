@@ -23,12 +23,12 @@ $ tree
 
 2，两种方式可以运行项目：
 
-1. `cargo run release`（默认是 debug），相当于执行了两个命令 cargo build 编译项目，和 ./target/debug/world_hello
-2. 手动编译和运行项目
+- `cargo run release`（默认是 debug），相当于执行了两个命令 cargo build 编译项目，和 ./target/debug/world_hello。
+- 手动编译和运行项目。
 
 3，`Cargo.toml` 和 `Cargo.lock`
 
--  Cargo.toml 是 cargo 特有的项目数据描述文件。它存储了项目的所有元配置信息，如果 `Rust` 开发者希望 Rust 项目能够按照期望的方式进行构建、测试和运行，那么，必须按照合理的方式构建 Cargo.toml。
+-  `Cargo.toml` 是一种轻量级的配置文件格式，用于配置项目的元信息、依赖关系、构建选项等。
 - `Cargo.lock` 文件是 `cargo` 工具根据同一项目的 `toml` 文件生成的项目依赖详细清单，因此我们一般不用修改它。
 
 ## 一，宏
@@ -157,7 +157,20 @@ struct User {
 
 该结构体名称是 `User`，拥有 4 个字段，且每个字段都有对应的字段名及类型声明，例如 `username` 代表了用户名，是一个可变的 `String` 类型。
 
+## 四，难点语法速记
 
+1，Option 代表可能为空可能有值的一种类型，本质上是一个枚举，有两种分别是 Some 和 None。Some 代表有值，None 则类似于 null，代表无值。
+
+2，Result 直接翻译过来就是“结果”，想象一下，我们的接口，服务有非常常规的调用场景，正常返回值，异常返回错误或抛异常等等。而 Rust 里就定义有了一个 Result 用于此场景。Result 内部本质又是一个枚举，内部分别是 Ok 和 Err，是 Ok 时则代表正常返回值，Err 则代表异常。
+
+3，使用 ? 后，你不需要挨个判断并返回，任何一个 ? 返回 Err 了函数都会直接返回 Err。
+
+4，unwrap 和 Option 的一样，正常则拿值，异常则 panic!
+
+#### 参考的博客
+
+- https://blog.vgot.net/archives/rust-some.html
+- 
 
 ## 参考资料
 

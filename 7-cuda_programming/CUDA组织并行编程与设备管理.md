@@ -62,7 +62,7 @@ __global__ void sumMatrixOnGPU2D(float *MatA, float *MatB, float *MatC, int nx, 
 
 这个核函数的关键步骤是**将每个线程从它的线程索引映射到全局线性内存索引**中，如下图所示。
 
-![内存索引和线程索引的映射](../../images/thread_idx/memory_idx.png)
+![内存索引和线程索引的映射](../images/thread_idx/memory_idx.png)
 
 使用一个二维网格和二维块按如下方法设置核函数的执行配置:
 
@@ -75,7 +75,7 @@ dim3 grid((nx + block.x-1)/block.x,(ny + block.y-1)/ block.y);
 
 使用上述的核函数定义和核函数配置代码替换前面文章相应部分代码，通过不同的配置编译并运行该代码，，可以得到 `Tesla M2070` 机器上运行的不同执行配置的性能对比表格。
 
-![不同执行配置下的性能](../../images/thread_idx/result.png)
+![不同执行配置下的性能](../images/thread_idx/result.png)
 
 结果显示，**增加块的数量不一定能提升内核性能**。后序文章会学习到为什么不同的执行配置会影响核函数的性能。
 

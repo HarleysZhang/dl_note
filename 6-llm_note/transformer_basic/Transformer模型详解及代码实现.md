@@ -1,9 +1,9 @@
+- [Transformer 发展史](#transformer-发展史)
 - [一，Transformer 输入](#一transformer-输入)
   - [1.1，单词 Embedding](#11单词-embedding)
   - [1.2，位置 Embedding](#12位置-embedding)
   - [1.1，TransformerEmbedding 层实现](#11transformerembedding-层实现)
-- [二，Transformer 整体结构](#二transformer-整体结构)
-  - [2.1，Transformer 发展史](#21transformer-发展史)
+- [二，Transformer 整体架构](#二transformer-整体架构)
 - [三，Multi-Head Attention 结构](#三multi-head-attention-结构)
   - [3.1，Self-Attention 结构](#31self-attention-结构)
   - [3.2，Self-Attention 实现](#32self-attention-实现)
@@ -18,9 +18,40 @@
   - [6.1，Transformer 完整代码实现](#61transformer-完整代码实现)
 - [参考资料](#参考资料)
 
+## Transformer 发展史
+
+以下是 Transformer 模型（简短）历史中的一些关键节点：
+
+![transformers_chrono](../../images/transfomer/transformers_chrono.svg)
+
+[Transformer 架构](https://arxiv.org/abs/1706.03762) 于 2017 年 6 月推出。原本研究的重点是翻译任务。随后推出了几个有影响力的模型，包括
+
+- **2018 年 6 月**: [GPT](https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf), 第一个预训练的 Transformer 模型，用于各种 NLP 任务并获得极好的结果
+- **2018 年 10 月**: [BERT](https://arxiv.org/abs/1810.04805), 另一个大型预训练模型，该模型旨在生成更好的句子摘要（下一章将详细介绍！）
+- **2019 年 2 月**: [GPT-2](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf), GPT 的改进（并且更大）版本，由于道德问题没有立即公开发布
+- **2019 年 10 月**: [DistilBERT](https://arxiv.org/abs/1910.01108), BERT 的提炼版本，速度提高 60%，内存减轻 40%，但仍保留 BERT 97% 的性能
+- **2019 年 10 月**: [BART](https://arxiv.org/abs/1910.13461) 和 [T5](https://arxiv.org/abs/1910.10683), 两个使用与原始 Transformer 模型相同架构的大型预训练模型（第一个这样做）
+- **2020 年 5 月**:  [GPT-3](https://arxiv.org/abs/2005.14165), GPT-2 的更大版本，无需微调即可在各种任务上表现良好（称为零样本学习）
+
+这个列表并不全面，只是为了突出一些不同类型的 Transformer 模型。大体上，它们可以分为三类：
+
+- GPT-like (也被称作自回归 Transformer 模型)
+- BERT-like (也被称作自动编码 Transformer 模型)
+- BART/T5-like (也被称作序列到序列的 Transformer 模型)
+
+Transformer 是大模型，除了一些特例（如 DistilBERT）外，实现更好性能的一般策略是增加模型的大小以及预训练的数据量。其中，GPT-2 是使用「transformer 解码器模块」构建的，而 BERT 则是通过「transformer 编码器」模块构建的。
+
+![transformers model_parameters](../../images/transfomer/model_parameters.png)
+
+| 模型  | 发布时间     | 参数量   | 预训练数据量 |
+| ----- | ------------ | -------- | ------------ |
+| GPT   | 2018 年 6 月 | 1.17 亿  | 约 5GB       |
+| GPT-2 | 2019 年 2 月 | 15 亿    | 40GB         |
+| GPT-3 | 2020 年 5 月 | 1,750 亿 | 45TB         |
+
 ## 一，Transformer 输入
 
-Transformer 中单词的输入表示 **x** 由**单词 Embedding** 和**位置 Embedding** （Positional Encoding）相加得到，通常定义为 TransformerEmbedding 层。`Embedding` 层的作用是将输入的离散化表示（例如 token ids）转换为连续的低维向量表示。
+Transformer 中单词的输入表示 $\mathbf{x}$ 由**单词 Embedding** 和**位置 Embedding** （Positional Encoding）相加得到，通常定义为 TransformerEmbedding 层。`Embedding` 层的作用是将输入的离散化表示（例如 token ids）转换为连续的低维向量表示。
 
 ### 1.1，单词 Embedding
 
@@ -111,6 +142,7 @@ class TransformerEmbedding(nn.Module):
         """
         super(TransformerEmbedding, self).__init__()
         self.tok_emb = TokenEmbedding(vocab_size, d_model)
+        # self.position_embedding = nn.Embedding(max_len, embed_size)
         self.pos_emb = PositionalEncoding(d_model, max_len, device)
         self.drop_out = nn.Dropout(p=drop_prob)
 
@@ -120,7 +152,7 @@ class TransformerEmbedding(nn.Module):
         return self.drop_out(tok_emb + pos_emb)
 ```
 
-## 二，Transformer 整体结构
+## 二，Transformer 整体架构
 
 论文中给出用于中英文翻译任务的 `Transformer` 整体架构如下图所示：
 
@@ -133,37 +165,6 @@ Transformer 架构更详细的可视化图如下所示:
 ![transformer_encoder_decoder_stack](../../images/transfomer/The_transformer_encoder_decoder_stack.png)
 
 ![transformer_resideual_layer_norm](../../images/transfomer/transformer_resideual_layer_norm_3.png)
-
-### 2.1，Transformer 发展史
-
-以下是 Transformer 模型（简短）历史中的一些关键节点：
-
-![transformers_chrono](../../images/transfomer/transformers_chrono.svg)
-
-[Transformer 架构](https://arxiv.org/abs/1706.03762) 于 2017 年 6 月推出。原本研究的重点是翻译任务。随后推出了几个有影响力的模型，包括
-
-- **2018 年 6 月**: [GPT](https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf), 第一个预训练的 Transformer 模型，用于各种 NLP 任务并获得极好的结果
-- **2018 年 10 月**: [BERT](https://arxiv.org/abs/1810.04805), 另一个大型预训练模型，该模型旨在生成更好的句子摘要（下一章将详细介绍！）
-- **2019 年 2 月**: [GPT-2](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf), GPT 的改进（并且更大）版本，由于道德问题没有立即公开发布
-- **2019 年 10 月**: [DistilBERT](https://arxiv.org/abs/1910.01108), BERT 的提炼版本，速度提高 60%，内存减轻 40%，但仍保留 BERT 97% 的性能
-- **2019 年 10 月**: [BART](https://arxiv.org/abs/1910.13461) 和 [T5](https://arxiv.org/abs/1910.10683), 两个使用与原始 Transformer 模型相同架构的大型预训练模型（第一个这样做）
-- **2020 年 5 月**:  [GPT-3](https://arxiv.org/abs/2005.14165), GPT-2 的更大版本，无需微调即可在各种任务上表现良好（称为零样本学习）
-
-这个列表并不全面，只是为了突出一些不同类型的 Transformer 模型。大体上，它们可以分为三类：
-
-- GPT-like (也被称作自回归 Transformer 模型)
-- BERT-like (也被称作自动编码 Transformer 模型)
-- BART/T5-like (也被称作序列到序列的 Transformer 模型)
-
-Transformer 是大模型，除了一些特例（如 DistilBERT）外，实现更好性能的一般策略是增加模型的大小以及预训练的数据量。其中，GPT-2 是使用「transformer 解码器模块」构建的，而 BERT 则是通过「transformer 编码器」模块构建的。
-
-![transformers model_parameters](../../images/transfomer/model_parameters.png)
-
-| 模型  | 发布时间     | 参数量   | 预训练数据量 |
-| ----- | ------------ | -------- | ------------ |
-| GPT   | 2018 年 6 月 | 1.17 亿  | 约 5GB       |
-| GPT-2 | 2019 年 2 月 | 15 亿    | 40GB         |
-| GPT-3 | 2020 年 5 月 | 1,750 亿 | 45TB         |
 
 ## 三，Multi-Head Attention 结构
 

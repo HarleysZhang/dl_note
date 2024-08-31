@@ -36,7 +36,7 @@
 
 GPU的微观结构因不同厂商、不同架构都会有所差异，但核心部件、概念、以及运行机制大同小异。下面将展示部分架构的GPU微观物理结构。NVidia Tesla 微观架构如下图所示:
 
-![Tesla 微观架构](../../images/cuda_exec_model/tesla_architecture.webp)
+![Tesla 微观架构](../images/cuda_exec_model/tesla_architecture.webp)
 
 SM 是 GPU 架构的核心，`GPU` 架构是围绕一个流式多处理器（SM）的可扩展阵列搭建的，可以通过复制这种架构的构建块来实现 `GPU` 的硬件并行，而 `SM` 的主要部件是：
 - `CUDA` 计算核心
@@ -53,7 +53,7 @@ GPU 中的每一个 SM 都能支持数百个线程并发执行，每个 GPU 通�
 
 注意，多个线程块可能会被分配到同一个 `SM` 上，而且是根据 `SM` 资源的可用性进行调度的。但同一个线程块不可能分配到多个 `SM` 上。下图从逻辑视图和硬件视图的角度描述了CUDA 编程对应的组件：
 
-![图3-2](../../images/cuda_exec_model/图3-2.png)
+![图3-2](../images/cuda_exec_model/图3-2.png)
 
 寄存器和共享内存是 SM 中的稀缺资源。CUDA 将这些资源分配到 SM 中的所有常驻线程里。因此，这些有限的资源限制了在 SM 上活跃的线程束数量，活跃的线程束数量即对应于 SM 上的并行量。了解 SM 硬件组成的基本知识，有助于组织线程和配置内核执行以获得最佳的性能。
 
@@ -88,12 +88,12 @@ GPU 中的每一个 SM 都能支持数百个线程并发执行，每个 GPU 通�
 
 下图显示了具有 84 个 `SM` 的完整 GV100 GPU（注意，不同的产品可以使用不同配置的 GV100）。Tesla V100 加速器使用 80 个 SM。 
 
-![具有 84 个 SM 单元的 Volta GV100 全 GPU](../../images/nvidia_gpu/GV100_GPU_hardware_structure.png)
+![具有 84 个 SM 单元的 Volta GV100 全 GPU](../images/nvidia_gpu/GV100_GPU_hardware_structure.png)
 表 1 比较了过去五年的 NVIDIA Tesla GPU。
 
 下表展示了 NVIDIA Tesla GPU 的比较。
 
-![nvidia_tesla_gpu](../../images/nvidia_gpu/nvidia_tesla_gpu.png)
+![nvidia_tesla_gpu](../images/nvidia_gpu/nvidia_tesla_gpu.png)
 
 #### 1.2.1 Volta SM 硬件结构
 
@@ -106,7 +106,7 @@ GPU 中的每一个 SM 都能支持数百个线程并发执行，每个 GPU 通�
 
 Volta GV100 流式多处理器(SM)架构如下图像所示：
 
-![Volta GV100 流式多处理器(SM)架构](../../images/nvidia_gpu/Volta_sm.png)
+![Volta GV100 流式多处理器(SM)架构](../images/nvidia_gpu/Volta_sm.png)
 
 ### 1.3 性能分析
 
@@ -138,7 +138,7 @@ Volta GV100 流式多处理器(SM)架构如下图像所示：
 
 **线程束是 SM 中的基本执行单元**。当一个线程块的网格被启动后，网格中的线程块分布在 SM 中。一旦线程块被调度到一个 SM 上，线程块中的线程会被进一步划分为线程束。一个线程束由32 个连续的线程组 成，在一个线程束中，所有的线程按照单指令多线程（SIMT）方式执行；也就是说，所有线程都执行相同的指令，每个线程在私有数据上进行操作。下图展示了线程块的逻辑视图和硬件视图之间的关系。
 
-![逻辑和物理视图](../../images/cuda_exec_model/thread_wrap.png)
+![逻辑和物理视图](../images/cuda_exec_model/thread_wrap.png)
 
 从逻辑和物理硬件的角度看线程块和线程束的关系：
 
@@ -173,25 +173,25 @@ global_ void mathKernel2(void)
 - 寄存器
 - 共享内存
 
-对于一个给定的内核，同时存在于同一个 SM 中的线程块和线程束的数量取决于在 SM 中可用的且内核所需的寄存器和共享内存的数量。
+**对于一个给定的内核，同时存在于同一个 SM 中的线程块和线程束的数量取决于在 SM 中可用的且内核所需的寄存器和共享内存的数量**。
 
-![线程束和寄存器数量的关系](../../images/cuda_exec_model/sm_register.png)
+![线程束和寄存器数量的关系](../images/cuda_exec_model/sm_register.png)
 
 ### 2.4 指令、吞吐量、带宽
 
 考虑到指令延迟，指令可以被分为两种基本类型：
-- 算术指令：其延迟 `latency` 是一个算术操作从开始到它产生输出之间的时间。算术操作为 10～20 个周期。
-- 内存指令：其延迟 `latency` 是指发送出的加载或存储操作和数据到达目的地之间的时间。全局内存访问为 400～800 个周期。
+- **算术指令**：其延迟 `latency` 是一个算术操作从开始到它产生输出之间的时间。算术操作为 10～20 个周期。
+- **内存指令**：其延迟 `latency` 是指发送出的加载或存储操作和数据到达目的地之间的时间。全局内存访问为 400～800 个周期。
 
 如何估算隐藏延迟所需要的活跃线程束的数量？利特尔法则（Little’s Law）可以提供一个合理的近似值。它起源于队列理论中的一个定理，它也可以应用于 GPU 中，形象地说明了利特尔法则。
 
 所需线程束数量 ＝ 延迟 × 吞吐量
 
-![利特尔法则](../../images/cuda_exec_model/latency_throughput.png)
+![利特尔法则](../images/cuda_exec_model/latency_throughput.png)
 
 带宽通常是指理论峰值，而吞吐量是指已达到的值。**带宽通常是用来描述单位时间内最大可能的数据传输量，而吞吐量是用来描述单位时间内任何形式的信息或操作的执行速度**，例如，每个周期完成多少个指令。
 
-GPU 的内存带宽是指 GPU 在单位时间内能够从其显存（VRAM）中读取或写入的数据量，GPU 内存带宽的计算公式为：
+GPU 的内存带宽是指 GPU 在单位时间内能够从其显存（VRAM）中读取或写入的数据量，也可以理解为 **SM 访问设备内存的速度**。GPU 内存带宽的计算公式为：
 
 $$\text{内存带宽 (GB/s)} = \text{显存频率 (GHz)} \times \text{总线宽度 (bit)} \times \text{每次传输的字节数 (Bytes/transfer)} \times 2$$
 
@@ -244,13 +244,13 @@ __global__ void sumMatrixOnGPu2D(float *A, float *B, float *C, int NX, int Ny){
 
 测试一组基础线程块的配置，尤其是大小为（32，32），（32，16），（16，32）和（16，16）的线程块。在 Tesla M2070 上输出以下结果：
 
-![性能测试时间](../../images/cuda_exec_model/nvprof0.png)
+![性能测试时间](../images/cuda_exec_model/nvprof0.png)
 
 在 sumMatrix 内核函数中（C[idx]＝A[idx]＋B[idx]）中有 3 个内存操作：两个内存加载和一个内存存储。可以使用 nvprof 检测这些内存操作的效率。
 
 首先，用 gld_throughput 指标检查**内核的内存的读取吞吐量**，从而得到每个执行配置的差异：
 
-![吞吐量](../../images/cuda_exec_model/nvprof1.png)
+![吞吐量](../images/cuda_exec_model/nvprof1.png)
 
 第四种情况中的加载吞吐量最高，第二种情况中的加载吞吐量大约是第四种情况的一半，但第四种情况却比第二种情况慢。所以，更高的加载吞吐量并不一定意味着更高的性能。
 
@@ -263,7 +263,7 @@ $$\text{gld\_efficiency} = \frac {实际使用的全局内存加载字节数}{�
 
 `gld_efficiency` 越高，说明内存访问越高效，优化方法是使用对齐访问、减少分支和提高内存访问的空间局部性。
 
-![吞吐量](../../images/cuda_exec_model/nvprof2.png)
+![吞吐量](../images/cuda_exec_model/nvprof2.png)
 
 最后两种情况下的加载效率是最前面两种情况的一半。这解释了为什么最后两种情况下更高的加载吞吐量和可实现占用率没有产生较好的性能，因为**加载的有效性（即效率）是较低的**。
 
@@ -335,7 +335,7 @@ CUDA 的动态并行允许在 GPU 端直接创建和同步新的 GPU 内核。
 
 在动态并行中，内核执行分为两种类型：父母和孩子。父线程、父线程块或父网格启动一个新的网格，即子网格。子线程、子线程块或子网格被父母启动。子网格必须在父线程、父线程块或父网格完成之前完成，只有在所有的子网格都完成之后，父母才会完成。下图说明了父网格和子网格的适用范围。
 
-![父网格和子网格](../../images/cuda_exec_model/father_gird.png)
+![父网格和子网格](../images/cuda_exec_model/father_gird.png)
 
 在 GPU上 嵌套输出 Hello World 的实例代码:
 
@@ -363,7 +363,7 @@ nvcc -arch=sm35 -rdc=true nestedHelloWorld.cu -o nestedHelloWorld -lcudadevrt
 ```
 因为动态并行是由设备运行时库所支持的，所以 nestedHelloWorld 函数必须在命令行使用 `-lcudadevrt` 进行明确链接。当 `-rdc` 标志为 true 时，它强制生成可重定位的设备代码，这是动态并行的一个要求。程序编译运行后输出如下所示:
 
-![动态嵌套执行](../../images/cuda_exec_model/dynamic_exec.png)
+![动态嵌套执行](../images/cuda_exec_model/dynamic_exec.png)
 
 从输出信息中可见，由主机调用的父网格有1个线程块和8个线程。nestedHelloWorld 核函数递归地调用三次，每次调用的线程数是上一次的一半。
 

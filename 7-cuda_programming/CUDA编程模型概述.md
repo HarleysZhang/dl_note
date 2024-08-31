@@ -34,7 +34,7 @@ CUDA 是 NVIDIA 的一种通用的并行计算平台和编程模型，是在C语
 
 CUDA 编程的一个关键是内存管理，，CUDA运行时除了负责分配与释放设备内存，也负责在主机内存和设备内存之间传输数据。表2-1 列出了标准的 C 函数以及相应地针对内存操作的 CUDA C 函数。
 
-![cuda 内存操作函数](../../images/cuda_model/cuda_memory_manage.png)
+![cuda 内存操作函数](../images/cuda_model/cuda_memory_manage.png)
 
 1，`cudaMalloc`: 负责分配 GPU 内存，函数原型为：
 ```cpp
@@ -78,12 +78,12 @@ CPU/GPU 内存往往存在一种组织结构（hierarchy）。在这种结构中
 
 在 GPU 内存层次结构中，最主要的两种内存是全局内存和共享内存。全局类似于 CPU 的系统内存，而共享内存类似于 CPU 的缓存。但 GPU 的共享内存可以由 CUDA C 的内核直接控制。
 
-![cuda 内存层次](../../images/cuda_model/mamory_hierarchy.png)
+![cuda 内存层次](../images/cuda_model/mamory_hierarchy.png)
 
 通过两个数组相加的示例来学习如何在主机和设备之间进行数据传输，以及如何使用 `CUDA C` 编程。如下图所示，数组 a 的第一个元素与数组 b 的第一个元素相加，得到的结果作为数
 组 c 的第一个元素，重复这个过程直到数组中的所有元素都进行了一次运算。
 
-![两个数组相加](../../images/cuda_model/array_add.png)
+![两个数组相加](../images/cuda_model/array_add.png)
 
 主机端的纯 C 语言代码如下:
 
@@ -293,7 +293,7 @@ kernel_name<<<gird, block>>>(argument list);
 kernel_name<<<4, 8>>>(argument list); 
 ```
 
-![线程布局可视化](../../images/cuda_model/thread_layout.png)
+![线程布局可视化](../images/cuda_model/thread_layout.png)
 
 核函数的调用与主机线程是异步的。核函数调用结束后，控制权立刻返回给主机端。我们可以**调用以下函数来强制主机端程序等待所有的核函数执行结束**：
 ```cpp
@@ -306,7 +306,7 @@ cudaError_t cudaDeviceSynchonize(void);
 
 下表2-2总结了 CUDA C 程序中的**函数类型限定符**。函数类型限定符指定一个函数在主机上执行还是在设备上执行，以及可被主机调用还是被设备调用。
 
-![函数类型限定符](../../images/cuda_model/function_type_qualifiers.png)
+![函数类型限定符](../images/cuda_model/function_type_qualifiers.png)
 
 注意，`__device__` 和 `__host__` 限定符可以一齐使用，这样函数可以同时在主机和设备端进行编译。
 

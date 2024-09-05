@@ -56,11 +56,15 @@ CosineSimilarity = sum(x[i]*y[i])/(sqrt(sum(x[i]*x[i]))*sqrt(sum(y[i]*y[i])))。
 $$\text{Multi-Head Attention} = Concat(head_1,….,head_h) W^o \\
 \text{Where} \ \text{head}_i = Attention (QW_i^Q, KW_i^K, VW_i^V)$$
 
-$Q$、$K$ 的线性映射层的权重维度是 $[d_\text{model}, d_k]$，$V$ 的线性映射层的权重维度是 $[d_{model}, d_v]$，输出映射层权重维度是 $[h*d_v, d_{model}]$。
+$Q$、$K$ 的线性(映射)层的权重维度是 $[d_\text{model}, d_k]$，$V$ 的线性(映射)层的权重维度是 $[d_{model}, d_v]$，输出线性(映射)层权重维度是 $[h*d_v, d_{model}]$。
 
 作用：**多头注意力机制可以注意到不同子空间的信息，捕捉到更加丰富的特征信息，实现类似卷积核的多通道机制的效果**。
-￼
+
+![从 scaled dot producted attention 到 multi-head attention](../../images/transformer_paper/attention.png)
+
 #### 7，Transformer 的三个 multi-head attention 的原理和作用
+
+![三个 multi-head attention](../../images/transformer_paper/multi-head-attention.png)
 
 **原理**：
 1. 解码器中的第二个注意力层，其查询 $q$ 来自前一层的解码器层，但 $k$、$v$ 来自于编码器最后一层的输出。

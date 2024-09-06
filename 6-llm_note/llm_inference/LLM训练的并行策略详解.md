@@ -6,7 +6,7 @@
 
 ### 1.1，常见集合通信算子
 
-3，集合通信（Collective Communications）是一个进程组的所有进程都参与的全局通信操作，其最为基础的操作有 发送 send、接收receive、复制 copy、组内进程栅障同步 Barrier 以及节点间进程同步(signal +wait )，这几个最基本的操作经过组合构成了一组通信模板也叫通信原语，比如：1 对多的广播 broadcast、多对 1 的收集gather、**多对多的收集 all-gather**、1 对多的发散 scatter、多对 1 的规约 reduce、多对多的规约 all-reduce、**组合的规约与发散 reduce-scatter**、多对多的 all-to-all 等，集合通信的难点在于通信效率以及网络硬件连接拓扑结构的最佳适用。
+3，集合通信（`Collective Communications`）是一个进程组的所有进程都参与的全局通信操作，其最为基础的操作有 发送 send、接收receive、复制 copy、组内进程栅障同步 Barrier 以及节点间进程同步(signal +wait )，这几个最基本的操作经过组合构成了一组通信模板也叫通信原语，比如：1 对多的广播 broadcast、多对 1 的收集gather、**多对多的收集 all-gather**、1 对多的发散 scatter、多对 1 的规约 reduce、多对多的规约 all-reduce、**组合的规约与发散 reduce-scatter**、多对多的 all-to-all 等，集合通信的难点在于通信效率以及网络硬件连接拓扑结构的最佳适用。
 
 4，`Scatter` 是数据的 1 对多的分发，它将一张 `XPU/GPU`` 卡上的数据进行分片再分发到其他所有的 `XPU/GPU` 卡上，他的反向操作对应 `Gather`，其应用场景有：
 
@@ -113,4 +113,3 @@ $$\frac2{N-1}{\frac{K}{N}}$$
 1. [Colossal-AI文档：并行技术](https://colossalai.org/zh-Hans/docs/concepts/paradigms_of_parallelism/)
 2. [Large Transformer Model Inference Optimization](https://lilianweng.github.io/posts/2023-01-10-inference-optimization/)
 3. [分布式训练 – 第3篇 - 集合通信及其通信原语](https://www.changping.me/2022/04/04/ai-distributed-training-coll-lang/)
-4. 

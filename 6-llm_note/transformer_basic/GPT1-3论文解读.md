@@ -239,10 +239,13 @@ $K$ 的值可以是从 $0$ 到模型上下文窗口所允许的最大值之间�
 - `GPT-2` 主要采用了 `zero-shot` 学习，即在没有针对特定任务进行微调的情况下，直接使用预训练模型来生成文本或执行任务。
 - `GPT-3` 则采用了 `few-shot` 学习，通过**少量的示例**来指导模型完成特定任务，这使得 GPT-3 在理解和执行任务方面更为有效。
 
+> 根据openAI官网介绍，GPT3.5 是一个系列模型，也就是保持基本训练框架不变，用不同的数据做指令微调，会得到不同的模型，这些模型都叫做 GPT3.5。值得注意的是，**都是以 GPT3 的模型架构为准，通过变换训练数据做指令微调，或引入 RLHF（Reinformcement Learning from Human Feedback）得到的**。
+
 ## 参考资料
 
 - [GPT，GPT-2，GPT-3 论文精读【论文精读】](https://www.bilibili.com/video/BV1AF411b7xQ/?spm_id_from=333.788&vd_source=69e98dbaea70afc6b62d55a86d59e408)
-
+- [GPT-1/GPT-2/GPT-3简介](https://zhuanlan.zhihu.com/p/473001104)
+- [ChatGPT技术解析之：GPT1、GPT2与GPT3](https://juejin.cn/post/7215806457961775160)
 
 
 

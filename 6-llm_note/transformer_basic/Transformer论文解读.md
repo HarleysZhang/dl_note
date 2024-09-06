@@ -51,7 +51,7 @@ CosineSimilarity = sum(x[i]*y[i])/(sqrt(sum(x[i]*x[i]))*sqrt(sum(y[i]*y[i])))。
 
 `Scaled Dot-Product Attention` 是不带任何参数的！
 
-与其做单个的注意力函数，不如将 $Q$、$K$、$V$ 投影到一个低维度、投影 $h$ 次，然后再做 $h$ 次的自注意力函数，并将这 $h$ 个函数的输出拼接在一起，最后再次进行线性投影回来。
+与其做单个的注意力函数，不如将 $Q$、$K$、$V$ 投影到一个**低维度**、投影 $h$ 次，然后再做 $h$ 次的自注意力函数，并将这 $h$ 个函数的输出拼接在一起，最后再次进行线性投影回来。
 
 $$\text{Multi-Head Attention} = Concat(head_1,….,head_h) W^o \\
 \text{Where} \ \text{head}_i = Attention (QW_i^Q, KW_i^K, VW_i^V)$$

@@ -3,17 +3,17 @@
   - [1.2，NVLINK](#12nvlink)
   - [1.3，NVSwitch](#13nvswitch)
   - [1.4，NVLINK 和 NVSwitch](#14nvlink-和-nvswitch)
-- [二，多 GPU 的 NVLINK 互联拓扑结构](#二多-gpu-的-nvlink-互联拓扑结构)
+- [二，单机多卡的 NVLINK 互联拓扑结构](#二单机多卡的-nvlink-互联拓扑结构)
   - [2.1，V100 拓扑互联结构](#21v100-拓扑互联结构)
   - [2.2，A100 拓扑互联结构](#22a100-拓扑互联结构)
     - [2.2.1， HGX A100 8-GPU 与 NVSwitch 连接-最快的解决方案](#221hgx-a100-8-gpu-与-nvswitch-连接-最快的解决方案)
     - [2.2.2，HGX A100 4-GPU 与 NVLink 连接以实现通用加速](#222hgx-a100-4-gpu-与-nvlink-连接以实现通用加速)
   - [2.3，A40 拓扑互联结构](#23a40-拓扑互联结构)
-- [2.4，查看 GPU 拓扑结构](#24查看-gpu-拓扑结构)
+- [2.4，如何查看 GPU 的拓扑结构](#24如何查看-gpu-的拓扑结构)
   - [2.5，SXM 和 PCIE 模组连接方式的区别](#25sxm-和-pcie-模组连接方式的区别)
-- [三，GPU 显存带宽](#三gpu-显存带宽)
+- [三，GPU 带宽](#三gpu-带宽)
   - [3.1，系统内存与设备内存](#31系统内存与设备内存)
-- [四，带宽对 LLM 推理服务性能的影响总结](#四带宽对-llm-推理服务性能的影响总结)
+  - [3.2，带宽对 LLM 性能的影响](#32带宽对-llm-性能的影响)
 - [参考资料](#参考资料)
 
 ## 一，GPU 多卡通信方式
@@ -68,7 +68,7 @@ GPU 之间互联通信的技术发展：`PCIE—>NVLink—>NVSwitch`。在 nvidi
 
 即 `NVSwitch` 是 NVLINK 通信技术的升级版。对于配备了 NVLINK3.0 的 A100 ，GPU 到 GPU 的互连速度最多为 600 GB/s，但如果是配备 NVSwitch 的 8 卡 A100，其 Total Aggregate Bandwidth  最多为 4.8 TB/s。
 
-<img src="../images/pcie_nvlink/NVSwitch.png" width="70%" alt="NVSwitch">
+<img src="../images/pcie_nvlink/NVSwitch.png" width="60%" alt="NVSwitch">
 
 > [NVIDIA HGX A100 超算平台的数据手册](https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/HGX/a100-80gb-hgx-a100-datasheet-us-nvidia-1485640-r6-web.pdf)。
 
@@ -94,7 +94,7 @@ NVSwitch 可连接多个 NVLink，在单节点内和节点间实现以 NVLink 
 
 ![nvlink_compare_with_nvswitch](../images/pcie_nvlink/nvlink_compare_with_nvswitch.png)
 
-## 二，多 GPU 的 NVLINK 互联拓扑结构
+## 二，单机多卡的 NVLINK 互联拓扑结构
 
 ### 2.1，V100 拓扑互联结构
 
@@ -131,7 +131,7 @@ HGX A100 8-GPU 基板是 HGX A100 服务器平台的关键构建模块。 图 1 
 
 #### 2.2.2，HGX A100 4-GPU 与 NVLink 连接以实现通用加速
 
-GPU 基板上的四个 A100 GPU 通过 NVLink 直接连接，实现了全连接。任何 A100 GPU 都可以使用高速 NVLink 端口访问其他 A100 GPU 的内存。A100 到 A100 的对等带宽为 200 GB/s双向，比最快的 PCIe Gen4 x16 总线快 3 倍以上。
+GPU 基板上的四个 A100 GPU **只通过 4 条 NVLink 链路两两连接，没有实现全连接**，所以两张 A100 卡的双向互连带宽为 $50 \times 4 = 200GB/s$，比最快的 PCIe Gen4 x16 总线快 3 倍以上。
 > 每个 A100 与其他 A100 的 NVLink 端口只有 4 个。
 
 ![HGX_A100_4-GPU](../images/pcie_nvlink/HGX_A100_4-GPU.png)
@@ -152,9 +152,9 @@ NVIDIA NVLink 是一种高速点对点对等传输连接，其中一个 GPU 可�
 
 如 8 卡 A40 机器，其简单拓扑图如下所示。其中NVIDIA® NVLink® 112.5 GB/s (bidirectional)3 PCIe Gen4: 64GB/s。
 
-![A40-8GPU-nvlink](../images/pcie_nvlink/A40-8GPU-nvlink.png)
+<img src="../images/pcie_nvlink/A40-8GPU-nvlink.png" width="60%" alt="A40-8GPU-nvlink">
 
-## 2.4，查看 GPU 拓扑结构
+## 2.4，如何查看 GPU 的拓扑结构
 
 用 `nvidia-smi topo -m` 查看集群（V100 显卡） 的 GPU 拓扑结构，对应的就是 HGX-1/DGX-1 使用的 8 个 V100 的混合立方网格拓扑结构。示例如下：
 
@@ -212,7 +212,7 @@ Legend:
 - SXM 模组的 GPU，多 GPU 的连接方式一般有 NVLINK 或者 NVLINK + NVSwitch。
 - PCIE 插卡形式的 GPU，如果是 A100/A40，最多支持两两 GPU 通过 NVLINK 互联，无法同时支持 8 个 GPU NVLINK互联。
 
-## 三，GPU 显存带宽
+## 三，GPU 带宽
 
 GPU 的内存（显存）带宽决定了它将数据从内存 (vRAM) 移动到计算核心的速度。显存带宽如果太小，就会导致 gpu 和计算核心（cuda/tensor core）处于等待显存返回数据的过程中。
 
@@ -229,10 +229,10 @@ GPU 的内存（显存）带宽决定了它将数据从内存 (vRAM) 移动到�
 - `PCIE-to-PCIE`：显卡之间通过PCIE直接传输数据；
 - `NVLINK`：英伟达显卡之间的一种专用的数据传输通道，由 NVIDIA 公司推出。
 
-## 四，带宽对 LLM 推理服务性能的影响总结
+### 3.2，带宽对 LLM 性能的影响
 
-1. CPU 和 GPU 的通信带宽（一般是通过 PCIE SWITCH 技术连接），只在前期影响模型加载到 GPU 显存的速度。
-2. GPU 卡间互联带宽，指的是不同 gpu 卡之间互联通信速度，英伟达提供了两种通信接口 PCIE 和 NVLINK ，GPU 互联速度严重影响大模型使用张量并行后的模型推理 Latency ，进而影响 llm  服务的最大并发量。
+1. **GPU 显存带宽**: 影响模型加载和算子计算速度。GPU 显存带宽越高，GPU 计算核心能够更快获得数据，从而提高矩阵乘法等操作的速度。
+2. **GPU 卡间互联带宽**: 指的是不同 gpu 卡之间互联通信速度，英伟达提供了两种通信接口 PCIE 和 NVLINK，GPU 互联速度严重影响大模型使用张量并行后的模型推理 Latency ，进而影响 llm  服务的最大并发量。
 
 ## 参考资料
 

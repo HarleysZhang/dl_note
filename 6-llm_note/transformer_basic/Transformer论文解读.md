@@ -1,3 +1,14 @@
+- [1，相关工作](#1相关工作)
+- [2，模型架构](#2模型架构)
+- [3，如何理解 Layer Norm](#3如何理解-layer-norm)
+- [4，Encoder 和 Decoder 结构](#4encoder-和-decoder-结构)
+- [5，从 attention 到 Scaled Dot-Product Attention](#5从-attention-到-scaled-dot-product-attention)
+- [6，Multi-Head Attention](#6multi-head-attention)
+- [7，Transformer 的三个 multi-head attention 的原理和作用](#7transformer-的三个-multi-head-attention-的原理和作用)
+- [8，Embedding 和 Softmax 层](#8embedding-和-softmax-层)
+- [9，Positional Encoding](#9positional-encoding)
+- [10，为什么使用 self-attention!](#10为什么使用-self-attention)
+- [参考资料](#参考资料)
 
 #### 1，相关工作
 
@@ -24,7 +35,9 @@
 * `BN`: 对于每个特征维度，计算它在整个批次中的均值和标准差，然后对该特征进行归一化。
 * `LN`: 对每个样本单独计算其所有特征的均值和标准差，然后在该样本内进行归一化。
 
-![BN 和 LN 的区别](../../images/transformer_paper/bn_ln.png)
+<!-- ![BN 和 LN 的区别](../../images/transformer_paper/bn_ln.png) -->
+
+<img src="../../images/transformer_paper/bn_ln.png" width="50%" alt="BN 和 LN 的区别">
 
 #### 4，Encoder 和 Decoder 结构
 

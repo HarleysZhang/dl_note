@@ -13,7 +13,7 @@ META 于 2020 年发表 `DETR` 论文，紧跟着谷歌从**特征编码的角�
 
 归纳偏置（inductive bias），是一种先验知识，即提前做好的假设。`CNN` 具有两种归纳偏置：
 1. **局部性**（locality/two-dimensional neighborhood structure），即图片上相邻的区域具有相似的特征；
-2. **平移不变形**（translation equivariance）， $f(g(x)) = g(f(x))$，其中 g 代表卷积操作，f 代表平移操作。
+2. **平移不变形**（translation equivariance）， $f(g(x)) = g(f(x))$，其中 $g$ 代表卷积操作，$f$ 代表平移操作。
 
 ## ViT 模型结构
 
@@ -29,7 +29,7 @@ META 于 2020 年发表 `DETR` 论文，紧跟着谷歌从**特征编码的角�
 2. `Position Embeddings`: 添加位置编码（positional embedding），因为 Transformer 本身不具有处理图像空间信息的能力，位置编码能帮助模型了解每个 patch 在图像中的位置。
 3. `Transformer Encoder`: 与 NLP 中的 Transformer 类似，包括多个堆叠的 Transformer blocks。每个 block 包含以下两部分：
    - Multi-Head Self Attention (MHSA): 允许每个 patch 关注其他 patch 的信息。
-   - Feed-Forward Network (FFN): 一个两层的全连接网络，其中使用了激活函数（如 GELU）。
+   - Feed-Forward Network (FFN): 一个两层的全连接网络，其中使用新的激活函数（`GELU`）。
 4. `Classification Head`: 将 Transformer Encoder 的输出（通常是第一个 token）传入全连接层（MLP Head）以生成最终的分类输出。
 5. `Layer Normalization and Skip Connections`: 在每个子层之后使用层归一化（Layer Normalization）和残差连接（skip connections）。
 
@@ -37,7 +37,7 @@ META 于 2020 年发表 `DETR` 论文，紧跟着谷歌从**特征编码的角�
 
 ViT 将输入图片分为多个 patch（`16x16`），再将每个 patch 投影为固定长度的向量送入 Transformer，后续encoder 的操作和原始 Transformer 中完全相同。另外，对于图片分类问题，在输入序列中加入一个特殊的 token，该 token 对应的输出即为最后的预测类别。
 
-举个例子来理解 patch embedding 过程: 假设输入图片大小为 224 *224，path 大小为 16*16，则每张图片都会生成 （224*224）/（16*16） = 196 个 patch，类似于 transformer 模型的输入序列长度为 196。每个 patch 维度大小 = 16*16*3 = 768，类似于每个 token 映射成的向量长度为768，输入序列会加上一个特俗字符 cls，因此最终的输入序列维度 = 197*768（一共有197个token）。线性投射层的维度为768xN (N=768)，因此输入通过**线性投影层**之后的维度依然为197x768。到此，我们详细的解析了通过 patch embedding 将一个视觉分类问题转换为 seq2seq 的问题。
+举个例子来理解 patch embedding 过程: 假设输入图片大小为 $224 \times224$，path 大小为 $16\times 16$，则每张图片都会生成 $(224\times224)/(16\times16) = 196$ 个 patch，类似于 transformer 模型的输入序列长度为 196。每个 patch 维度大小 = $16\times 16\times 3 = 768$，类似于每个 `token` 映射成的向量长度为 768，输入序列会加上一个特俗字符 `cls`，因此最终的输入序列维度 = $197\times 768$（一共有 197 个token）。线性投射层的维度为 $768\times N (N=768)$，因此输入通过**线性投影层**之后的维度依然为 $197\times 768$。到此，我们详细的解析了通过 `patch embedding` 将一个视觉分类问题转换为 `seq2seq` 的问题。
 
 ## 代码实现
 

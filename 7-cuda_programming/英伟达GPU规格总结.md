@@ -82,6 +82,7 @@
 > 本文对 Volta 架构的总结是基于 Volta 架构白皮书资料总结而来，该[白皮书](https://images.nvidia.com/content/volta-architecture/pdf/volta-architecture-whitepaper.pdf)介绍了 Tesla V100 加速器和 Volta GV100 GPU 架构。
 
 ### 2.1，Volta 架构主要特性
+
 以基于 Volta GV100 GPU 架构的 `Tesla V100` 加速器为例，介绍 `Volta` 架构的主要特点:
 
 1，**专门为深度学习优化的全新流式多处理器 (SM) 架构**
@@ -172,14 +173,16 @@ Volta 架构的 Tensor Core 的特性已经在 `CUDA9` C++ API 提供，公开�
 
 NVIDIA TESLA V100 芯片是用于 `HPC`（高性能计算）的**专业卡**，是第一个配备 Tensor Core 的 GPU，采用 Volta 架构，提供 16GB 和 32GB 显存两个版本。主要规格如下如下表所示。
 
-|                     | GPU 架构 | Tensor核心 | CUDA 核心 | FP64 算力 | FP32算力    | Tensor 效能 | 显存            | 显存带宽  | 互连带宽  |
+|                     | GPU 架构 | Tensor核心 | CUDA 核心 | FP64 算力 | FP32算力    | Tensor 效能 | 显存            | 显存带宽  | **双向互连带宽**  |
 | :------------------ | :------- | :--------- | --------- | --------- | ----------- | ----------- | --------------- | --------- | --------- |
 | Tesla `V100` `PCle` | Volta    | 640        | 5120      | 7 TFLOPS  | 14 TFLOPS   | 112 TFLOPS  | 32GB /16GB HBM2 | 900GB/sec | 32GB/sec  |
 | Tesla `V100` `SXM2` | Volta    | 640        | 5120      | 7.8TFLOPS | 15.7 TFLOPS | 125 TFLOPS  | 32GB /16GB HBM2 | 900GB/sec | 300GB/sec |
 
 更加详细的规格如下图所示:
 
-![NVIDIA®Tesla®V100规格](../images/nvidia_gpu/v100_format.png)
+<!-- ![NVIDIA®Tesla®V100规格](../images/nvidia_gpu/v100_format.png) -->
+
+<img src="../images/nvidia_gpu/v100_format.png" width="60%" alt="NVIDIA®Tesla®V100规格">
 
 ## 三，Turing 架构
 
@@ -255,9 +258,8 @@ Turing TU102 GPU 的内部结构图如下所示。
 
 Turing 架构采用全新 SM 设计。每个 TPC 均包含两个 SM，每个 SM 共有 64 个 FP32 核心和 64 个 INT32 核心。**相比之下，Pascal GP10x GPU 的每个 TPC 仅有一个 SM，且每个 SM 只含 128 个 FP32 核心**。
 
-Turing TU102/TU104/TU106 流式多元处理器 (SM)结构图如下所示：
-
-![Turing SM 结构图](../images/nvidia_gpu/turing_sm.png)
+Turing TU102/TU104/TU106 流式多元处理器 (`SM`)结构图如下所示：
+<img src="../images/nvidia_gpu/turing_sm.png" width="75%" alt="Turing SM 结构图">
 
 ### 3.4，基于 TURING GPU 架构的专业训练卡对比-RTX 6000 卡
 
@@ -383,7 +385,7 @@ A100 提供了高达 `80GB` 的 GPU 显存和 `2TB/s` 的显存带宽，主要�
 
 更加详细的规格如下图所示:
 
-![NVIDIA®Tesla®A100规格](../images/nvidia_gpu/a100_format.png)
+<img src="../images/nvidia_gpu/a100_format.png" width="60%" alt="NVIDIA®Tesla®A100规格">
 
 NVIDIA A100 GPU 的突破性创新点：
 1. **基于 NVIDIA AMPERE 架构**
@@ -508,7 +510,7 @@ H100 提供了高达 `80GB` 的 GPU 显存和 `3.35TB/s`（H100 SXM）的显存�
 
 1. [NVIDIA Volta-Architecture 白皮书-中文版](https://www.nvidia.cn/content/dam/en-zz/zh_cn/Solutions/Data-Center/volta-gpu-architecture/Volta-Architecture-Whitepaper-v1.1-CN.compressed.pdf)
 2. [NVIDIA Turing-Architecture-Whitepaper](https://images.nvidia.com/aem-dam/en-zz/Solutions/design-visualization/technologies/turing-architecture/NVIDIA-Turing-Architecture-Whitepaper.pdf)
-3. [NVIDIA Ampere Architecture Whitepaper](https://www.nvidia.com/content/PDF/nvidia-ampere-ga-102-gpu-architecture-whitepaper-v2.pdf)
+3. [NVIDIA Ampere Architecture Whitepaper](https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf)
 4. [NVIDIA Hopper Architecture Whitepaper中文版](https://resources.nvidia.com/cn-hopper-architecture)
 5. [NVIDIA TESLA V100 GPU 加速器数据手册](https://www.nvidia.com/content/dam/en-zz/zh_tw/Solutions/design-visualization/grid-vpc-vapps/volta-v100-datasheet-update-a4-636418-r4-tw.pdf)
 6. [NVIDIA A100 GPU 中文数据手册](https://images.nvidia.cn/aem-dam/en-zz/Solutions/data-center/a100/nvidia-a100-datasheet-nvidia-a4-2188504-r5-zhCN.pdf)

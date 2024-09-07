@@ -24,7 +24,7 @@
 
 PCI-Express(peripheral component interconnect express)是一种高速串行计算机扩展总线标准，它原来的名称为 “3GIO”，是由英特尔在 2001 年提出的，旨在替代旧的 PCI，PCI-X 和 AGP 总线标准。PCIe 属于高速串行点对点双通道高带宽传输，所连接的设备分配独享通道带宽，不共享总线带宽。
 
-![pcie](../images/pcie_nvlink/pcie.png)
+<img src="../images//pcie_nvlink/pcie.png" width="50%" alt="pcie">
 
 ### 1.2，NVLINK
 
@@ -34,7 +34,7 @@ PCI-Express(peripheral component interconnect express)是一种高速串行计�
 
 一块 P100 上，集成了 4 条 NVLink 链路。每条链路具备双向共 40GB/s 的带宽，单个芯片可高达 `160GB/s` 的**双向互连带宽**。
 
-![nvlink1.0](../images/pcie_nvlink/nvlink1.0.png)
+<img src="../images/pcie_nvlink/nvlink1.0.png" width="50%" alt="nvlink1.0">
 
 当我们说 NVLink 的双向带宽为 300 GB/s 时，这通常是指每个 NVLink 链路的总带宽（双向数据传输速率），而不是单个方向的带宽。比如，300 GB/s 的双向带宽是指 NVLink 在两个方向上的总带宽，另外，NVLink 链路是可以同时支持向前和向后的数据传输。
 
@@ -48,7 +48,7 @@ NVLink2.0 与 V100 一同而来，NVLink2.0 提升了信号的传输率，从 20
 
 NVLink3.0 随着 Ampere 架构（A100 卡）一起发布。NVLink3.0 每条链路在每个方向上使用 $4$ 对差分信号线（4 条通道），单条链路在**每个方向**上提供 25GB/s 的带宽，同时链路总数增加到 12 条，而 A100 的双向互连带宽 $ = 25\times 2\times 12 = 600 GB/sec$。
 
-![nvidia-nvlink-performance-chart-dlt](../images/pcie_nvlink/nvidia-nvlink-performance-chart-dlt.png)
+<img src="../images/pcie_nvlink/nvidia-nvlink-performance-chart-dlt.png" width="70%" alt="nvidia-nvlink-performance-chart-dlt">
 
 4，NVLink 发展史
 
@@ -68,7 +68,8 @@ GPU 之间互联通信的技术发展：`PCIE—>NVLink—>NVSwitch`。在 nvidi
 
 即 `NVSwitch` 是 NVLINK 通信技术的升级版。对于配备了 NVLINK3.0 的 A100 ，GPU 到 GPU 的互连速度最多为 600 GB/s，但如果是配备 NVSwitch 的 8 卡 A100，其 Total Aggregate Bandwidth  最多为 4.8 TB/s。
 
-![NVSwitch](../images/pcie_nvlink/NVSwitch.png)
+<img src="../images/pcie_nvlink/NVSwitch.png" width="70%" alt="NVSwitch">
+
 > [NVIDIA HGX A100 超算平台的数据手册](https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/HGX/a100-80gb-hgx-a100-datasheet-us-nvidia-1485640-r6-web.pdf)。
 
 ### 1.4，NVLINK 和 NVSwitch

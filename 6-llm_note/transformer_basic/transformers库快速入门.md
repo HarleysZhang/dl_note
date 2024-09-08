@@ -2,7 +2,7 @@
   - [1.1，token、tokenization 和 tokenizer](#11tokentokenization-和-tokenizer)
   - [1.2，input IDs](#12input-ids)
   - [1.3，attention mask](#13attention-mask)
-  - [1.4，bos\_token、eop\_token、pad\_token、eos\_token](#14bos_tokeneop_tokenpad_tokeneos_token)
+  - [1.4，特殊 tokens 的意义](#14特殊-tokens-的意义)
   - [1.5，decoder models](#15decoder-models)
   - [1.6，架构与参数](#16架构与参数)
 - [二，Transformers 功能](#二transformers-功能)
@@ -32,7 +32,7 @@
 
 ### 1.2，input IDs
 
-`LLM` 唯一必须的输入是 `input ids`，本质是 `tokens` 索引（Indices of input sequence tokens in the vocabulary.），即数字 ID 数组，从而符合模型输入的要求。
+`LLM` 唯一必须的输入是 `input ids`，本质是 `tokens` 索引（Indices of input sequence tokens in the vocabulary.），即数整数向量。
 
 - 将输入文本序列转换成 tokens，即 tokenized 过程；
 - 将输入文本序列转换成 input ids，即输入编码过程，数值对应的是 tokenizer 词汇表中的索引，
@@ -60,7 +60,7 @@ print("[INFO]: length of tokenized_sequence and encoded_sequence:", len(tokenize
 """
 ```
 
-值得注意的是，调用 tokenizer() 函数返回的是字典对象，包含相应模型正常工作所需的所有参数，token indices 在键 `input_ids` 对应的键值中。同时，**tokenizer 会自动填充 "special tokens"**（如果相关模型依赖它们），这也是 tokenized_sequence 和 encoded_sequence 列表中长度不一致的原因。
+值得注意的是，**调用 `tokenizer()` 函数返回的是字典对象**，包含相应模型正常工作所需的所有参数，tokens 索引在键 `input_ids` 对应的键值中。同时，**tokenizer 会自动填充 "special tokens"**（如果相关模型依赖它们），这也是 tokenized_sequence 和 encoded_sequence 列表中长度不一致的原因。
 
 ```python
 decoded_sequence = tokenizer.decode(encoded_sequence)
@@ -101,7 +101,7 @@ tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 
 ![attention_mask](../../images/transformers_basic/attention_mask.png)
 
-### 1.4，bos_token、eop_token、pad_token、eos_token
+### 1.4，特殊 tokens 的意义
 
 我们在模型的 checkpoints 目录下的配置文件中，经常能看到 eop_token、pad_token、bos_token、eos_token 这些与文本序列处理相关的特殊 `token`，它们代表的意义如下:
 
@@ -273,7 +273,7 @@ print(pt_predictions)
 print(pt_model.config.id2label) # {0: '1 star', 1: '2 stars', 2: '3 stars', 3: '4 stars', 4: '5 stars'}
 ```
 
-> 注意，Transformers 模型默认情况下需要多个句子，虽然这里输入是一个句子，但 tokenizer 不仅会将输入ID列表转换为张量，还在其顶部添加了一个维度。
+> 注意，Transformers 模型默认情况下是需要多个句子。虽然这里输入看起来是一个句子，但实际 `tokenizer` 不仅将 input ids 列表转换为张量，还在其顶部添加了一个维度（`batch` 维度）。
 
 程序运行结果输出如下所示。
 

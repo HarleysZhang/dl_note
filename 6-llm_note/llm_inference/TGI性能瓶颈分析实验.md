@@ -16,7 +16,7 @@
 - 2/4/8 张 a100 卡性能数据，分别跑 20/50/100 个并发，得到主要 operation 的 Promehteus 性能数据；
 - 2/4/8 张 a40 卡性能数据，分别跑 20/50/100 个并发，得到主要 operation 的 Promehteus 性能数据；
 
-理论分析：prefill 过程计算受限，decode 过程内存受限。
+理论分析：prefill 过程计算受限，decode 过程内存受限（用了 kv cache 优化）。
 
 ![llm_profiler 理论分析](../../images/performance_bottleneck_analysis/llm_profiler.png)
 
@@ -32,9 +32,9 @@
 
 1. 不同的模拟应用场景：用户并发数（高并发 vs 低并发场景）、输入输出上下文长度（DocQA长上下文 vs Chatbot短上下文）…
 2. 不同的硬件资源条件：GPU 型号（算力、显存容量、显存带宽、卡间通信带宽）、GPU 数量（张量并行数）…
-下面的实验结果是对于短上下文场景（ShareGPT数据集），在 2/4/8*A100、2/4/8*A40、2/4/8*V100 的不同硬件资源条件下，使用 InternLM-20B 模型，固定请求池容量为 250，分别设置用户并发数分别为 10/50/100 测试得到。
 
-下面的实验结果是对于短上下文场景（ShareGPT数据集），在 2/4/8*A100、2/4/8*A40、2/4/8*V100 的不同硬件资源条件下，使用 InternLM-20B 模型，固定请求池容量为 250，分别设置用户并发数分别为 10/50/100 测试得到。
+
+下面的实验结果是对于短上下文场景（ShareGPT数据集），在 2/4/8 张 A100、2/4/8张 A40、2/4/8 张V100 的不同硬件资源条件下，使用 InternLM-20B 模型，固定请求池容量为 250，分别设置用户并发数分别为 10/50/100 测试得到。
 
 ### 1.3. 实验结果与分析
 
@@ -60,7 +60,7 @@
 
 ![result4](../../images/performance_bottleneck_analysis/result4.png)
 
-5，实际平均推理组 batch 的 batch_size 大小是远小于它能支持的理论最大 batch_size，实际推理时 batch_size 是动态变化的。以 8 卡 A100 为例，2k 上下文长度的理论最大 batch_size = 110，实际平均推理 batch_size = 25， 25 << 110。另外，TGI 调度策略影响 lightllm 推理后端的 batch_size ，而 batch_size 影响推理 latency。
+5，实际平均推理组 batch 的 batch_size 大小是远小于它能支持的理论最大 batch_size，实际推理时 batch_size 是动态变化的。以 8 卡 A100 为例，2k 上下文长度的理论最大 batch_size = 110，实际平均推理 batch_size = 25， 25 << 110。另外，**LLM 推理服务框架 TGI 调度策略影响 lightllm 推理后端的 batch_size ，而 batch_size 影响推理 latency**。
 
 ![result5](../../images/performance_bottleneck_analysis/result5.png)
 

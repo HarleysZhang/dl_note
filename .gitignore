@@ -1,5 +1,6 @@
 code/others
 code/LLM-Viewer
+code/NeuralGPU-Optimizer
 
 .DS_Store
 code/temporary.md

@@ -33,9 +33,22 @@ $$\text{OI} = \frac{\text{总浮点操作数（FLOPs）}}{\text{总内存访问�
 
 `Roof-line` 划分出的两个瓶颈区域定义如下：
 
-![Roof-line划分出的两个瓶颈区域](../../images/flops/Roof-line划分出的两个瓶颈区域.png)
+$$
+P = \begin{cases} 
+\beta \cdot I & \text{if } I < I_{\max} \text{ (Memory Bound: 内存瓶颈区域)} \\
+\pi & \text{if } I \geqslant I_{\max} \text{ (Compute Bound: 计算瓶颈区域)}
+\end{cases}
+$$
 
 通过上述图，我们可以看到应用程序是在内存受限还是计算受限的区域，进而进行有针对性的优化。
+
+下表是 v100、a100、h100 卡的常用性能指标和 `FP16 Tensor` 算力的操作强度 `oi`:
+
+| GPU  | 显存            | CUDA 核心数 | FP16 Tensor Core 浮点运算能力| FP32 浮点运算能力| 最大内存带宽 | Tensor 运算强度（OI） |
+|------|-----------------|------------|--------------------------|--------------------------|--------------|-----------------------|
+| V100-SXM | 16 GB           | 5120       | 125 TFLOPS                | 15.7 TFLOPS               | 900 GB/s      | 138 TOPS (FP16)         |
+| A100-SXM | 40 GB / 80 GB   | 6912       | 312 TFLOPS                | 19.5 TFLOPS               | 2039 GB/s     | 153 TOPS (FP16)        |
+| H100-SXM | 80 GB           | 8192       | 989 TFLOPS                | 60 TFLOPS                 | 3350 GB/s     | 295 TOPS (FP16)       |
 
 ### 1.2 Roofline 模型实例分析
 
@@ -45,9 +58,9 @@ $$\text{OI} = \frac{\text{总浮点操作数（FLOPs）}}{\text{总内存访问�
 
 $$\text{OI} = \frac{n\times (24bsh^2 + 4bs^2h) + 2bshV}{1.2*12nh^2 + 4nbh(s+o)} = 7563.29\ \text{FLOPs/Byte}$$
 
-2，**Roofline 模型的理论限制**：
-- **内存带宽**：假设 GPU 的内存带宽为 900 GB/s。
-- **理论计算能力**（FLOPs）：假设 GPU 的理论计算能力为 16 TFLOPs（$16 \times 10^{12} $FLOPs）。
+2，**Roofline 模型的理论限制（A100 卡）**：
+- **内存带宽**：GPU 的内存带宽为 2039 GB/s。
+- **理论计算能力**（FLOPs）：GPU 的理论 `FP16` 计算能力为 312 TFLOPs（$312 * 10^{12}$FLOPs）。
 
 根据这些数据，绘制 Roofline 图可以显示性能的上限，并展示应用程序的瓶颈。
 
@@ -71,18 +84,34 @@ total_flops = n * (24*b*s*h*h + 4*b*s*s*h) + 2*b*s*h*V
 print(f"Total FLOPs for LLaMA-13B: {total_flops / 10**12:.2f} TFLOPs")
 
 
-# 总的显存占用量（=显存访问量？）, 2字节访问
+# 2. 总的显存占用量（=显存访问量？）, 2字节访问
 total_memory_access = 1.2*12*n*h*h + 4*n*b*h*(s+o)  
 print(f"Total memory access: {total_memory_access / 10**9:.2f} GB")
 
 # 3. 计算操作强度（OI = FLOPs / Memory Access）
-operational_intensity = total_flops / total_memory_access
-print(f"Operational Intensity (OI): {operational_intensity:.2f} FLOPs/Byte")
+llama_oi = total_flops / total_memory_access
+print(f"Operational Intensity (OI): {llama_oi:.2f} FLOPs/Byte")
+
+# 4. 定义 A100-SXM3 硬件参数
+peak_flops = 312 * 10**12  # 312 FP16 Tensor Core TFLOPs
+memory_bandwidth = 2039 * 10**9  # 900 GB/s = 900 * 10^9 Bytes/s
+
+# 计算 Roofline 中的两条线
+
+oi_max = peak_flops / memory_bandwidth
+# 带宽受限部分（FLOPs = OI * Memory Bandwidth）
+bandwidth_bound_performance = oi_values * memory_bandwidth
+# 计算受限部分（FLOPs = Peak FLOPs）
+compute_bound_performance = np.full_like(oi_values, peak_flops)
+
+
 ```
 
 该代码将输出矩阵乘法的操作强度以及带宽受限时的性能上限。通过比较实际的性能和理论峰值性能，我们可以判断该应用是否是计算受限还是内存受限。
 
 ### 1.3 AI 应用性能优化策略
+
+![roofline model picture](../../images/transformer-performance_basic/roofline_model.png)
 
 ![Many components contribute to the kernel run time](../../images/transformer-performance_basic/many_components_time.png)
 

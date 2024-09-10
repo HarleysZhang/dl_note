@@ -4,8 +4,6 @@
 - [二 LLM 并发支持估算](#二-llm-并发支持估算)
 - [参考资料](#参考资料)
 
-
-
 ## 一 估算推理 latency 
 
 ### 1.1 推理 Latency 估算公式
@@ -55,7 +53,7 @@ $$
 
 2，输入输出向量维度都为 `4096` 的全连接层，其算术密度和 batch_size 的关系如下图所示：
 
-![arithmetic-intensity](../../images/gpu_performance_basic/arithmetic-intensity.svg)
+![arithmetic-intensity](../../images/transformer_latency/arithmetic-intensity.svg)
 
 `batch_size` 小于等于 `128` 的情况在 `NVIDIA A100` 加速器上受到**内存带宽限制**。
 
@@ -69,15 +67,15 @@ $$
 
 **自回归模型的推理实验**。**固定 seq_len=8/20**， 如果 seq_len * bs < ops:byte ratio * gpu_num，即**小 `batch_size` 范围 的 latency 不明显增加的**。从实验测试结果看，**使用 4/8 个 V100 硬件做模型推理（张量并行），输入长度固定，在 batch_size < 16/32，其 latency 不明显增加**。且有以下实验结果：
 
-![bs_latency2](../../images/gpu_performance_basic/bs_latency2.png)
-![bs_latency](../../images/gpu_performance_basic/bs_latency.png)
+![bs_latency2](../../images/transformer_latency/bs_latency2.png)
+![bs_latency](../../images/transformer_latency/bs_latency.png)
 
 **`Latency` 的理论分析**：对于自回归模型的推理，默认推理配置是 `use_cache=True`，**固定 seq_len**，batch_size 较小时，模型的算术强度较低，模型受到内存带宽限制，`Latency` 取决于内存搬运时间，而 `batch_size ` 较小时，kv cache 读写时间也较小，而模型权重读取时间又是固定的，故 latency 不明显增加；当 batch_size 增加到一定程度，模型的算术强度增加，模型受到算力 `FLOPS` 限制，故此时 `Latency` 与 batch_size 几乎成正比。
 
 另外，基于这个理论分析也可知，当 batch_size 和 output_ids_len 比较大时，**迭代生成 token 的过程中，后面 token 的 Latency 会大于前面的**。
 
-![token latency](../../images/transformer-performance_basic/every_token_latency.png)
-![token latency](../../images/transformer-performance_basic/every_token_latency2.png)
+![token latency](../../images/transformer_latency/every_token_latency.png)
+![token latency](../../images/transformer_latency/every_token_latency2.png)
 
 ## 二 LLM 并发支持估算
 

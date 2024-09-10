@@ -27,14 +27,14 @@
 
 一个正常的 `Attention` 允许一个位置关注/看见到它两边的 `tokens`，而 `Masked Attention` 只让模型看到左边的 `tokens`：
 
-![masked Self Attention](../../images/transformer-performance_basic/4-mask.png)
+![masked Self Attention](../../images/transformer_params_flops/4-mask.png)
 > 图： self attention vs mask self attention
 
 ### 1.1，decoder-only 模型结构
 
 以 `gpt1-3` 模型为例，`decoder-only` 架构的 `transformer` 模型结构如下所示:
 
-![decoder-only-model](../../images/transformer-performance_basic/decoder-only-model.png)
+![decoder-only-model](../../images/transformer_params_flops/decoder-only-model.png)
 > llama、gpt 或者其他 decoder-only 架构的模型，在细节上会有所区别，但是主要网络层不会变。
 
 可以看出，模型由 $N$ 个相同的 `decoder block` 串联而成，每个 `decoder block` 又由一个带掩码（`mask`）多头注意力（MHA）层、2 个层归一化层、和一个前馈神经网络（FFN）层组成：
@@ -54,7 +54,7 @@
 - `n_layers`：模型中 decoder layers 层数，对应 hf 模型配置文件中的 num_hidden_layers。
 
 这些变量值都可以在模型配置文件中找到，以 `llama-13b` 模型配置文件为例，主要字段解释如下：
-![llama-13b-config](../../images/transformer-performance_basic/llama-13b-config.png)
+![llama-13b-config](../../images/transformer_params_flops/llama-13b-config.png)
 
 - `vocab_size`：词汇表中标记的数量，也是嵌入矩阵的第一个维度。
 - `hidden_​​size`：模型的隐藏层大小，其实就是 $d_\text{model}$。
@@ -97,7 +97,7 @@ $$\text{totoal param} = \text{param}_{\text{embedding}} + \text{param}_\text{dec
 
 注意，很多 `decoder-only` 架构的自回归模型的全连接层的偏置 `bias` 都设置为 False，故这里的计算公式中没有考虑偏置参数。
 
-![LlamaForCausalLM architecture](../../images/transformer-performance_basic/llama-model-params.png)
+![LlamaForCausalLM architecture](../../images/transformer_params_flops/llama-model-params.png)
 
 ## 二，参数量 Params 理论分析
 
@@ -203,7 +203,7 @@ $$n(12h^2 + 4h) + Vh $$
 $$8nh^2/12nh^2 = 2/3\cong 66\% \\
 4nh^2/12nh^2 = 1/3\cong 33\%$$
 
-![gpt-like 模型（`opt`）的参数分布](../../images/transformer-performance_basic/opt-prams-dist.png)
+![gpt-like 模型（`opt`）的参数分布](../../images/transformer_params_flops/opt-prams-dist.png)
 
 ## 三，内存使用量理论分析
 
@@ -249,7 +249,6 @@ $$8nh^2/12nh^2 = 2/3\cong 66\% \\
 
 `Feed-forward`（MLP/FFN）层的计算量分析。包含两个线性层，以及一个 `relu` 激活层（逐元素操作，flops 很小$=5\cdot 4h$，可忽略）。`MLP` 两个线性层的权重参数矩阵: $W_1 \in \mathbb{R}^{h\times 4h}$、$W_2 \in \mathbb{R}^{4h\times h}$，`MLP` 的输入矩阵: $\in \mathbb{R}^{s\times h}$。
 
-
 1. 第一个线性层，矩阵乘法的输入和输出形状为 $[s,h] \times [h,4h]\to[s,4h]$，`FLOPs` 为 $8sh^2$
 2. 第二个线性层，矩阵乘法的输入和输出形状为 矩阵乘法的输入和输出形状为 $[s,4h] \times [4h, h]\to [s,h]$，`FLOPs` 为 $8sh^2$
 
@@ -287,7 +286,7 @@ $$6 \times 12850 \times 10^6 \times 300 \times 10^9 = 2.313 \times 10^{22}$$
 
 计算结果和下表所示结果相符合。
 
-![llm_params_flops](../../images/transformer-performance_basic/llm_params_flops.png)
+![llm_params_flops](../../images/transformer_params_flops/llm_params_flops.png)
 > 估算训练一个 transformer 模型所需的算力成本的公式可参考文章[Transformer 估算 101](https://mp.weixin.qq.com/s/MFgTUDAOODgMDb59eZC9Cw)。本章主要参考 [Transformer Inference Arithmetic](https://kipp.ly/blog/transformer-inference-arithmetic/) 以及 [分析transformer模型的参数量、计算量、中间激活、KV cache](https://zhuanlan.zhihu.com/p/624740065)。
 
 这个表总结了常见大型语言模型（LLM）的**参数数量、序列长度、批次大小、隐藏层大小、层数和每次前向推理的浮点操作数总量（FLOPs）**，`FLOPs` 以 T（万亿）为单位。

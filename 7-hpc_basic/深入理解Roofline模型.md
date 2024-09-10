@@ -24,7 +24,7 @@ $P_{max}$: 性能上限 [操作数/秒]
 
 `Roofline` 模型可视化曲线如下图所示：
 
-![roof-line](../../images/transformer_perf_analysis/roofline_model_visual.jpeg)
+![roof-line](../../images/roofline_model/roofline_model_visual.jpeg)
 
 `Roofline` 可以帮助识别程序的性能瓶颈，并指导优化（减少内存访问次数还是算法计算量 `FLOPs`），以及是否达到了硬件的能力上限。
 
@@ -91,19 +91,17 @@ oi_max = peak_flops / memory_bandwidth
 bandwidth_bound_performance = oi_values * memory_bandwidth
 # 计算受限部分（FLOPs = Peak FLOPs）
 compute_bound_performance = np.full_like(oi_values, peak_flops)
-
-
 ```
 
 该代码将输出矩阵乘法的操作强度以及带宽受限时的性能上限。通过比较实际的性能和理论峰值性能，我们可以判断该应用是否是计算受限还是内存受限。
 
 ### 1.3 AI 应用性能优化策略
 
-![roofline model picture](../../images/transformer-performance_basic/roofline_model.png)
+![roofline model picture](../images/roofline_model/roof_line_model.png)
 
-![Many components contribute to the kernel run time](../../images/transformer-performance_basic/many_components_time.png)
+![Many components contribute to the kernel run time](../images/roofline_model/many_components_time.png)
 
-![roofline_time](../../images/transformer-performance_basic/roofline_time.png)
+![roofline_time](../images/roofline_model/roofline_time.png)
 
 总结：
 1. AI 应用的推理时间取决于多个因素，我们应该关注主要因素，比如：内存读写和数学计算时间，而不是次要因素：网络带宽和磁盘读写时间。

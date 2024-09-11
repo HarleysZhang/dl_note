@@ -24,7 +24,7 @@ $P_{max}$: 性能上限 [操作数/秒]
 
 `Roofline` 模型可视化曲线如下图所示：
 
-![roof-line](../../images/roofline_model/roofline_model_visual.jpeg)
+![roof-line](../images/roofline_model/roofline-curve.jpeg)
 
 `Roofline` 可以帮助识别程序的性能瓶颈，并指导优化（减少内存访问次数还是算法计算量 `FLOPs`），以及是否达到了硬件的能力上限。
 
@@ -36,7 +36,9 @@ $P_{max}$: 性能上限 [操作数/秒]
 |------|-----------------|------------|--------------------------|--------------------------|--------------|-----------------------|
 | V100-SXM | 16 GB           | 5120       | 125 TFLOPS                | 15.7 TFLOPS               | 900 GB/s      | 138 TOPS (FP16)         |
 | A100-SXM | 40 GB / 80 GB   | 6912       | 312 TFLOPS                | 19.5 TFLOPS               | 2039 GB/s     | 153 TOPS (FP16)        |
-| H100-SXM | 80 GB           | 8192       | 989 TFLOPS                | 60 TFLOPS                 | 3350 GB/s     | 295 TOPS (FP16)       |
+| H100-SXM | 80 GB           | 8192       | 989 TFLOPS(不开启稀疏计算)  | 60 TFLOPS                 | 3350 GB/s     | 295 TOPS (FP16)       |
+
+下表是 llama7b、llama13b、llama70b、gpt3、模型的参数量、计算量和模型推理 prefill 阶段的显存占用量和内存访问代价及操作强度 `oi`:
 
 ### 1.2 Roofline 模型实例分析
 
@@ -114,6 +116,7 @@ compute_bound_performance = np.full_like(oi_values, peak_flops)
 ## 参考资料
 
 - [Roofline: An Insightful Visual Performance Model for Floating-Point Programs and Multicore Architectures*](https://people.eecs.berkeley.edu/~kubitron/cs252/handouts/papers/RooflineVyNoYellow.pdf)
+- [LLM Inference Unveiled: Survey and Roofline Model Insights](https://arxiv.org/pdf/2402.16363)
 - [Understanding the Roofline Model](https://dando18.github.io/posts/2020/04/02/roofline-model)
 - [《Performance Tuning of Scientific Codes with the Roofline Model》](https://crd.lbl.gov/assets/Uploads/SC18-Roofline-1-intro.pdf)
 - https://hackernoon.com/understanding-the-roofline-model

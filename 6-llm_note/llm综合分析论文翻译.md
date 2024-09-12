@@ -369,6 +369,7 @@ The memory analysis results shed light on the memory consumption patterns of LLM
 The analysis reveals the peak memory consumption, which represents the maximum amount of memory used by the LLM during inference. It identifies the most memoryintensive components or layers of the model, such as the embedding layer, attention mechanisms, or intermediate activations. The memory consumption breakdowns help in understanding the distribution of memory usage across different parts of the model.
 
 The analysis also examines the memory footprint of LLMs, considering both the model parameters and the runtime memory requirements. It highlights the impact of factors such as batch size, sequence length, and vocabulary size on memory consumption. This information is crucial for optimizing memory usage and ensuring efficient deployment of LLMs on resource-constrained devices or environments.
+
 #### 5.4 Impact of model size and architecture on memory usage
 
 The memory analysis results provide insights into the relationship between model size, architecture, and memory usage. It explores how the number of parameters, layers, and hidden dimensions affect the memory requirements of LLMs.

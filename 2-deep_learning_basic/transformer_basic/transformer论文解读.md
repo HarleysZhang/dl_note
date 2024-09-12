@@ -93,9 +93,9 @@ $Q$、$K$ 的线性(映射)层的权重维度是 $[d_\text{model}, d_k]$，$V$ �
 
 #### 8，Embedding 和 Softmax 层
 
-Embedding  层的作用学习一个长为 $d_{model}$ 的向量来表示 `token`，编码器和解码器的输入都需要 embedding 层，两个嵌入层和softmax之前的线性变换之间共享相同的权重矩阵重（维度都是一样的），并且将权重值乘以 \sqrt(d_model)。
+**`Embedding` 层的作用学习一个长为 $d_{model}$ 的向量来表示 `token`**，编码器和解码器的输入都需要 `embedding` 层，两个嵌入层和 `softmax` 之前的线性变换之间共享相同的权重矩阵重（维度都是一样的），并且将权重值乘以 $\sqrt{d_{model}}$。
 
-学习 embedding 时，可能会把每个向量的 $L2\ norm$ 学得相对较小（维度越大权重值越小），乘以根号 d 后放大，使得和 PE 相加时在 scale 上匹配。
+学习 embedding 时，可能会把每个向量的 $L2\ norm$ 学得相对较小（维度越大权重值越小），乘以 $\sqrt{d_{model}}$ 后放大，使得和 PE 相加时在 `scale` 上匹配。
 
 L2 归一化（L2 Norm）是一种将向量缩放到单位长度的操作，使得向量的模为1。对于一个给定向量  $\mathbf{v}$ ，L2 归一化后的向量 $\mathbf{\hat{v}}$，计算公式如下：
 

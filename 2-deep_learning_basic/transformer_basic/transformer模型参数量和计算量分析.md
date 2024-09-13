@@ -35,7 +35,7 @@
 以 `gpt1-3` 模型为例，`decoder-only` 架构的 `transformer` 模型结构如下所示:
 
 ![decoder-only-model](../../images/transformer_params_flops/decoder-only-model.png)
-> llama、gpt 或者其他 decoder-only 架构的模型，在细节上会有所区别，但是主要网络层不会变。
+> gpt 模型结构，llama 在细节上会有所区别，但是主要网络层不会变。
 
 可以看出，模型由 $N$ 个相同的 `decoder block` 串联而成，每个 `decoder block` 又由一个带掩码（`mask`）多头注意力（MHA）层、2 个层归一化层、和一个前馈神经网络（FFN）层组成：
 

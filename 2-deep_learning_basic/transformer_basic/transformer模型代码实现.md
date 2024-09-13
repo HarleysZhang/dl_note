@@ -39,7 +39,7 @@ print("Last hidden states shape:", last_hidden_states.shape)
 
 `nn.Embedding` 的输入输出形式:
 - 输入：一个整数张量，表示词表索引（即每个 token 在词表中的位置）。输入形状: `(batch_size, sequence_length)`，其中 batch_size 表示批次中的样本数，sequence_length 表示每个输入序列的长度。
-- 输出：每个词对应的嵌入向量，维度是可配置的（比如 100 维或 300 维）。输出的形状:`(batch_size, sequence_length, embedding_dim)`。
+- 输出：每个词对应的嵌入向量，维度是可配置的（比如 100 维或 300 维）。输出的形状:`(batch_size, sequence_length, embedding_dim)`。`embedding_dim` 隐藏层大小，也是 $d_{model}$ 或者 $h$，
 
 示例代码:
 

@@ -264,7 +264,7 @@ $$O_{dec}=\text{softmax}(\frac{Q_{dec}\cdot K_{cat}^{T}}{\sqrt{d}}) * V_{cat } *
 
 其中 MHA 的输出 $O_{dec}\in R^{1\times d}$ 被传递到 MLP。最后一个 Transformer 层的输出被发送到最终的预测层，以预测下一个 token 。
 
-1，计算 Q、K、V：矩阵乘法的输入和输出形状为: $[1,h] \times [h,h]\to [1,h]$，`FLOPs`: $3* 2sh^2 = 6h^2$。
+1，计算 Q、K、V：矩阵乘法的输入和输出形状为: $[1,h] \times [h,h]\to [1,h]$，`FLOPs`: $2sh^2 = 2h^2$。
 
 2，**Self-Attention 层**：
 - $QK^T$：矩阵乘法的输入输出形状为: $[1, h] \times [h, s+1]\to [1,s+1]$，`FLOPs`: $2h(s+1)$。

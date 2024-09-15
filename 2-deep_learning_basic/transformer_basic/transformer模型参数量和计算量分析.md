@@ -11,6 +11,8 @@
 - [三，内存使用量理论分析](#三内存使用量理论分析)
 - [四，计算量 FLOPs 理论分析](#四计算量-flops-理论分析)
 	- [4.1，MHA 层计算量](#41mha-层计算量)
+		- [4.1.1 prefill 阶段](#411-prefill-阶段)
+		- [4.1.2 decode 阶段](#412-decode-阶段)
 	- [4.2，FFN 层计算量](#42ffn-层计算量)
 	- [4.3，其他操作的计算量。](#43其他操作的计算量)
 	- [4.4，总的计算量](#44总的计算量)
@@ -66,8 +68,9 @@
 
 对于每个 `token`，各个 layer 的参数量分析过程如下所示:
 
-1，，`Masked Multi-Head Attention` 层的输入是 `Embedding Vector`，形状为 $[1, \text{d\_model}]$。**`Embedding Vector` 经过 `3` 个线性层的线性变换（`Linear` 层）分别得到 $Q$、$K$、$V$ 三个向量**，并将它们作为 `Scale Dot Product Attention` 层的输入。多个 `Scale Dot Product Attention` 层的输出进行 `concat` 后，**再经过 `1` 个线性层进行维度的映射，得到最终的输出**。
-> 对于每一个 `token`，都会生成三个向量 $q$、$k$、$v$，向量大小为 $\text{d\_model}$；对于长度为 `seq_len` 的输入序列，则生成三个矩阵 $Q$、$K$、$V$，形状为 $[\text{seq\_len}, \text{d\_model}]$。
+1，`Masked Multi-Head Attention` 层的输入是 `Embedding Vector`，形状为 $[1, \text{d\_model}]$。**`Embedding Vector` 经过 `3` 个线性层的线性变换（`Linear` 层）分别得到 $Q$、$K$、$V$ 三个向量**，并将它们作为 `Scale Dot Product Attention` 层的输入。多个 `Scale Dot Product Attention` 层的输出进行 `concat` 后，**再经过 `1` 个线性层进行维度的映射，得到最终的输出**。
+
+对于每一个 `token`，都会生成三个向量 $q$、$k$、$v$，向量大小为 $\text{d\_model}$；对于长度为 `seq_len` 的输入序列，则生成三个矩阵 $Q$、$K$、$V$，形状为 $[\text{seq\_len}, \text{d\_model}]$。
 
 `Scale Dot Product Attention` 层的内部计算过程用数学公式可表达为:
 
@@ -233,9 +236,11 @@ $$8nh^2/12nh^2 = 2/3\cong 66\% \\
 
 ### 4.1，MHA 层计算量
 
+#### 4.1.1 prefill 阶段
+
 先分析 `MHA` 块的计算量：
 
-1, **计算 Q、K、V**：对输入的 Query (Q)、Key (K)、Value (V) 向量做线性变换，输入矩阵 $x$ 的形状为 $[s, h]$，做线性变换的权重矩阵 $W_Q$、$W_K$、$W_V$ $\in \mathbb{R}^{h\times h}$，矩阵乘法的输入和输出形状为: $[s,h] \times [h,h]\to [s,h]$，`FLOPs`: $3* 2sh^2 = 6sh^2$。
+1, **计算 Q、K、V**：对输入矩阵做线性变换，输入矩阵 $x$ 的形状为 $[s, h]$，做线性变换的权重矩阵 $W_Q$、$W_K$、$W_V$ $\in \mathbb{R}^{h\times h}$，矩阵乘法的输入和输出形状为: $[s,h] \times [h,h]\to [s,h]$，`FLOPs`: $3* 2sh^2 = 6sh^2$。
 
 2, **Self-Attention 层**，`MHA` 包含 `heads` 数目的 `Self-Attention` 层，这里直接分析所有 `Self-Attention` 层的 `FLOPs`:
 - **$QK^T$ 打分计算**：每个头需要计算 Query 和 Key 的点积，所有头的 $QK^T$ 矩阵乘法的输入和输出形状为: $[s,h] \times [h,s]\to [s,s]$，`FLOPs`: $2s^2h$。
@@ -244,6 +249,33 @@ $$8nh^2/12nh^2 = 2/3\cong 66\% \\
 **`Scale Dot Product Attention` 层内部只估算两个矩阵乘法的计算量**，`attention_scale`（$/\sqrt(k)$）、`attn_softmax` ($\text{softmax}$) 的计算量忽略不计，因为这两个小算子都是逐元素操作。
 
 3, **多头拼接和线性映射**：所有注意力头输出拼接后通过线性映射，`concat` 不涉及数学运算，只涉及内存操作。矩阵乘法的输入和输出形状为: $[s,h] \times [h,h]\to [s,h]$，**attention 后的线性映射的 `FLOPs`: $2sh^2$**。
+
+#### 4.1.2 decode 阶段
+
+**在解码阶段**，MHA 加载先前存储的 KV 缓存 $K_{cache}$ 和 $V_{cache}$。输入为 $X_{dec}\in R^{1\times d}$。新的键值对被计算并连接到现有缓存：
+
+$$\text{Query}: Q_{dec}=X_{dec}*W_{q} \\
+\text{Key}: K_{cat }=[K_{cache }, X_{dec } * W_{k}] \\
+\text{Value}: V_{cat }=[V_{cache }, X_{dec } * W_{v}]$$
+
+这些新计算的 $X_{dec}\cdot W_{k}$ 和 $X_{dec}\cdot W_{v}$ 然后被附加到 $KV$ 缓存。MHA 中的其他计算如下进行：
+
+$$O_{dec}=\text{softmax}(\frac{Q_{dec}\cdot K_{cat}^{T}}{\sqrt{d}}) * V_{cat } * W_{o}+X_{dec}$$
+
+其中 MHA 的输出 $O_{dec}\in R^{1\times d}$ 被传递到 MLP。最后一个 Transformer 层的输出被发送到最终的预测层，以预测下一个 token 。
+
+1，计算 Q、K、V：矩阵乘法的输入和输出形状为: $[1,h] \times [h,h]\to [1,h]$，`FLOPs`: $3* 2sh^2 = 6h^2$。
+
+2，**Self-Attention 层**：
+- $QK^T$：矩阵乘法的输入输出形状为: $[1, h] \times [h, s+1]\to [1,s+1]$，`FLOPs`: $2h(s+1)$。
+- $\text{score}\cdot V$: 矩阵乘法的输入输出形状为: $[1, s+1] \times [s+1, h]\to [1, h]$，`FLOPs`: $2h(s+1)$。
+
+**总结：上述两个公式，在实际代码中也常等效于: $2sh$**
+
+3，输出线性映射层: 矩阵乘法 `matmul` 的输入输出形状为: $[1, h] \times [h, h]\to [1, h]$，`FLOPs`: $2h^2$。
+
+值得注意的是，出了 `MHA` 层的 `FLOPs` 计算需要区分 `prefill` 和 `decode` 阶段，其他层不需要区分。
+
 
 ### 4.2，FFN 层计算量
 

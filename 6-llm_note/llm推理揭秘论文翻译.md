@@ -187,7 +187,7 @@ MHA 的输出 $O_{pre }\in R^{n\times d}$ 将传递到 MLP。MLP 的输出作为
 解码阶段是 LLM 推理的关键部分。在这一阶段，模型使用预填充阶段生成的 **KV 缓存**，同时逐步添加新信息。目标是**逐步生成新的 token **，每个新 token 的生成都会参考之前生成的 token ，从而逐字逐句地完成文本输出。
 
 
-在解码阶段，MHA 加载先前存储的 KV 缓存 $K_{cache}$ 和 $V_{cache}$。输入为 $X_{dec}\in R^{1\times d}$。新的键值对被计算并连接到现有缓存：
+**在解码阶段**，MHA 加载先前存储的 KV 缓存 $K_{cache}$ 和 $V_{cache}$。输入为 $X_{dec}\in R^{1\times d}$。新的键值对被计算并连接到现有缓存：
 
 $$\text{Query}: Q_{dec}=X_{dec}*W_{q} \\
 \text{Key}: K_{cat }=[K_{cache }, X_{dec } * W_{k}] \\

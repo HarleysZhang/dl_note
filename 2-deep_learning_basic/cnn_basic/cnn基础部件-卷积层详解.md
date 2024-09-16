@@ -12,6 +12,7 @@
   - [2.2，卷积层理解](#22卷积层理解)
   - [2.3，分组卷积和DW卷积](#23分组卷积和dw卷积)
   - [2.4，卷积层 api](#24卷积层-api)
+  - [4.5，卷积层代码简单实现](#45卷积层代码简单实现)
 - [三，卷积神经网络](#三卷积神经网络)
   - [3.1，汇聚层](#31汇聚层)
   - [3.2.，汇聚层 api](#32汇聚层-api)
@@ -84,7 +85,7 @@ $$
 一般，数字图像可以表示为如下所示矩阵：
 > 本图片摘自[知乎用户马同学的文章](https://www.zhihu.com/question/22298352)。
 
-![图像矩阵](../images/conv/image1.png)
+![图像矩阵](../../images/conv/image1.png)
 
 而卷积核 $g$ 也可以用一个矩阵来表示，如:
 
@@ -133,7 +134,7 @@ $$
 
 计算过程可视化如下动图所示，注意动图给出的是 $g$ 不是 $g'$。
 
-![二维卷积计算过程](../images/conv/conv_visual.gif)
+![二维卷积计算过程](../../images/conv/conv_visual.gif)
 
 以上公式有一个特点，做乘法的两个对应变量 $a, b$ 的下标之和都是 $(u,v)$，其目的是对这种加权求和进行一种约束，这也是要将矩阵 $g$ 进行翻转的原因。上述计算比较麻烦，实际计算的时候，都是用翻转以后的矩阵，直接求**矩阵内积**就可以了。
 
@@ -205,7 +206,7 @@ $$
 
 下图显示了全连接层和卷积层的每个输入单元影响的输出单元比较:
 
-![全连接层和卷积层对比](../images/conv/ful_conv2.png)
+![全连接层和卷积层对比](../../images/conv/ful_conv2.png)
 
 - 对于传统全连接层，每个输入单元影响了所有的输出单元。
 - 对于卷积层，每个输入单元只影响了3个输出单元（核尺寸为3时）。
@@ -214,14 +215,14 @@ $$
 
 **权重共享**：卷积层中，同一个核会在输入的不同区域做卷积运算。全连接层和卷积层的权重参数比较如下图:
 
-![全连接层和卷积层对比](../images/conv/ful_conv3.png)
+![全连接层和卷积层对比](../../images/conv/ful_conv3.png)
 
 - 对于传统全连接层: $x_3\to s_3$ 的权重 $w_{3,3}$ 只使用了一次 。
 - 对于卷积层： $x_3\to s_3$ 的权重 $w_{3,3}$ 被共享到  $x_i \to s_i, i = 12,4,5$。
 
 全连接层和卷积层的可视化对比如下图所示:
 
-![全连接层和卷积层对比](../images/conv/ful_conv_compare.png)
+![全连接层和卷积层对比](../../images/conv/ful_conv_compare.png)
 
 总结：一个滤波器（3维卷积核）只捕捉输入数据中的一种特定的局部特征。为了提高卷积网络的表示能力，可以在每一层使用多个不同的特征映射，即增加滤波器的数量，以更好地提取图像的特征。
 
@@ -239,7 +240,7 @@ $$
 
 卷积层数值计算过程可视化如下图  1 所示：
 
-![Example of Convolutional layer](../images/conv/Example-of-Convolutional-layer.png)
+![Example of Convolutional layer](../../images/conv/Example-of-Convolutional-layer.png)
 
 > 图片来源论文 [Improvement of Damage Segmentation Based on Pixel-Level Data Balance Using VGG-Unet](https://www.researchgate.net/figure/Example-of-Convolutional-layer_fig2_348296106)。
 
@@ -261,7 +262,7 @@ $$
 - 卷积核 kernal
 - 输出 Feature Map
 
-![三通道经过两组过滤器的卷积过程](../images/conv/conv3d.png)
+![三通道经过两组过滤器的卷积过程](../../images/conv/conv3d.png)
 
 上图是三通道经过两组过滤器的卷积过程，在这个例子中，输入是三维数据 $3\times 32 \times32$，经过权重参数尺寸为 $2\times 3\times 5\times 5$ 的卷积层后，输出为三维 $2\times 28\times 28$，维数并没有变化，只是每一维内部的尺寸有了变化，一般都是要向更小的尺寸变化，以便于简化计算。
 
@@ -283,7 +284,7 @@ $$
 
 分组卷积的极致是分组数数等于输入通道数，这其实就是 `DW` 卷积，可视化如下：
 
-![DW卷积](../images/conv/dw_conv.png)
+![DW卷积](../../images/conv/dw_conv.png)
 
 另外，对于 `pytorch` 的卷积层 api 是同时支持普通卷积、分组卷积/DW 卷积的。但值得注意的是，对于分组卷积，卷积层的输出通道数必须是分组数的整数倍，否则代码会报错！
 
@@ -346,6 +347,39 @@ output = m(input)
 print(output.shape)  # 输出shape: torch.Size([20, 16, 24, 49])
 ```
 
+### 4.5，卷积层代码简单实现
+
+**卷积层参数**和全连接参数是类似的，都是权重 `weights` 和偏移向量 `bias` 的组合，但是区别在于卷积层的权重矩阵是四维的（`conv2d`），而全连接层的权重二维的，但偏移向量都是列向量。
+
+基于 `numpy` 库，没有经过优化版本的卷积层代码实现如下：
+
+```python
+for bs in range(batch_size):
+  for oc in range(output_channels):
+    for oh in range(output_height):
+      for ow in range(output_weight):
+        # input 三维矩阵 kernel 三维矩阵相乘, 默认 array1*array2 就是对应元素的乘积
+        output[bs, oc, oh, ow] = np.sum(input[bs, :, oh: oh+kernel_size, ow: ow+kernel_size] * weights[oc, :, :, :]) + bias[oc]
+return output
+```
+
+如果不用 `numpy` 函数，for 循环的次数会更多，实现方式如下：
+
+```python
+stride = 1
+kernel_size = 3
+for bs in range(batch_size):
+    for oc in range(output_channels):
+        output[bs, oc, oh, ow] += bias[oc]
+        for ic in range(input_channels):
+            for oh in range(height):
+                for ow in range(width):
+                    for kh in range(kernel_size):
+                        for kw in range(kernel_size):
+                            output[bs, oc, oh, ow] += input[bs, ic, oh+kh, ow+kw] * weights[oc, ic, kh, kw]
+```
+
+
 ## 三，卷积神经网络
 
 卷积神经网络一般由卷积层、汇聚层和全连接层构成。
@@ -362,7 +396,7 @@ print(output.shape)  # 输出shape: torch.Size([20, 16, 24, 49])
 
 比如最大汇聚层，其计算输入中区域的最大值。
 
-![最大汇聚层计算结果](../images/conv/pool_cal2.png)
+![最大汇聚层计算结果](../../images/conv/pool_cal2.png)
 
 值得注意的是，与卷积层一样，汇聚层也可以通过改变填充和步幅以获得所需的输出形状。
 
@@ -402,18 +436,18 @@ print(output.shape)  # torch.Size([20, 16, 25, 16])
 
 一个典型的卷积网络结构是由卷积层、汇聚层、全连接层交叉堆叠而成。如下图所示：
 
-![典型的卷积网络整体结构](../images/conv/cnn_structure.png)
+![典型的卷积网络整体结构](../../images/conv/cnn_structure.png)
 
 一个简单的 `CNN` 网络连接图如下所示。
 > 经典 `CNN` 网络的总结，可参考我之前写的文章-[经典 backbone 网络总结](https://github.com/HarleysZhang/cv_note/blob/master/5-deep_learning/%E7%BB%8F%E5%85%B8backbone%E8%AF%A6%E8%A7%A3/%E7%BB%8F%E5%85%B8backbone%E6%80%BB%E7%BB%93.md)。
 
-![一个简单的cnn网络结构图](../images/conv/cnn_demo1.jpeg)
+![一个简单的cnn网络结构图](../../images/conv/cnn_demo1.jpeg)
 
 目前，卷积网络的整体结构趋向于使用更小的卷积核(比如 $1 \times 1$ 和 $3 \times 3$) 以及更深的结构(比如层数大于 50)。另外，由于卷积层的操作性越来越灵活（同样可完成减少特征图分辨率），汇聚层的作用越来越小，因此目前的卷积神经网络逐渐趋向于全卷积网络。
 
 另外，可通过这个[网站](https://poloclub.github.io/cnn-explainer/#article-convolution)可视化 `cnn` 的全部过程。
 
-![cnn_explainer](../images/conv/cnn_explainer.png)
+![cnn_explainer](../../images/conv/cnn_explainer.png)
 
 ## 参考资料
 

@@ -50,7 +50,7 @@ f(x)=\frac{1}{\sqrt{2 \pi}} e^{- \frac{x^2}{2}} \tag{4}
 $$
 正态分布的数学期望值或期望值 $\mu$ 等于位置参数，决定了分布的位置；其方差 $\sigma^2$ 的开平方或标准差 $\sigma$ 等于尺度参数，决定了分布的幅度。正态分布的概率密度函数曲线呈钟形，常称之为**钟形曲线**，如下图所示:
 
-![正态分布概率密度函数曲线](../images/bn/normal-distribution-curve-1.png)
+![正态分布概率密度函数曲线](../../images/bn/normal-distribution-curve-1.png)
 
 可视化正态分布，可直接通过 `np.random.normal` 函数生成指定均值和标准差的正态分布随机数，然后基于 `matplotlib + seaborn` 库 `kdeplot`函数绘制概率密度曲线。示例代码如下所示：
 
@@ -75,7 +75,7 @@ plt.show()
 
 以上代码直接运行后，输出结果如下图：
 
-![不同参数的正态分布函数曲线](../images/bn/normal_distribution_curve.png)
+![不同参数的正态分布函数曲线](../../images/bn/normal_distribution_curve.png)
 
 当然也可以自己实现正态分布的概率密度函数，代码和程序输出结果如下:
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     plt.show()
 ```
 
-![自己实现的不同参数的正态分布函数曲线](../images/bn/normal_distribution_curve2.png)
+![自己实现的不同参数的正态分布函数曲线](../../images/bn/normal_distribution_curve2.png)
 
 ## 二，背景
 
@@ -157,7 +157,7 @@ $$
 
 论文中给出的 Batch Normalizing Transform 算法计算过程如下图所示。其中输入是一个考虑一个大小为 $m$ 的小批量数据 $\cal B$。
 
-![Batch Normalizing Transform](../images/bn/bn_algorithm.png)
+![Batch Normalizing Transform](../../images/bn/bn_algorithm.png)
 
 论文中的公式不太清晰，下面我给出更为清晰的  Batch Normalizing Transform 算法计算过程。
 
@@ -191,11 +191,11 @@ z_i &= \gamma n_i + \beta = \frac{\gamma}{\sqrt{\sigma^2_B + \epsilon}}x_i + (\b
 
 在论文中，训练一个带 `BN` 层的网络， `BN` 算法步骤如下图所示:
 
-![Training a Batch-Normalized Network](../images/bn/algorithm2.png)
+![Training a Batch-Normalized Network](../../images/bn/algorithm2.png)
 
 在训练期间，我们一次向网络提供一小批数据。在前向传播过程中，网络的每一层都处理该小批量数据。 `BN` 网络层按如下方式执行前向传播计算：
 
-![Batch Norm 层执行的前向计算](../images/bn/bn_fp.png)
+![Batch Norm 层执行的前向计算](../../images/bn/bn_fp.png)
 
 > 图片来源[这里](https://towardsdatascience.com/batch-norm-explained-visually-how-it-works-and-why-neural-networks-need-it-b18919692739)。
 
@@ -205,7 +205,7 @@ z_i &= \gamma n_i + \beta = \frac{\gamma}{\sqrt{\sigma^2_B + \epsilon}}x_i + (\b
 
 如下图可以展示BN 层的前向传播计算过程数据的 `shape` ，红色框出来的单个样本都指代单个矩阵，即运算都是在单个矩阵运算中计算的。
 
-![Batch Norm 向量的形状](../images/bn/bn_fp_shape.png)
+![Batch Norm 向量的形状](../../images/bn/bn_fp_shape.png)
 
 > 图片来源 [这里](https://towardsdatascience.com/batch-norm-explained-visually-how-it-works-and-why-neural-networks-need-it-b18919692739)。
 
@@ -245,7 +245,7 @@ $$
 
 `BN` 在 `ImageNet` 分类数据集上实验结果是 `SOTA` 的，如下表所示:
 
-![实验结果表4](../images/bn/Figure_4.png)
+![实验结果表4](../../images/bn/Figure_4.png)
 
 ### 3.5，BN 层的作用
 
@@ -259,7 +259,7 @@ $$
 
 Sigmoid 导数的**梯度消失区域**如下图所示：
 
-![sigmoid 函数及其导数图像](../images/activation_function/sigmoid_and_gradient_curve2.png)
+![sigmoid 函数及其导数图像](../../images/activation_function/sigmoid_and_gradient_curve2.png)
 
 ## 参考资料
 

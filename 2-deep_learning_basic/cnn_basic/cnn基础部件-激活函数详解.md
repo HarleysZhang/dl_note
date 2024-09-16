@@ -20,7 +20,7 @@
 
 人工神经元(Artificial Neuron)，简称神经元(Neuron)，是构成神经网络的基本单元，其主要是模拟生物神经元的结构和特性，接收一组输入信号并产生输出。生物神经元与人工神经元的对比图如下所示。
 
-![neuron](../images/activation_function/neuron.png)
+![neuron](../../images/activation_function/neuron.png)
 
 从机器学习的角度来看，神经网络其实就是一个**非线性模型**，其基本组成单元为具有非线性激活函数的神经元，通过大量神经元之间的连接，使得多层神经网络成为一种高度非线性的模型。**神经元之间的连接权重就是需要学习的参数**，其可以在机器学习的框架下通过**梯度下降方法**来进行学习。
 > 深度学习一般指的是深度神经网络模型，泛指网络层数在三层或者三层以上的神经网络结构。
@@ -43,7 +43,7 @@ $$a = f(z)$$
 
 由此，典型的神经元结构如下所示:
 
-<img src="../images/activation_function/典型的神经元架构.png" alt="典型的神经元架构" style="zoom: 50%;" />
+<img src="../../images/activation_function/典型的神经元架构.png" alt="典型的神经元架构" style="zoom: 50%;" />
 
 ### 1.3，激活函数性质
 
@@ -73,7 +73,7 @@ $$
 
 sigmoid 函数及其导数曲线如下所示:
 
-<img src="../images/activation_function/sigmoid_and_gradient_curve2.png" alt="sigmoid 函数及其导数图像" style="zoom:67%;" />
+<img src="../../images/activation_function/sigmoid_and_gradient_curve2.png" alt="sigmoid 函数及其导数图像" style="zoom:67%;" />
 
 可以看出，sigmoid 函数连续，光滑、严格单调，以 (0,0.5) 中心对称，是一个非常良好的阈值函数。
 
@@ -169,11 +169,11 @@ plt.show()
 
 程序运行后得到的 Sigmoid 和 Tanh 函数曲线如下图所示:
 
-<img src="../images/activation_function/sigmoid_tanh_curve.png" alt="Logistic函数和Tanh函数" style="zoom:67%;" />
+<img src="../../images/activation_function/sigmoid_tanh_curve.png" alt="Logistic函数和Tanh函数" style="zoom:67%;" />
 
 以上代码的基础上，改下 plt.plot 函数的输入数据，同样可得到 Tanh 函数及其导数曲线图:
 
-<img src="../images/activation_function/tanh_and_gradient_curve.png" alt="Tanh函数及其导数" style="zoom:67%;" />
+<img src="../../images/activation_function/tanh_and_gradient_curve.png" alt="Tanh函数及其导数" style="zoom:67%;" />
 
 可以看出 `Sigmoid` 和 `Tanh` 函数在输入很大或是很小的时候，**输出都几乎平滑且梯度很小趋近于 0**，不利于权重更新；不同的是 `Tanh` 函数的输出区间是在 `(-1,1)` 之间，而且整个函数是以 0 为中心的，即他本身是零均值的，也就是说，在前向传播过程中，输入数据的均值并不会发生改变，这就使他在很多应用中效果能比 Sigmoid 优异一些。
 
@@ -232,7 +232,7 @@ class ReLU(object):
 ```
 **ReLU 激活函数及其函数梯度图**如下所示:
 
-<img src="../images/activation_function/relu_and_gradient_curve2.png" alt="relu_and_gradient_curve" style="zoom: 67%;" />
+<img src="../../images/activation_function/relu_and_gradient_curve2.png" alt="relu_and_gradient_curve" style="zoom: 67%;" />
 
 > `ReLU` 激活函数的更多内容，请参考原论文 [Rectified Linear Units Improve Restricted Boltzmann Machines](https://www.cs.toronto.edu/~fritz/absps/reluICML.pdf)
 
@@ -289,7 +289,7 @@ $$
 
 ReLU、Leaky ReLU、ELU 以及 Softplus 函数示意图如下图所示:
 
-<img src="../images/activation_function/relu_more.png" alt="relu_more" style="zoom:50%;" />
+<img src="../../images/activation_function/relu_more.png" alt="relu_more" style="zoom:50%;" />
 
 ## 四，Swish 函数
 
@@ -313,7 +313,7 @@ class Swish(nn.Module):  #Swish激活函数
 
 结合前面的画曲线代码，可得 Swish 函数的示例图：
 
-<img src="../images/activation_function/swish_of_different_beta2.png" alt="Swish 函数" style="zoom:67%;" />
+<img src="../../images/activation_function/swish_of_different_beta2.png" alt="Swish 函数" style="zoom:67%;" />
 
 **Swish 函数可以看作线性函数和 ReLU 函数之间的非线性插值函数，其程度由参数 $\beta$ 控制**。
 ## 五，激活函数总结
@@ -371,7 +371,7 @@ class Softplus(object):
 
 下表汇总比较了几个激活函数的属性:
 
-![activation_function](../images/activation_function/activation_function_summary.png)
+![activation_function](../../images/activation_function/activation_function_summary.png)
 
 **激活函数的在线可视化**移步 [Visualising Activation Functions in Neural Networks](https://dashee87.github.io/deep%20learning/visualising-activation-functions-in-neural-networks/)。
 

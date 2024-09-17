@@ -71,6 +71,40 @@ print(embedded_output)
 
 ![embedding 层输出结果示例](../../images/transformer_code/embedding_layer_code.png)
 
+**子 layer 输入输出分析**：
+
+对于每个 `token`，各个 layer 的参数量分析过程如下所示:
+
+1，`Masked Multi-Head Attention` 层的输入是 `Embedding Vector`，形状为 $[1, \text{d\_model}]$。**`Embedding Vector` 经过 `3` 个线性层的线性变换（`Linear` 层）分别得到 $Q$、$K$、$V$ 三个向量**，并将它们作为 `Scale Dot Product Attention` 层的输入。多个 `Scale Dot Product Attention` 层的输出进行 `concat` 后，**再经过 `1` 个线性层进行维度的映射，得到最终的输出**。
+
+对于每一个 `token`，都会生成三个向量 $q$、$k$、$v$，向量大小为 $\text{d\_model}$；对于长度为 `seq_len` 的输入序列，则生成三个矩阵 $Q$、$K$、$V$，形状为 $[\text{seq\_len}, \text{d\_model}]$。
+
+`Scale Dot Product Attention` 层的内部计算过程用数学公式可表达为:
+
+$$\text{Attention}(Q, K, V) = \text{softmax} (\frac{QK^T}{\sqrt{d_k}})V$$
+
+以上分析可以得出: **`Masked Multi-Head Attention` 层的权重参数包括 $Q$、$K$、$V$ 的权重矩阵 $W_Q$、$W_K$、$W_V$ 及其偏置，以及输出权重矩阵 $W_O$**，这些权重矩阵的大小都是 $[\text{d}_\text{model}, \text{d}_\text{model}]$。
+
+另外，`concat` 算子无参数，`Scale Dot Product Attention` 层都是计算 Kernel，内部执行的操作也不涉及权重参数。
+
+2，`Add & Norm` 层由 `Add` 和 `Norm` 两部分组成。这里的 Add 指 X + MultiHeadAttention(X)，是一种残差连接。Norm 是 Layer Normalization。Add & Norm 层计算过程用数学公式可表达为:
+
+$$\text{Layer Norm}(X + \text{MultiHeadAttention}(X))$$
+
+Add 比较简单，执行的是逐元素相加操作，该算子没有参数。
+
+3，Feed Forward 层全称是 Position-wise Feed-Forward Networks（`FFN`），其本质是一个**两层的全连接层**（线性层），第一层的激活函数为 `Relu`，第二层不使用激活函数，计算过程用数学公式可表达为：
+
+$$\text{FFN}(X) = \text{max}(0, XW_1 + b_1 )W_2 + b_2$$
+
+一般地，第一个线性层是先将维度从 $\text{d\_{model}}$ 映射到 $\text{4d\_{model}}$，第二个线性层再将维度从 $\text{4d\_{model}}$ 映射到 $\text{d\_{model}}$。FFN 层由 2 个参数权重矩阵组成，权重矩阵形状: $W_1:   [\text{d}_\text{model}, 4\text{d}_\text{model}]$，权重 $W_2: [4\text{d}_\text{model}, \text{d}_\text{model}]$。
+
+4，另外，最底层的 `decoder layer` 的输入是 `Embedding` 层（Token Embedding + Positional Embedding），其他 decoder layer 的输入是上一层的输出。  
+
+模型总的参数量计算公式可抽象如下:
+
+$$\text{totoal param} = \text{param}_{\text{embedding}} + \text{param}_\text{decoder layer} \cdot \text{n}_\text{layers}$$
+
 - [一，模型输入预处理](#一模型输入预处理)
 - [Embedding 层](#embedding-层)
 - [Transformer 发展史](#transformer-发展史)
@@ -131,6 +165,10 @@ Transformer 中单词的输入表示 $\mathbf{x}$ 由**单词 Embedding** 和**�
 ### 1.1，单词 Embedding
 
 单词的 Embedding 有很多种方式可以获取，例如可以采用 Word2Vec、Glove 等算法预训练得到，也可以在 Transformer 中训练得到。
+
+Token Embedding 层的参数量较多，需要计算。输入 token 序列的维度是 `[batch_size, seq_len, vocab_size]`（后续都统一把输入维度写前，输出维度写后），其经过 `Token Embedding` 层后的输出维度是 `[batch_size, seq_len, d_model]`。对应 Token Embedding 层权重矩阵的大小为：`[vocab_size, d_model]`，因此 **`Token Embedding` 层的参数量为**：
+
+$$\text{param}_\text{TE} = \text{vocab\_size} \cdot \text{d}_\text{model}$$
 
 ### 1.2，位置 Embedding
 
@@ -723,3 +761,5 @@ class Transformer(nn.Module):
 2. [The Illustrated Transformer](http://jalammar.github.io/illustrated-transformer/)
 3. [Learning Word Embedding](https://lilianweng.github.io/posts/2017-10-15-word-embedding/)
 4. [Transformer模型详解（图解最完整版）](https://zhuanlan.zhihu.com/p/338817680)
+5. [The Illustrated Transformer](http://jalammar.github.io/illustrated-transformer/)
+6. [The Illustrated GPT-2 (Visualizing Transformer Language Models)](http://jalammar.github.io/illustrated-gpt2/)

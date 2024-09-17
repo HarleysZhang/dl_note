@@ -143,7 +143,7 @@
 - 《机器学习》
 - 《动手学深度学习》
 - [《机器学习系统：设计和实现》](https://openmlsys.github.io/index.html)
-- [《AI-EDU》](https://microsoft.github.io/ai-edu/index.html)
+- [《AI-EDU》](https://ai-edu.openai.wiki/%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/index.html)
 - [《AI-System》](https://github.com/microsoft/AI-System/tree/main/Textbook)
 - [《PyTorch_tutorial_0.0.5_余霆嵩》](https://github.com/TingsongYu/PyTorch_Tutorial)
 - [《动手编写深度学习推理框架 Planer》](https://github.com/Image-Py/planer)

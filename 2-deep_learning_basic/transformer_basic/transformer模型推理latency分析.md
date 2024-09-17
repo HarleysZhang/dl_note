@@ -53,7 +53,7 @@ $$
 
 2，输入输出向量维度都为 `4096` 的全连接层，其算术密度和 batch_size 的关系如下图所示：
 
-![arithmetic-intensity](../../images/transformer_latency/arithmetic-intensity.svg)
+![arithmetic-intensity](../../../images/transformer_latency/arithmetic-intensity.svg)
 
 `batch_size` 小于等于 `128` 的情况在 `NVIDIA A100` 加速器上受到**内存带宽限制**。
 

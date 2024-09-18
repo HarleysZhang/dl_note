@@ -4,8 +4,6 @@
 - [三，深度学习炼丹](#三深度学习炼丹)
 - [四，深度学习模型压缩](#四深度学习模型压缩)
 - [五，模型推理部署](#五模型推理部署)
-- [六，异构计算](#六异构计算)
-- [七，大语言模型推理及服务化](#七大语言模型推理及服务化)
 - [八，进阶课程](#八进阶课程)
 - [九，其他](#九其他)
 - [Star History](#star-history)
@@ -76,40 +74,14 @@
 
 - [英伟达 GPU 架构特性详解](5-model_deploy/英伟达GPU架构详解.md)
 
-## 六，异构计算
+6，异构计算
 
 1. 移动端异构计算：`neon` 编程
 2. GPU 端异构计算：`cuda` 编程
 
 通用矩阵乘法 `gemm` 算法解析与优化、`neon`、`cuda` 编程等内容，以及 `ncnn` 框架代码解析总结。
 
-## 七，大语言模型推理及服务化
 
-**1，LLM 基础知识**：
-
-- [transformers 库快速入门](./6-llm_note/transformer_basic/transformers库快速入门.md)
-- [LLM 背景知识总结](./6-llm_note/transformer_basic/LLM背景知识总结.md)
-
-**2，Transformer 模型基础**：
-
-- [Transformer 原理详解](./6-llm_note/transformer_basic/Transformer模型详解及代码实现.md)
-- [Transformer 基础视觉模型详解](./6-llm_note/transformer_basic/Transformer视觉模型概述.md)
-- [LLaMA 及其子孙模型详解](./6-llm_note/transformer_basic/LLaMA及其子孙模型概述.md)
-- [BLOOM 模型结构详解](./6-llm_note/transformer_basic/BLOOM模型结构详解.md)
-- [GPT1-3 系列模型总结](./6-llm_note/transformer_basic/GPT1-3系列模型总结.md)
-- [CLIP 多模态模型总结](./6-llm_note/transformer_basic/CLIP多模态模型总结.md)
-
-**3，大规模模型的推理优化及部署总结**:
-
-- [Transformer 模型性能分析理论基础](./6-llm_note/llm_inference/Transformer性能分析理论基础.md)
-- [FasterTransformer 框架速览](./6-llm_note/llm_inference/FasterTransformer速览.md)
-- [LLM 训练的并行策略详解](./6-llm_note/llm_inference/LLM训练的并行策略详解.md)
-
-**4，DeepSpeed 框架学习笔记**：
-
-- [DeepSpeed:通过系统优化和压缩加速大规模模型推理和训练](./6-llm_note/deepspeed_note/DeepSpeed:通过系统优化和压缩加速大规模模型推理和训练.md)
-- [DeepSpeed推理:具有定制推理内核和量化支持的多GPU推理](./6-llm_note/deepspeed_note/DeepSpeed推理:具有定制推理内核和量化支持的多GPU推理.md)
-- [DeepSpeed:模型压缩模块详解](./6-llm_note/deepspeed_note/DeepSpeed:模型压缩模块详解.md)
 
 ## 八，进阶课程
 

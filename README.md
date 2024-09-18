@@ -1,7 +1,8 @@
 - [项目概述](#项目概述)
 - [一，数学基础专栏](#一数学基础专栏)
 - [二，神经网络基础部件](#二神经网络基础部件)
-- [三，深度学习炼丹](#三深度学习炼丹)
+- [三，经典卷积神经网络模型](#三经典卷积神经网络模型)
+- [四，深度学习炼丹](#四深度学习炼丹)
 - [四，深度学习模型压缩](#四深度学习模型压缩)
 - [五，模型推理部署](#五模型推理部署)
 - [八，进阶课程](#八进阶课程)
@@ -35,53 +36,62 @@
 - [深度学习基础-损失函数详解](./2-deep_learning_basic/深度学习基础-损失函数详解.md)
 - [深度学习基础-优化算法详解](./2-deep_learning_basic/深度学习基础-优化算法详解.md)
 
-## 三，深度学习炼丹
+## 三，经典卷积神经网络模型
 
-1. [深度学习炼丹-数据标准化](./3-deep_learning_alchemy/深度学习炼丹-数据标准化.md)
-2. [深度学习炼丹-数据增强](./3-deep_learning_alchemy/深度学习炼丹-数据增强.md)
-3. [深度学习炼丹-不平衡样本的处理](./3-deep_learning_alchemy/深度学习炼丹-不平衡样本的处理.md)
-4. [深度学习炼丹-超参数设定](./3-deep_learning_alchemy/深度学习炼丹-超参数调整.md)
-5. [深度学习炼丹-正则化策略](./3-deep_learning_alchemy/深度学习炼丹-正则化策略.md)
+**1，卷积神经网络的经典 backbone**：
+
+- [ResNet网络详解](3-classic_backbone/ResNet网络详解.md)
+- [DenseNet 网络详解](3-classic_backbone/DenseNet论文解读.md)
+- [ResNetv2 网络详解](3-classic_backbone/ResNetv2论文解读.md)
+- [经典 backbone 网络总结](3-classic_backbone/经典backbone总结.md)
+
+**2，轻量级网络详解**：
+
+- [MobileNetv1论文详解](3-classic_backbone/efficient_cnn/MobileNetv1论文详解.md)
+- [ShuffleNetv2论文详解](3-classic_backbone/efficient_cnn/ShuffleNetv2论文详解.md)
+- [RepVGG论文详解](3-classic_backbone/efficient_cnn/RepVGG论文详解.md)
+- [CSPNet论文详解](3-classic_backbone/efficient_cnn/CSPNet论文详解.md)
+- [VoVNet论文解读](3-classic_backbone/efficient_cnn/VoVNet论文解读.md)
+- [轻量级模型设计总结](5-model_compression/模型压缩-轻量化网络总结.md)
+
+## 四，深度学习炼丹
+
+1. [深度学习炼丹-数据标准化](./4-deep_learning_alchemy/深度学习炼丹-数据标准化.md)
+2. [深度学习炼丹-数据增强](./4-deep_learning_alchemy/深度学习炼丹-数据增强.md)
+3. [深度学习炼丹-不平衡样本的处理](./4-deep_learning_alchemy/深度学习炼丹-不平衡样本的处理.md)
+4. [深度学习炼丹-超参数设定](./4-deep_learning_alchemy/深度学习炼丹-超参数调整.md)
+5. [深度学习炼丹-正则化策略](./4-deep_learning_alchemy/深度学习炼丹-正则化策略.md)
 
 ## 四，深度学习模型压缩
 
-1. [深度学习模型压缩算法综述](./4-model_compression/深度学习模型压缩方法概述.md)
-2. [模型压缩-轻量化网络设计与部署总结](./4-model_compression/模型压缩-轻量化网络详解.md)
-3. [模型压缩-剪枝算法详解](./4-model_compression/模型压缩-剪枝算法详解.md)
-4. [模型压缩-知识蒸馏详解](./4-model_compression/模型压缩-知识蒸馏详解.md)
-5. [模型压缩-量化算法详解](./4-model_compression/模型压缩-量化算法概述.md)
+1. [深度学习模型压缩算法综述](./5-model_compression/深度学习模型压缩方法概述.md)
+2. [模型压缩-轻量化网络设计与部署总结](./5-model_compression/模型压缩-轻量化网络详解.md)
+3. [模型压缩-剪枝算法详解](./5-model_compression/模型压缩-剪枝算法详解.md)
+4. [模型压缩-知识蒸馏详解](./5-model_compression/模型压缩-知识蒸馏详解.md)
+5. [模型压缩-量化算法详解](./5-model_compression/模型压缩-量化算法概述.md)
 
 ## 五，模型推理部署
 
-1，模型部署：
+1，模型推理部署：
 
-- [卷积神经网络复杂度分析](./5-model_deploy/卷积神经网络复杂度分析.md)
-- [模型压缩部署概述](./5-model_deploy/模型压缩部署概述.md)
+- [卷积神经网络复杂度分析](./6-model_deploy/卷积神经网络复杂度分析.md)
+- [模型压缩部署概述](./6-model_deploy/模型压缩部署概述.md)
+- [矩阵乘法详解](./6-model_deploy/卷积算法优化.md)
+- [模型推理加速技巧-融合卷积和BN层](./6-model_deploy/模型推理加速技巧-融合卷积和BN层.md)
 
-2，模型推理：
-
-- [矩阵乘法详解](./5-model_deploy/卷积算法优化.md)
-- [模型推理加速技巧-融合卷积和BN层](./5-model_deploy/模型推理加速技巧-融合卷积和BN层.md)
-
-3，`ncnn` 框架源码解析：
+2，`ncnn` 框架源码解析：
 
 - [ncnn 源码解析-sample 运行](5-model_deploy/ncnn源码解析/ncnn源码解析-sample运行.md)
 - [ncnn 源码解析-Net 类](5-model_deploy/ncnn源码解析/ncnn源码解析-Net类.md)
 - [ncnn 源码解析-Layer 层](5-model_deploy/ncnn源码解析/ncnn源码解析-Layer层.md)
 - [ncnn 源码解析-常见算子](../5-model_deploy/ncnn源码解析/ncnn源码解析-常见算子.md)
 
-**5，AI/NPU/GPU 芯片特性**：
-
-- [英伟达 GPU 架构特性详解](5-model_deploy/英伟达GPU架构详解.md)
-
-6，异构计算
+3，异构计算
 
 1. 移动端异构计算：`neon` 编程
 2. GPU 端异构计算：`cuda` 编程
 
 通用矩阵乘法 `gemm` 算法解析与优化、`neon`、`cuda` 编程等内容，以及 `ncnn` 框架代码解析总结。
-
-
 
 ## 八，进阶课程
 

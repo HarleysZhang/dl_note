@@ -18,7 +18,7 @@
 - [后续改进-MobileDets](#后续改进-mobiledets)
 - [参考资料](#参考资料)
 
-> 文章同步发于 [github](https://github.com/HarleysZhang/cv_note/blob/master/7-model_compression/%E8%BD%BB%E9%87%8F%E7%BA%A7%E7%BD%91%E7%BB%9C%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90/MobileNetv1%E8%AE%BA%E6%96%87%E8%AF%A6%E8%A7%A3.md)、[博客园](https://www.cnblogs.com/armcvai/p/16793167.html) 和 [知乎](https://zhuanlan.zhihu.com/p/359524431)。最新版以 `github` 为主。如果看完文章有所收获，一定要先点赞后收藏。**毕竟，赠人玫瑰，手有余香**。
+> 文章同步发于[知乎](https://zhuanlan.zhihu.com/p/359524431)。最新版以 `github` 为主。如果看完文章有所收获，一定要先点赞后收藏。**毕竟，赠人玫瑰，手有余香**。
 
 > `MobileNet` 论文的主要贡献在于提出了一种**深度可分离卷积架构（DW+PW 卷积）**，先通过理论证明这种架构比常规的卷积计算成本（`Mult-Adds`）更小，然后通过分类、检测等多种实验证明模型的有效性。
 
@@ -51,7 +51,7 @@
 
 ![分组卷积](../../images/mobilenetv1/分组卷积.png)
 
-**分组卷积的定义**：对输入 `feature map` 进行分组，然后分组分别进行卷积。假设输入 feature map 的尺寸为 $H \times W \times c_{1}$，输出 feature map 数量为 $c_2$ 个，如果将输入 feature map 按通道分为 $g$ 组，则每组特征图的尺寸为 $H \times W \times \frac{c_1}{g}$，**每组**对应的滤波器（卷积核）的 尺寸 为 $h_{1} \times w_{1} \times \frac{c_{1}}{g}$，每组的滤波器数量为  $\frac{c_{2}}{g}$ 个，滤波器总数依然为 $c_2$ 个，即分组卷积的卷积核 `shape` 为 $(c_2,\frac{c_1}{g}, h_1,w_1)$。每组的滤波器只与其同组的输入 map 进行卷积，每组输出特征图尺寸为 $H \times W \times \frac{c_{2}}{g}$，将 $g$ 组卷积后的结果进行拼接 (`concatenate`) 得到最终的得到最终尺寸为 $H \times W \times c_2$ 的输出特征图，其分组卷积过程如下图所示：
+**分组卷积的定义**：**对输入 `feature map` 进行分组，然后分组分别进行卷积**。假设输入 feature map 的尺寸为 $H \times W \times c_{1}$，输出 feature map 数量为 $c_2$ 个，如果将输入 feature map 按通道分为 $g$ 组，则每组特征图的尺寸为 $H \times W \times \frac{c_1}{g}$，**每组**对应的滤波器（卷积核）的 尺寸 为 $h_{1} \times w_{1} \times \frac{c_{1}}{g}$，每组的滤波器数量为  $\frac{c_{2}}{g}$ 个，滤波器总数依然为 $c_2$ 个，即分组卷积的卷积核 `shape` 为 $(c_2,\frac{c_1}{g}, h_1,w_1)$。每组的滤波器只与其同组的输入 map 进行卷积，每组输出特征图尺寸为 $H \times W \times \frac{c_{2}}{g}$，将 $g$ 组卷积后的结果进行拼接 (`concatenate`) 得到最终的得到最终尺寸为 $H \times W \times c_2$ 的输出特征图，其分组卷积过程如下图所示：
 
 ![分组卷积过程2](../../images/mobilenetv1/分组卷积过程2.png)
 
@@ -61,11 +61,11 @@ $$
 \begin{align*}
 & MACC = H \times W \times 1 \times 1 \times \frac{c_{1}}{g}\frac{c_{2}}{g} \times g = \frac{hwc_{1}c_{2}}{g} \\\\
 & FLOPs = 2 \times MACC \\\\
-& Params = g \times \frac{c_2}{g}\times\frac{c_1}{g} \times 1\times 1 + c_2 = \frac{c_{1}c_{2}}{g} \\\\
+& Params = g \times \frac{c_2}{g}\times\frac{c_1}{g} \times 1\times 1 = \frac{c_{1}c_{2}}{g} \\\\
 & MAC = HW(c_1 + c_2) + \frac{c_{1}c_{2}}{g} \\\\
 \end{align*}$$
 
-从以上公式可以得出分组卷积的参数量和计算量是标准卷积的 $\frac{1}{g}$ 的结论 ，但其实对分组卷积过程进行深入理解之后也可以直接得出以上结论。
+从以上公式可以得出 $1\times 1$ 分组卷积的参数量和计算量是标准卷积的 $\frac{1}{g}$ 的结论 ，但其实对分组卷积过程进行深入理解之后也可以直接得出以上结论。
 
 **分组卷积的深入理解**：对于 $1\times 1$ 卷积，常规卷积输出的特征图上，每一个像素点是由输入特征图的 $c_1$ 个点计算得到，而分组卷积输出的特征图上，每一个像素点是由输入特征图的 $ \frac{c_1}{g}$个点得到（参考常规卷积计算过程）。**卷积运算过程是线性的，自然，分组卷积的参数量和计算量是标准卷积的 $\frac{1}{g}$ 了**。
 
@@ -128,7 +128,7 @@ Figure 4 中的“极限” Inception 模块与本文的主角-深度可分离�
 
 > 注意本文 DW 和 PW 卷积计算量的计算与论文有所区别，本文的输出 Feature map 大小是 $D_G \times D_G$， 论文公式是$D_F \times D_F$。
 
-不同于常规卷积操作， Depthwise Convolution 的一个卷积核只负责一个通道，**一个通道只能被一个卷积核卷积**（不同的通道采用不同的卷积核卷积），也就是输入通道、输出通道和分组数相同的特殊分组卷积，因此 Depthwise（`DW`）卷积不会改变输入特征图的通道数目。深度可分离卷积的 `DW`卷积步骤如下图：
+不同于常规卷积操作， Depthwise Convolution 的一个卷积核只负责一个通道，**一个通道只能被一个卷积核卷积**（不同的通道采用不同的卷积核卷积），也就是**输入通道、输出通道和分组数相同的特殊分组卷积**，因此 Depthwise（`DW`）卷积不会改变输入特征图的通道数目。深度可分离卷积的 `DW`卷积步骤如下图：
 
 ![DW卷积计算步骤](../../images/mobilenetv1/DW卷积计算步骤.jpg)
 
@@ -152,8 +152,7 @@ $$
 \end{align*}
 $$ 
 
-可以看到 `Depthwise + Pointwise` 卷积的**计算量**相较于标准卷积近乎减少了 $N$ 倍，$N$ 为输出特征图的通道数目，同理**参数量**也会减少很多。在达到相同目的（即对相邻元素以及通道之间信息进行计算）下， 深度可分离卷积能极大减少卷积计算量，因此大量移动端网络的 `backbone` 都采用了这种卷积结构，再加上模型蒸馏，剪枝，能让移动端更高效的推理。
-> 深度可分离卷积的详细计算过程可参考 [Depthwise卷积与Pointwise卷积](https://zhuanlan.zhihu.com/p/80041030)。
+可以看出 **`Depthwise + Pointwise` 卷积的计算量相较于标准卷积近乎减少了 $N$ 倍**，$N$ 为输出特征图的通道数目，同理**参数量**也会减少很多。在达到相同目的（即对相邻元素以及通道之间信息进行计算）下， 深度可分离卷积能极大减少卷积计算量，因此大量移动端网络的 `backbone` 都采用了这种卷积结构，再加上模型蒸馏，剪枝，能让移动端更高效的推理。
 
 ### 2.2、网络结构
 

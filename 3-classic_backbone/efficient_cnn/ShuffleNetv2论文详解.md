@@ -65,7 +65,7 @@ $$
 ![表1](../../images/shufflenetv2/表1.png)
 > 这个实验设计的卷积 block 很有意思，首先就是它不能层数太少。
 
-可以看到，当比值接近 `1:1` 的时候，网络的 `MAC` 更小，测试速度也最快。
+可以看到，当比值接近 `1:1` 的时候，网络的 `MAC` 更小，测试速度也最快。这里可以结合 Roofline 模型分析，$1\times 1$ 卷积本质是处于内存受限的情况，因此只有减少 `MAC` 才能从源头上减少网络层的运行时间。
 
 下述是我参考论文作者实验设计，构建的基准测试代码:
 
@@ -142,9 +142,10 @@ for ratio, (c1, c2) in channel_configs.items():
         print(f"Batch size {batch_size}, Images/sec: {images_per_sec:.2f}")
 ```
 
-代码在 `macbook m3pro`（arm cpu）机器上运行后结果如下所示，另外，对于 $3\times 3$ 卷积和 bs>1 输入，输入输出通道数相等并不能减少模型运行时间。结合 Roofline 模型分析，$1\times 1$ 卷积本质是处于内存受限的情况，因此只有减少 `MAC` 才能从源头上减少网络层的运行时间。
+代码在 `macbook m3pro`（arm cpu）机器上运行后结果如下所示，另外，对于 $3\times 3$ 卷积和 bs>1 输入的情况，即计算密集型，输入输出通道数相等并不能减少模型运行时间。
 
 ![g1 基准自行测试实验结果](../../images/shufflenetv2/g1test.png)
+![g 基准自行测试实验结果2](../../images/shufflenetv2/g1test2.png)
 
 ### G2-分组数太多的卷积会增加 MAC
 

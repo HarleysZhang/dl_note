@@ -61,7 +61,7 @@ channel_configs = {
 
 # 逐一测试每种通道配置和不同 batch 大小的性能
 for ratio, (c1, c2) in channel_configs.items():
-    print(f"Testing ratio {ratio} with channels ({c1}, {c2})")
+    print(f"Testing 3x3 conv lsyers ratio {ratio} with channels ({c1}, {c2})")
     model = ConvNet(c1, c2).to(device)
     
     for batch_size in batch_sizes:

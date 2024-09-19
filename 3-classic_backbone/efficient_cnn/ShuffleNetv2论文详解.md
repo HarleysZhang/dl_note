@@ -1,7 +1,7 @@
 - [摘要](#摘要)
 - [1、介绍](#1介绍)
 - [2、高效网络设计的实用指导思想](#2高效网络设计的实用指导思想)
-  - [G1-同样大小的通道数可以最小化 MAC](#g1-同样大小的通道数可以最小化-mac)
+  - [G1-同样大小的通道数可以最小化 1x1 卷积 MAC](#g1-同样大小的通道数可以最小化-1x1-卷积-mac)
   - [G2-分组数太多的卷积会增加 MAC](#g2-分组数太多的卷积会增加-mac)
   - [G3-网络碎片化会降低并行度](#g3-网络碎片化会降低并行度)
   - [G4-逐元素的操作不可忽视](#g4-逐元素的操作不可忽视)
@@ -11,7 +11,7 @@
 - [6，个人思考](#6个人思考)
 - [参考资料](#参考资料)
 
-> 近期在研究轻量级 backbone 网络，我们所熟悉和工业界能部署的网络有 `MobileNet V2`、`ShuffleNet V2`、`RepVGG` 等，本篇博客是对 `ShuffleNet v2` 论文的个人理解分析。本文的参考资料是自己对网络上资料进行查找和筛选出来的，质量相对较高、且对本文有参考意义的文章。`ShuffleNet v2` 论文最大的贡献在于看到了 GPU 访存带宽（内存访问代价 MAC）对于模型推理时间的影响，而不仅仅是模型复杂度，也就是 `FLOPs` 和参数量 `Params` 对于推理时间的影响，并由此提出了 `4` 个轻量级网络设计的原则和一个新颖的 卷积 block 架构-ShuffleNet v2。
+> 近期在研究轻量级 backbone 网络，工业界应用较多的模型有 `MobileNet V2`、`ShuffleNet V2`、`RepVGG` 等，本篇博客是对 `ShuffleNet v2` 论文的个人理解分析。本文的参考资料是自己对网络上资料进行查找和筛选出来的，质量相对较高、且对本文有参考意义的文章。`ShuffleNet v2` 论文最大的贡献在于看到了 GPU 访存带宽（内存访问代价 MAC）对于模型推理时间的影响，而不仅仅是模型复杂度：`FLOPs` 和参数量 `Params` 对于推理时间的影响，并由此提出了 `4` 个轻量级网络设计的原则和一个新颖的 卷积 block 架构-ShuffleNet v2。
 
 ## 摘要
 
@@ -43,26 +43,108 @@
 3. **G3**：网络碎片化会减少并行度。
 4. **G4**：逐元素的操作不可忽视。
 
-### G1-同样大小的通道数可以最小化 MAC
+### G1-同样大小的通道数可以最小化 1x1 卷积 MAC
 
 现代的网络如 `Xception [12], MobileNet [13], MobileNet V2 [14], ShuffleNet [15]` 都采用了深度可分离卷积，它的点卷积（即 $1\times 1$ 卷积）占据了大部分的计算复杂度（ShuffleNet 有分析）。假设输入特征图大小为 $h*w*c_1$，那么卷积核 shape 为 $(c_2, c_1, 1, 1)$，输出特征图长宽不变，那么 $1 \times 1$ 卷积的 `FLOPs` 为 $B = hwc_{1}c_{2}$。
 > 论文中 `FLOPs` 的计算是把乘加当作一次浮点运算的，所以其实等效于我们通常理解的 `MACs` 计算公式。
 
-简单起见，我们假设计算设备的缓冲足够大能够存放下整个特征图和参数。那么 $1 \times 1$ 卷积层的内存访问代价（内存访问次数）为 $MAC = hwc_1 + hwc_2 + c_{1}c_{2} = hw(c_{1} + c_{2}) + c_{1}c_{2}$，等式的三项分别代表输入特征图、输出特征图和权重参数的代价。由均值不等式，我们有：
+简单起见，我们假设计算设备的缓冲足够大能够存放下整个特征图和参数。那么 $1 \times 1$ 卷积层的内存访问代价（内存访问次数）为 $\text{MAC} = hwc_1 + hwc_2 + c_{1}c_{2} = hw(c_{1} + c_{2}) + c_{1}c_{2}$，等式的三项分别代表输入特征图、输出特征图和权重参数的代价。由均值不等式，我们有：
 
 $$
 \begin{split}
-MAC &= hw(c_{1} + c{2}) + c_{1}c_{2} \\\\
+\text{MAC} &= hw(c_{1} + c{2}) + c_{1}c_{2} \\\\
 &= \sqrt{(hw)^{2}(c_{1} + c_{2})^{2}} + \frac{B}{hw} \\\\
 &\geq \sqrt{(hw)^{2}(4c_{1}c_{2})}+ \frac{B}{hw} \\\\
 &\geq 2\sqrt{hwB} + \frac{B}{hw} \\\\
 \end{split}$$
 
-由均值不等式，可知当 $c_1 = c_2$ 时，$(c_{1} + c_{2})^{2} = 4c_{1}c_{2}$，即式子 $(c_{1} + c_{2})^{2}$ 取下限。即当且仅当 $c_{1}=c_{2}$ （$1 \times 1$ **卷积输入输出通道数相等**）时，`MAC` 取得最小值。但是这个结论只是理论上成立的，实际中缓存容量可能不够大，缓存策略也因平台各异。所以我们进一步设计了一个对比试验来验证，实验的基准的网络由 10 个卷积 `block` 组成，每个块有两层卷积，第一个卷积层输入通道数为 $c_{1}$ 输出通道数为$c_{2}$，第二层与第一层相反，然后固定总的 FLOPs 调整$c_{1}:c_{2}$的值测试实际的运行速度，结果如表 1 所示：
+由均值不等式，可知当 $c_1 = c_2$ 时，$(c_{1} + c_{2})^{2} = 4c_{1}c_{2}$，即式子 $(c_{1} + c_{2})^{2}$ 取下限。即当且仅当 $c_{1}=c_{2}$ （$1 \times 1$ **卷积输入输出通道数相等**）时，`MAC` 取得由 FLOPs 给出的最小值。
+
+但是这个结论只是理论上成立的，实际中缓存容量可能不够大，缓存策略也因平台各异。所以我们进一步设计了一个对比试验来验证，实验的基准的网络由 10 个卷积 `block` 组成，每个块有两层卷积，第一个卷积层输入通道数为 $c_{1}$ 输出通道数为$c_{2}$，第二层与第一层相反，然后固定总的 FLOPs 调整$c_{1}:c_{2}$的值测试实际的运行速度，结果如表 1 所示：
 
 ![表1](../../images/shufflenetv2/表1.png)
+> 这个实验设计的卷积 block 很有意思，首先就是它不能层数太少。
 
 可以看到，当比值接近 `1:1` 的时候，网络的 `MAC` 更小，测试速度也最快。
+
+下述是我参考论文作者实验设计，构建的基准测试代码:
+
+```python
+import torch
+import torch.nn as nn
+import time
+
+# 生成随机数据进行测试
+def benchmark(model, input_tensor, batch_size, device, num_iterations=100):
+    model.to(device)
+    input_tensor = input_tensor.to(device)
+    
+    # 确保模型处于评估模式
+    model.eval()
+    
+    # 预热 GPU
+    for _ in range(10):
+        with torch.no_grad():
+            model(input_tensor)
+    
+    start_time = time.time()
+    for _ in range(num_iterations):
+        with torch.no_grad():
+            output = model(input_tensor)
+    
+    elapsed_time = time.time() - start_time
+    images_per_sec = batch_size * num_iterations / elapsed_time
+    return images_per_sec
+
+# 定义卷积块
+class ConvBlock(nn.Module):
+    def __init__(self, c1, c2):
+        super(ConvBlock, self).__init__()
+        self.conv1 = nn.Conv2d(c1, c2, kernel_size=1, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(c2, c1, kernel_size=1, stride=1, padding=1)
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        x = self.relu(self.conv1(x))  # 第一层卷积
+        x = self.relu(self.conv2(x))  # 第二层卷积
+        return x
+
+# 构建由 10 个卷积块组成的网络
+class ConvNet(nn.Module):
+    def __init__(self, c1, c2, num_blocks=10):
+        super(ConvNet, self).__init__()
+        self.blocks = nn.Sequential(*[ConvBlock(c1, c2) for _ in range(num_blocks)])
+
+    def forward(self, x):
+        return self.blocks(x)
+
+# 配置参数
+input_size = (56, 56)  # 输入图片的大小
+batch_sizes = [1, 2, 4]  # 不同的 batch 大小
+device = 'cuda' if torch.cuda.is_available() else 'cpu'  # 使用 GPU 还是 CPU
+
+# 四种通道配置 (c1:c2) 比例
+channel_configs = {
+    "1:1": (128, 128),
+    "1:2": (90, 180),
+    "1:6": (52, 312),
+    "1:12": (36, 432)
+}
+
+# 逐一测试每种通道配置和不同 batch 大小的性能
+for ratio, (c1, c2) in channel_configs.items():
+    print(f"Testing ratio {ratio} with channels ({c1}, {c2})")
+    model = ConvNet(c1, c2).to(device)
+    
+    for batch_size in batch_sizes:
+        input_tensor = torch.randn(batch_size, c1, input_size[0], input_size[1])
+        images_per_sec = benchmark(model, input_tensor, batch_size, device=device)
+        print(f"Batch size {batch_size}, Images/sec: {images_per_sec:.2f}")
+```
+
+代码在 `macbook m3pro`（arm cpu）机器上运行后结果如下所示，另外，对于 $3\times 3$ 卷积和 bs>1 输入，输入输出通道数相等并不能减少模型运行时间。结合 Roofline 模型分析，$1\times 1$ 卷积本质是处于内存受限的情况，因此只有减少 `MAC` 才能从源头上减少网络层的运行时间。
+
+![g1 基准自行测试实验结果](../../images/shufflenetv2/g1test.png)
 
 ### G2-分组数太多的卷积会增加 MAC
 
@@ -79,7 +161,7 @@ $$
 
 $$ 
 \begin{split}
-MAC = hw(c_{1} + c_{2}) + \frac{c_{1}c_{2}}{g} = hwc_{1} + \frac{Bg}{c_1}+\frac{B}{hw}\end{split}
+\text{MAC} = hw(c_{1} + c_{2}) + \frac{c_{1}c_{2}}{g} = hwc_{1} + \frac{Bg}{c_1}+\frac{B}{hw}\end{split}
 $$
 
 > 固定 $\frac{c_2}{g}$ 的比值，又因为输入特征图 $c_{1} \times h \times w$ 固定，从而也就固定了计算代价 $B$，所以可得 上式中 $MAC$ 与 $g$ 成正比的关系。

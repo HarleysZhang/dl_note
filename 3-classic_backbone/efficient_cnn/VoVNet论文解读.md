@@ -9,9 +9,10 @@
   - [3.3，构建 VoVNet 网络](#33构建-vovnet-网络)
 - [4，实验](#4实验)
 - [5，代码解读](#5代码解读)
+- [6. 总结](#6-总结)
 - [参考资料](#参考资料)
 
-> 文章同步发于 [github](https://github.com/HarleysZhang/cv_note/blob/master/7-model_compression/)、[博客园](https://www.cnblogs.com/armcvai) 和 [知乎](https://www.zhihu.com/column/c_1359601708180529152)。最新版以 `github` 为主。如果看完文章有所收获，一定要先点赞后收藏。**毕竟，赠人玫瑰，手有余香**。
+> 文章同步发于[知乎](https://www.zhihu.com/column/c_1359601708180529152)。最新版以 `github` 为主。如果看完文章有所收获，一定要先点赞后收藏。**毕竟，赠人玫瑰，手有余香**。
 
 ## 摘要
 
@@ -432,6 +433,10 @@ def vovnet27_slim(pretrained=False, progress=True, **kwargs):
                     [1,1,1,1], 5, pretrained, progress, **kwargs)
 
 ```
+
+## 6. 总结
+
+本文针对实时目标检测，提出了一种高效的主干网络 VoVNet。该网络通过多感受野的多样化特征表示，有效地解决了 DenseNet 的低效问题。我们提出的 One-Shot Aggregation (OSA) 技术，**通过在最终特征图中一次性聚合所有特征，解决了密集连接中输入通道逐渐增加的问题，确保输入尺寸恒定，从而降低了内存访问开销，并提升了 GPU 计算效率**。实验结果表明，基于 VoVNet 的检测器不仅轻量化表现优异，在大规模检测任务中也以更快的速度超越了基于 DenseNet 的检测器。
 
 ## 参考资料
 

@@ -20,14 +20,14 @@
 ## 一，张量的基本操作
 `Pytorch` 中，张量的操作分为**结构操作和数学运算**，其理解就如字面意思。结构操作就是改变张量本身的结构，数学运算就是对张量的元素值完成数学运算。
 + 常使用的张量结构操作：维度变换（`tranpose`、`view` 等）、合并分割（`split`、`chunk`等）、索引切片（`index_select`、`gather` 等）。
-+ 常使用的张量数学运算：标量运算、向量运算、矩阵运算。
++ 常用的张量数学运算：标量运算、向量运算、矩阵运算。
 
 ### 1.1 改变形状: view 和 reshape
 
-+ 两个方法都是用来改变 tensor 的 shape，view() 只适合对满足连续性条件（`contiguous`）的 tensor 进行操作，而 reshape() 同时还可以对不满足连续性条件的 tensor 进行操作。
++ 两个方法都是用来改变 tensor 的 shape，**view() 只适合对满足连续性条件（`contiguous`）的 tensor 进行操作**，而 reshape() 同时还可以对不满足连续性条件的 tensor 进行操作。
 + 在满足 tensor 连续性条件（`contiguous`）时，a.reshape()  返回的结果与a.view() 相同，都不会开辟新内存空间；不满足 `contiguous` 时， 直接使用 view() 方法会失败，`reshape()` 依然有用，但是会重新开辟内存空间，不与之前的 tensor 共享内存，即返回的是 **”副本“**（等价于先调用 `contiguous()` 方法再使用 `view()` 方法）。
 
-更多理解参考这篇[文章](https://blog.csdn.net/Flag_ing/article/details/109129752)
+> 更多理解可以参考这篇[文章](https://blog.csdn.net/Flag_ing/article/details/109129752)。
 
 ## 二，维度变换
 ### 2.1，squeeze vs unsqueeze 维度增减

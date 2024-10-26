@@ -1,20 +1,18 @@
 - [项目概述](#项目概述)
-- [一，数学基础专栏](#一数学基础专栏)
+- [一，数学和编程基础专栏](#一数学和编程基础专栏)
 - [二，神经网络基础部件](#二神经网络基础部件)
 - [三，经典卷积神经网络模型](#三经典卷积神经网络模型)
 - [四，深度学习炼丹](#四深度学习炼丹)
-- [四，深度学习模型压缩](#四深度学习模型压缩)
-- [五，模型推理部署](#五模型推理部署)
-- [八，进阶课程](#八进阶课程)
-- [九，其他](#九其他)
-- [Star History](#star-history)
+- [五，深度学习模型压缩](#五深度学习模型压缩)
+- [六，模型推理部署](#六模型推理部署)
+- [七，进阶课程](#七进阶课程)
 - [参考资料](#参考资料)
 
 ## 项目概述
 
 本仓库项目是个人总结的计算机视觉和大语言模型学习笔记，包含深度学习基础知识、神经网络基础部件详解、深度学习炼丹策略、深度学习模型压缩算法、深度学习推理框架代码解析及动手实战，以及 `LLM` 基础及推理优化的专栏笔记。
 
-## 一，数学基础专栏
+## 一，数学和编程基础专栏
 
 - [深度学习数学基础-概率与信息论](./1-math_ml_basic/深度学习数学基础-概率与信息论.md)
 - [深度学习基础-机器学习基本原理](./1-math_ml_basic/深度学习基础-机器学习基本原理.md)
@@ -62,7 +60,7 @@
 4. [深度学习炼丹-超参数设定](./4-deep_learning_alchemy/深度学习炼丹-超参数调整.md)
 5. [深度学习炼丹-正则化策略](./4-deep_learning_alchemy/深度学习炼丹-正则化策略.md)
 
-## 四，深度学习模型压缩
+## 五，深度学习模型压缩
 
 1. [深度学习模型压缩算法综述](./5-model_compression/深度学习模型压缩方法概述.md)
 2. [模型压缩-轻量化网络设计与部署总结](./5-model_compression/模型压缩-轻量化网络详解.md)
@@ -70,7 +68,7 @@
 4. [模型压缩-知识蒸馏详解](./5-model_compression/模型压缩-知识蒸馏详解.md)
 5. [模型压缩-量化算法详解](./5-model_compression/模型压缩-量化算法概述.md)
 
-## 五，模型推理部署
+## 六，模型推理部署
 
 1，模型推理部署：
 
@@ -93,7 +91,7 @@
 
 通用矩阵乘法 `gemm` 算法解析与优化、`neon`、`cuda` 编程等内容，以及 `ncnn` 框架代码解析总结。
 
-## 八，进阶课程
+## 七，进阶课程
 
 1，推荐几个比较好的深度学习模型压缩与加速的仓库和课程资料：
 
@@ -108,14 +106,12 @@
 - [What are Diffusion Models?](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
 - [annotated_deep_learning_paper_implementations](https://github.com/labmlai/annotated_deep_learning_paper_implementations)
 
-## 九，其他
-
-最后，持续高质量创作不易，有 `5` 秒空闲时间的，**可以扫码关注我的公众号-嵌入式视觉**，记录 CV 算法工程师成长之路，分享技术总结、读书笔记和个人感悟。
+3，最后，持续高质量创作不易，有 `5` 秒空闲时间的，**可以扫码关注我的公众号-嵌入式视觉**，记录 CV 算法工程师成长之路，分享技术总结、读书笔记和个人感悟。
 > 公众号不会写标题党文章，也不输出给大家带来的焦虑的内容！
 
 ![qcode](images/others/qcode.png)
 
-## Star History
+4，Star History Chart：
 
 [![Star History Chart](https://api.star-history.com/svg?repos=HarleysZhang/deep_learning_system&type=Date)](https://star-history.com/#HarleysZhang/deep_learning_system&Date)
 

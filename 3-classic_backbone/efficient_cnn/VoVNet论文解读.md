@@ -33,7 +33,7 @@
 
 首先，**内存访问代价** `MAC` 是影响能耗的关键因素。如图 1(a) 所示，因为 DenseNet 中的所有特征图都被密集连接用作后续层的输入，因此内存访问成本与网络深度成二次方增加，从而导致计算开销和更多的能耗。
 
-![OSA和密集连接](../../images/VoVNet/OSA和密集连接.png)
+![OSA和密集连接](../../images/VoVNet/osa_and_dense_connections.png)
 
 从图 (a) 中可以看出，DenseBlock 中的每一层的输入都是前面所有层 feature map 的叠加。而图 (b)只有最后一层的输入是前面所有层 feature map 的叠加。
 
@@ -133,21 +133,21 @@
 
 如下图所示，分别构建了 VoVNet-27-slim，VoVNet-39， VoVNet-57。注意，其中downsampling 层是通过 3x3 stride=2 的 max pooling 实现的，conv 表示的是 Conv-BN-ReLU 的顺序连接。
 
-![VoVNet网络结构概览](../../images/VoVNet/VoVNet网络结构概览.png)
+![VoVNet网络结构概览](../../images/VoVNet/vovnet_network_structure_overview.png)
 
  VOVNet 由 5 个阶段组成，各个阶段的输出特征大小依次降为原来的一半。VOVNet-27 前 2 个 stage 的连接图如下所示。
 
-![VOVNet-27前2个stage](../../images/VoVNet/VOVNet-27前2个stage.jpg)
+![VOVNet-27前2个stage](../../images/VoVNet/vovnet_27_first_two_stages.jpg)
 
 ## 4，实验
 
 GPU 的能耗计算公式如下：
 
-![GPU能耗计算公式](../../images/VoVNet/GPU能耗计算公式.png)
+![GPU能耗计算公式](../../images/VoVNet/gpu_energy_consumption_calculation_formula.png)
 
 **实验1： VoVNet vs. DenseNet. 对比不同 backbone 下的目标检测模型性能(PASCALVOC)**
 
-![对比试验](../../images/VoVNet/对比实验.png)
+![对比试验](../../images/VoVNet/comparative_experiment.png)
 
 对比指标：
 
@@ -166,7 +166,7 @@ GPU 的能耗计算公式如下：
 
 **实验2：Ablation study on 1×1 conv bottleneck.**
 
-![bottleneck验证实验](../../images/VoVNet/bottleneck验证实验.png)
+![bottleneck验证实验](../../images/VoVNet/bottleneck_verification_experiment.png)
 
 结论 2：可以看出，1x1 bottleneck 增加了 GPU Inference 时间，降低了 mAP，尽管它减少了参数数量和计算量。
 
@@ -174,7 +174,7 @@ GPU 的能耗计算公式如下：
 
 **实验3： GPU-Computation Efficiency.**
 
-![GPU计算效率对比实验](../../images/VoVNet/GPU计算效率对比实验.png)
+![GPU计算效率对比实验](../../images/VoVNet/gpu_computing_efficiency_comparison_experiment.png)
 
 - 图3(a) VoVNet 兼顾准确率和 Inference 速度
 - 图3(b) VoVNet 兼顾准确率和 GPU 使用率
@@ -194,7 +194,7 @@ GPU 的能耗计算公式如下：
 
 通过替换 Mask R-CNN 的 backbone，也发现 VoVNet 在Inference 速度和准确率上优于 ResNet。
 
-![mask-rcnn上的实验结果](../../images/VoVNet/mask-rcnn上的实验结果.png)
+![mask-rcnn上的实验结果](../../images/VoVNet/experimental_results_on_mask_rcnn.png)
 
 ## 5，代码解读
 

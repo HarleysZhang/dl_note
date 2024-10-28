@@ -29,7 +29,7 @@
 
 不同层数的 `Resnet` 网络参数表如下图所示。
 
-![resnet网络参数表](../images/backbone/resnet网络参数表.png)
+![resnet网络参数表](../images/backbone/resnet_network_parameter_table.png)
 
 > 看了后续的 `ResNeXt`、`ResNetv2`、`Densenet`、`CSPNet`、`VOVNet` 等论文，越发觉得 `ResNet` 真的算是 `Backone` 领域划时代的工作了，因为它让**深层**神经网络可以训练，基本解决了深层神经网络训练过程中的梯度消失问题，并给出了系统性的解决方案（两种残差结构），即系统性的让网络变得更“深”了。而让网络变得更“宽”的工作，至今也没有一个公认的最佳方案（`Inception`、`ResNeXt` 等后续没有广泛应用），难道是因为网络变得“宽”不如“深”更重要，亦或是我们还没有找到一个更有效的方案。
 
@@ -45,7 +45,7 @@ Inception v3 是一种图像识别模型，经证实可以对 ImageNet 数据集
 
 常见的一种 `Inception Modules` 结构如下：
 
-![Inception模块](../images/backbone/Inception模块.jpg)
+![Inception模块](../images/backbone/inception_module.jpg)
 
 论文地址 [https://arxiv.org/pdf/1512.00567.pdf](https://arxiv.org/pdf/1512.00567.pdf)。
 ## Resnetv2
@@ -56,11 +56,11 @@ Inception v3 是一种图像识别模型，经证实可以对 ImageNet 数据集
 
 `ResNeXt` 的卷积block 和 `Resnet` 对比图如下所示。
 
-![resnext的卷积block和resnet的对比图](../images/backbone/resnext的卷积block和resnet的对比图.png)
+![resnext的卷积block和resnet的对比图](../images/backbone/comparison_of_resnext_s_convolutional_block_and_resnet.png)
 
 ResNeXt 和 Resnet 的模型结构参数对比图如下图所示。
 
-![resnext的结构参数和resnet的对比图](../images/backbone/resnext的结构参数和resnet的对比图.png)
+![resnext的结构参数和resnet的对比图](../images/backbone/comparison_of_resnext_s_structural_parameters_and_resnet.png)
 
 ## Darknet53
 
@@ -74,7 +74,7 @@ ResNeXt 和 Resnet 的模型结构参数对比图如下图所示。
 
 **在密集块（`DenseBlock`）结构中，每一层都会将前面所有层 `concate` 后作为输入**。`DenseBlock`（类似于残差块的密集块结构）结构的 `3` 画法图如下所示：
 
-![3种DenseNet结构画法](../images/backbone/3种DenseNet结构画法.png)
+![3种DenseNet结构画法](../images/backbone/3_densenet_structure_drawing_methods.png)
 
 可以看出 `DenseNet` 论文更侧重的是 `DenseBlock` 内各个卷积层之间的密集连接（`dense connection`）关系，另外两个则是强调每层的输入是前面所有层 feature map 的叠加，反映了 feature map 数量的变化。
 
@@ -82,7 +82,7 @@ ResNeXt 和 Resnet 的模型结构参数对比图如下图所示。
 
 **`CSPDenseNet` 的一个阶段是由局部密集块和局部过渡层组成（`a partial dense block and a partial transition layer`）**。
 
-![Figure3几种不同形式的CSP](../images/backbone/Figure3几种不同形式的CSP.png)
+![Figure3几种不同形式的CSP](../images/backbone/figure_3_several_different_forms_of_csp.png)
 
 `CSP` 方法可以减少模型计算量和提高运行速度的同时，还不降低模型的精度，是一种更高效的网络设计方法，同时还能和 `Resnet`、`Densenet`、`Darknet` 等 `backbone` 结合在一起。
 
@@ -96,7 +96,7 @@ ResNeXt 和 Resnet 的模型结构参数对比图如下图所示。
 
 基于 OSA 模块构建的各种 `VoVNet` 结构参数表如下。
 
-![各种VoVNet结构](../images/backbone/各种VoVNet结构.png)
+![各种VoVNet结构](../images/backbone/various_vovnet_structures.png)
 
 作者认为 `DenseNet` 用更少的参数与 `Flops` 而性能却比 `ResNet` 更好，主要是因为`concat` 比 `add` 能保留更多的信息。但是，实际上 `DenseNet` 却比 `ResNet`要慢且消耗更多资源。
 

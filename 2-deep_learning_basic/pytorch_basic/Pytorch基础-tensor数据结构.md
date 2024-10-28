@@ -103,7 +103,7 @@ print(type(t))
 
 Torch 定义了七种 CPU Tensor 类型和八种 GPU Tensor 类型：
 
-![tensor数据类型](../../images/tensor_datastructure/tensor数据类型.png)
+![tensor数据类型](../../images/tensor_datastructure/tensor_data_types.png)
 
 `torch.Tensor` 是默认的 tensor 类型（`torch.FloatTensor`）的简称，即 `32` 位浮点数数据类型。
 

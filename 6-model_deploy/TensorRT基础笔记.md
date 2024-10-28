@@ -11,7 +11,7 @@
 
 在描述 `TensorRT` 的优化原理之前，需要先了解 `TensorRT` 的工作流程。首先输入一个训练好的 `FP32` 模型文件，并通过 `parser` 等方式输入到 `TensorRT` 中做解析，解析完成后 `engin` 会进行计算图优化（优化原理在下一章）。得到优化好的 `engine` 可以序列化到内存（`buffer`）或文件（`file`），读的时候需要反序列化，将其变成 `engine`以供使用。然后在执行的时候创建 `context`，主要是分配预先的资源，`engine` 加 `context` 就可以做推理（`Inference`）。
 
-![TensorRT工作流程.jpg](../../data/images/TensorRT/TensorRT工作流程.jpg)
+![TensorRT工作流程.jpg](../../data/images/TensorRT/tensorrt_workflow.jpg)
 
 ## 三，TensorRT 的优化原理
 

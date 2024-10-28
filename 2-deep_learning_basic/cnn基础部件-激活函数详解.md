@@ -43,7 +43,7 @@ $$a = f(z)$$
 
 由此，典型的神经元结构如下所示:
 
-<img src="../images/activation_function/典型的神经元架构.png" alt="典型的神经元架构" style="zoom: 50%;" />
+<img src="../images/activation_function/typical_neuron_architecture.png" alt="典型的神经元架构" style="zoom: 50%;" />
 
 ### 1.3，激活函数性质
 

@@ -21,7 +21,7 @@
 
 为了衡量计算复杂度，一个广泛采用的度量方式是浮点运算的次数 `FLOPs`，但是，它是一个间接的度量，是对我们真正关心的直接度量比如速度或者时延的一种近似估计。在以前的工作中，这种不一致已经被学者们所发现，比如 MobileNet v2 要比 NASNET-A 快很多，但是它们两者具有差不多的 FLOPs。
 
-![图1](../../images/shufflenetv2/图1.png)
+![图1](../../images/shufflenetv2/figure_1.png)
 
 图 1 中在 `GPU` 和 `ARM` 两个平台上，具有相同 `FLOPs` 的模型运行速度也会相差很多。因此只用 FLOPs 来衡量计算复杂度是不充分的，也会导致得不到最优的网络设计。
 
@@ -32,9 +32,9 @@
 
 首先，作者分析了两个经典结构 ShuffleNet v1 和 MobileNet v2 的运行时间。ARM 和 GPU 平台的具体运行环境如下图所示。
 
-![ARM和GPU的具体运行环境](../../images/shufflenetv2/ARM和GPU的具体运行环境.png)
+![ARM和GPU的具体运行环境](../../images/shufflenetv2/specific_operating_environment_of_arm_and_gpu.png)
 
-![图2](../../images/shufflenetv2/图2.jpg)
+![图2](../../images/shufflenetv2/figure_2.jpg)
 
 从图 2 可以看出，虽然以 `FLOPs` 度量的卷积占据了大部分的时间，但其余操作也消耗了很多运行时间，比如数据输入输出、通道打乱和逐元素的一些操作（张量相加、激活函数）。因此，FLOPs 不是实际运行时间的一个准确估计。
 
@@ -62,7 +62,7 @@ $$
 
 但是这个结论只是理论上成立的，实际中缓存容量可能不够大，缓存策略也因平台各异。所以我们进一步设计了一个对比试验来验证，实验的基准的网络由 10 个卷积 `block` 组成，每个块有两层卷积，第一个卷积层输入通道数为 $c_{1}$ 输出通道数为$c_{2}$，第二层与第一层相反，然后固定总的 FLOPs 调整$c_{1}:c_{2}$的值测试实际的运行速度，结果如表 1 所示：
 
-![表1](../../images/shufflenetv2/表1.png)
+![表1](../../images/shufflenetv2/table_1.png)
 > 这个实验设计的卷积 block 很有意思，首先就是它不能层数太少。
 
 可以看到，当比值接近 `1:1` 的时候，网络的 `MAC` 更小，测试速度也最快。这里可以结合 Roofline 模型分析，$1\times 1$ 卷积本质是处于内存受限的情况，因此只有减少 `MAC` 才能从源头上减少网络层的运行时间。
@@ -169,7 +169,7 @@ $$
 
 其中 $B$ 是卷积层的浮点运算次数（`FLOPs`），$g$ 是分组卷积的组数，可以看到，如果给定输入特征图尺寸（`shape`）$c_{1} \times h \times w$ 和计算代价 $B$，则 $MAC$ 与组数 $g$ 成正比。本文通过叠加 10 个分组点卷积层设计了实验，在保证计算代价（`FLOPs`）相同的情况下采用不同的分组组数测试模型的运行时间，结果如下表 2 所示。
 
-![表2](../../images/shufflenetv2/表2.png)
+![表2](../../images/shufflenetv2/table_2.png)
 
 很明显使用分组数多的网络速度更慢，比如 分为 `8` 个组要比 `1` 个组慢得多，主要原因在于 `MAC` 的增加 。因此，本文建议要根据硬件平台和目标任务谨慎地选择分组卷积的组数，不能简单地因为可以提升准确率就选择很大的组数，而忽视了内存访问代价（`MAC`）的增加。
 
@@ -183,11 +183,11 @@ $$
 
 为了量化网络碎片化（network fragmentation）如何影响效率，我们评估了一系列具有不同碎片化程度(degree of fragmentation)的网络块（network blocks）。具体来说，对比实验实验的每个构建块由 1 到 4 个 顺序或并行结构的1x1 卷积层组成。The block structure 如附录图1所示。
 
-![附录图1](../../images/shufflenetv2/附录图1.png)
+![附录图1](../../images/shufflenetv2/appendix_figure_1.png)
 
 每个 `block` 重复堆叠 10 次。表 3 的结果表明，碎片化会降低 GPU 的速度，例如 4-fragment 比 1-fragment 结构慢约 3 倍。但是在 `ARM` 上，`fragmentation` 对速度的影响速会比 `GPU` 相对较小些。
 
-![表3](../../images/shufflenetv2/表3.png)
+![表3](../../images/shufflenetv2/table_3.png)
 
 ### G4-逐元素的操作不可忽视
 
@@ -200,7 +200,7 @@ $$
 
 ![bottleneck](../../images/shufflenetv2/bottleneck.png)
 
-![表4](../../images/shufflenetv2/表4.png)
+![表4](../../images/shufflenetv2/table_4.png)
 
 **结论和讨论**。根据上诉 4 个指导原则和经验研究，我们得出高效的网络结构应该满足：
 1. 使用平衡的卷积，也就是通道数一样；
@@ -225,7 +225,7 @@ $$
 最后，对两个分支的结果进行拼接（`concatnate`），这样对于卷积 `block` 来说，输入输出通道数是一样的，符合 **G1** 原则。和 `ShuffleNet v1` 一样**都使用通道打乱（`channel shuffle`）操作来保证两个分支的信息进行交互**。
 > ResNet 的 basic block 和 bottleneck block 也是这样设计的，符合 **G1** 原则。
 
-![图3](../../images/shufflenetv2/图3.png)
+![图3](../../images/shufflenetv2/figure_3.png)
 
 通道打乱之后的输出，就是下一个单元的输入。ShuffleNet v1 的 “Add” 操作不再使用，逐元素操作算子如：`ReLU` 和 `DW 卷积` 只存在于在右边的分支。与此同时，我们将三个连续的逐元素操作算子：拼接（`“Concat”`）、通道打乱（`“Channel Shuffle”`）和通道拆分（`“Channel Split”`）**合并成一个逐元素算子**。根据 **G4**原则，这些改变是有利的。
 
@@ -234,7 +234,7 @@ $$
 图 3(c)(d) 显示的卷积 `block`叠加起来即组成了最后的 `ShuffleNet v2` 模型，简单起见，设置 $c^{'} = c/2$，这样堆叠后的网络是类似 ShuffleNet v1 模型的，网络结构详细信息如表 5 所示。v1 和 v2 block 的区别在于， v2 在全局平均池化层（global averaged pooling）之前添加了一个 $1 \times 1$ 卷积来混合特征（mix up features），而 v1 没有。和 v1 一样，**v2 的 `block` 的通道数是按照 `0.5x 1x` 等比例进行缩放，以生成不同复杂度的 ShuffleNet v2 网络**，并标记为 ShuffleNet v2 0.5×、ShuffleNet v2 1× 等模型。
 > 注意：表 5 的通道数设计是为了控制 `FLOPs`，需要调整通道数将 `FLOPs` 与之前工作对齐从而使得对比实验公平，没有使用 `2^n` 通道数是因为其与精度无关。
 
-![表5](../../images/shufflenetv2/表5.png)
+![表5](../../images/shufflenetv2/table_5.png)
 
 > 根据前文的分析，我们可以得出此架构遵循所有原则，因此非常高效。
 
@@ -243,14 +243,14 @@ $$
 
 在 DenseNet 论文中，作者通过画不同权重的 `L1` 范数值来分析特征重复利用的模式，如图 4(a)所示。可以看到，**相邻层之间的关联性是远远大于其它层的，这也就是说所有层之间的密集连接可能是多余的**，最近的论文 CondenseNet 也支持这个观点。
 
-![图4](../../images/shufflenetv2/图4.png)
+![图4](../../images/shufflenetv2/figure_4.png)
 
 在 ShuffleNet V2 中，很容易证明，第 $i$ 层和第 $i+j$ 层之间直接相连的特征图通道数为 $r^{j}c$，其中 $r=(1−c^{'})/c$。换句话说，两个 blocks 之间特征复用的数量是随着两个块之间的距离变大而呈指数级衰减的。相距远的 blocks，特征重用会变得很微弱。
 > 图 4 的两个 blocks 之间关联性的理解有些难。
 
 因此，和 DenseNet 一样，Shufflenet v2 的结构通过设计实现了特征重用模式，从而得到高精度，并具有更高的效率，在实验中已经证明了这点，实验结果如表 8 所示 。
 
-![表8](../../images/shufflenetv2/表8.png)
+![表8](../../images/shufflenetv2/table_8.png)
 
 ## 4、实验
 
@@ -262,7 +262,7 @@ $$
 
 **与其他方法的结合**。ShuffleNet v2 与其他方法结合可以进一步提高性能。当使用 `SE` 模块时，模型会损失一定的速度，但分类的精度会提升 0.5%。卷积 block 的结构如附录 2(b)所示，对比实验结果在表 8 中。
 
-![附录图2](../../images/shufflenetv2/附录图2.png)
+![附录图2](../../images/shufflenetv2/appendix_figure_2.png)
 
 `Sequeeze-and-Excitation(SE)` `block` 不是一个完整的网络结构，而是一个子结构（卷积 block），**通用性较强、即插即用**，可以嵌到其他分类或检测模型中，和 `ResNext`、`ShuffleNet v2` 等模型结合。`SENet` 主要是学习了 `channel` 之间的相关性，筛选出了针对通道的注意力，稍微增加了一点计算量，但是效果比较好。`SE` 其 block 结构图如下图所示。
 
@@ -270,19 +270,19 @@ $$
 
 **大型模型通用化（Generation to Large Models）**。虽然本文的消融（`ablation`）实验主要是针对轻量级网络，但是 `ShuffleNet v2` 在大型模型($FLOPs \geq 2G$)的表现上也丝毫不逊色。**表6** 比较了`50` 层的 `ShuffleNet v2`、`ShuffleNet v1` 和 `ResNet50` 在 `ImageNet` 分类实验上的精度，可以看出同等 `FLOPs=2.3G` 条件下 ShuffleNet v2 比 v1 的精度更高，同时和 ResNet50 相比 `FLOPs` 减少 `40%`，但是精度表现更好。实验用的网络细节参考附录表`2`。
 
-![表6](../../images/shufflenetv2/表6.png)
+![表6](../../images/shufflenetv2/table_6.png)
 
 对于很深的 ShuffleNet v2 模型（例如超过 `100` 层），我们通过添加一个 `residual path` 来轻微的修改基本的 `block` 结构，来使得模型的训练收敛更快。表 6 提供了 带 `SE` 模块的 `164` 层的 ShuffleNet v2 模型，其精度比当前最高精度的 state-of-the-art 模型 `SENet` 精度更高，同时 `FLOPs` 更少。
 
 **目标检测任务评估**。为了评估模型的泛化性能，我们使用 `Light-Head RCNN` 作为目标检测的框架，在 COCO 数据集上做了对比实验。表 7 的实验结果表明模型在 4 种不同复杂度条件下， ShuffleNet v2 做 backbone 的模型精度比其他网络更高、速度更快，全面超越其他网络。
 
-![表7](../../images/shufflenetv2/表7.png)
+![表7](../../images/shufflenetv2/table_7.png)
 
 Table 7: Performance on COCO object detection. The input image size is 800 1200. FLOPs row lists the complexity levels at 224 224 input size. For GPU speed evaluation, the batch size is 4. We do not test ARM because the PSRoI Pooling operation needed in [34] is unavailable on ARM currently.
 比较检测任务的结果（表 7），发现精度上 `ShuffleNet v2 > Xception ≥ ShuffleNet v1 ≥ MobileNet v2`。
 比较分类任务的结果（表 8），精度等级上 `ShuffleNet v2 ≥ MobileNet v2 > ShuffeNet v1 > Xception`。
 
-![表8](../../images/shufflenetv2/表8.png)
+![表8](../../images/shufflenetv2/table_8.png)
 
 ## 5、结论
 

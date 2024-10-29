@@ -1,3 +1,11 @@
+---
+layout: post
+title: cnn 基础部件-卷积层详解
+date: 2022-12-15 22:00:00
+summary: 卷积神经网络核心网络层是卷积层，其使用了卷积(convolution)这种数学运算，卷积是一种特殊的线性运算。
+categories: DeepLearning
+---
+
 - [前言](#前言)
 - [一，卷积](#一卷积)
   - [1.1，卷积运算定义](#11卷积运算定义)
@@ -46,6 +54,7 @@
 $$s(t) = \int x(a)w(t-a )da$$
 
 这种运算就叫做卷积（`convolution`）。更一般的，卷积运算的数学公式定义如下：
+
 $$
 连续定义: \; h(x)=(f*g)(x) = \int_{-\infty}^{\infty} f(t)g(x-t)dt \tag{1}
 $$

@@ -130,3 +130,5 @@
 - [distill：知识精要和在线可视化](https://distill.pub/)
 - [LLVM IR入门指南](https://github.com/Evian-Zhang/llvm-ir-tutorial)
 - [nanoPyC](https://github.com/vesuppi/nanoPyC/tree/master)
+- [ClassifyTemplate](https://github.com/Yale1417/ClassifyTemplate)
+- [pytorch-classification](https://github.com/bearpaw/pytorch-classification)

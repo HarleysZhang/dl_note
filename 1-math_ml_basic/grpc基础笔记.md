@@ -51,7 +51,7 @@ message Response {
 - 在服务端，实现这个接口并且运行 `gRPC` 服务器来处理客户端调用。
 - 在客户端，有一个 `stub ` （存根）提供和服务端相同的方法。
 
-![grpc ](../../images/python_grpc/grpc.svg)
+![grpc ](../images/python_grpc/grpc.svg)
 
 ### 2.2，gRPC 优点
 
@@ -267,7 +267,7 @@ route_guide_server.py 有一个 RouteGuideServicer 类，它是生成的类 rout
 # RouteGuideServicer provides an implementation of the methods of the RouteGuide service.
 class RouteGuideServicer(route_guide_pb2_grpc.RouteGuideServicer):
 ```
-![RouteGuideServicer](../../images/python_grpc/RouteGuideServicer.png)
+![RouteGuideServicer](../images/python_grpc/RouteGuideServicer.png)
 
 #### 2.3.1，响应流式 RPC（Response-streaming RPC）
 
@@ -441,11 +441,9 @@ if __name__ == "__main__":
 
 程序运行结果：
 
-![Typer](../../images/python_grpc/app_example.png)
+![Typer](../images/python_grpc/app_example.png)
 
 ## 参考资料
-
-
 
 1. [ProtoBuf 快速入门教程](https://www.tizi365.com/archives/367.html)
 2. [grpc-Basics tutorial](https://grpc.io/docs/languages/python/basics/#client)

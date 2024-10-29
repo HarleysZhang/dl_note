@@ -32,7 +32,8 @@
 
 `2D` 卷积计算过程动态图如下，通过这张图能够更直观理解卷积核如何执行滑窗操作，又如何相加并输出 $c_2$ 个  `feature map` ，动态图来源 [这里](https://blog.csdn.net/v_july_v/article/details/51812459?utm_source=copy)。
 
-![卷积过程](https://img-blog.csdn.net/20160707204048899)
+![卷积过程](../../images/mobilenetv1/conv_gif.gif)
+> Input Shape : (3, 7, 7) — Output Shape : (2, 3, 3) — K : (3, 3) — P : (1, 1) — S : (2, 2) — D : (2, 2) — G : 1
 
 上述动态图侧重于滤波器的划窗计算过程，而下图则侧重于解释标准卷积层五个概念的关系，图片来源 [这里](https://microsoft.github.io/ai-edu/%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/A2-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/%E7%AC%AC8%E6%AD%A5%20-%20%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/17.1-%E5%8D%B7%E7%A7%AF%E7%9A%84%E5%89%8D%E5%90%91%E8%AE%A1%E7%AE%97%E5%8E%9F%E7%90%86.html)。
 

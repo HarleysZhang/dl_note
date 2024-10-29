@@ -167,11 +167,7 @@ struct User {
 
 4，unwrap 和 Option 的一样，正常则拿值，异常则 panic!
 
-#### 参考的博客
-
-- https://blog.vgot.net/archives/rust-some.html
-- 
-
 ## 参考资料
 
 - [rust入门秘籍-模式匹配的基本使用](https://rust-book.junmajinlong.com/ch10/01_pattern_match_basis.html)
+- https://blog.vgot.net/archives/rust-some.html

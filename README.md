@@ -81,8 +81,8 @@
 
 2，`ncnn` 框架源码解析：
 
-- [ncnn 源码解析-sample 运行](5-model_deploy/ncnn源码解析/ncnn源码解析-sample运行.md)
-- [ncnn 源码解析-Net 类](5-model_deploy/ncnn源码解析/ncnn源码解析-Net类.md)
+- [ncnn 源码解析-sample 运行](5-model_deploy/ncnn源码解析-sample运行.md)
+- [ncnn 源码解析-Net 类](5-model_deploy/ncnn源码解析-Net类.md)
 
 3，异构计算
 

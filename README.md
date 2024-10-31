@@ -83,15 +83,12 @@
 
 - [ncnn 源码解析-sample 运行](5-model_deploy/ncnn源码解析/ncnn源码解析-sample运行.md)
 - [ncnn 源码解析-Net 类](5-model_deploy/ncnn源码解析/ncnn源码解析-Net类.md)
-- [ncnn 源码解析-Layer 层](5-model_deploy/ncnn源码解析/ncnn源码解析-Layer层.md)
-- [ncnn 源码解析-常见算子](../5-model_deploy/ncnn源码解析/ncnn源码解析-常见算子.md)
 
 3，异构计算
 
 1. 移动端异构计算：`neon` 编程
-2. GPU 端异构计算：`cuda` 编程
+2. GPU 端异构计算：`cuda` 编程，比如 `gemm` 算法解析与优化
 
-通用矩阵乘法 `gemm` 算法解析与优化、`neon`、`cuda` 编程等内容，以及 `ncnn` 框架代码解析总结。
 
 ## 七，进阶课程
 

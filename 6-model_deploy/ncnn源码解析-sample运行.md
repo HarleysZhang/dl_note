@@ -73,13 +73,13 @@ github submodule（子模块）允许你将一个 Git 仓库作为另一个 Git 
 
 一个典型的 Intel Skylake 消费级四核 CPU，其核心架构如下图所示。
 
-![cpu 核心架构](../../images/ncnn/cpu_architecture.png)
+![cpu 核心架构](../images/ncnn/cpu_architecture.png)
 
 ## 三，ncnn 推理模型
 
 ### 3.1，shufflenetv2 模型推理解析
 
-这里以分类网络 shufflenetv2 为例，分析如何使用 `ncnn` 框架模型推理。先源码在 `ncnn/examples/shufflenetv2.cpp`文件中，程序主要分为两个函数，分别是 `detect_shufflenetv2()` 和 `print_topk()`。前者用于运行图片分类网络，后者用于输出前 N 个分类结果。代码流程总结如下:
+这里以分类网络 shufflenetv2 为例，分析如何使用 `ncnn` 框架模型推理。源码在 `ncnn/examples/shufflenetv2.cpp`文件中，程序主要分为两个函数，分别是 `detect_shufflenetv2()` 和 `print_topk()`。前者用于运行图片分类网络，后者用于输出前 N 个分类结果。代码流程总结如下:
 
 1. 在 `detect_shufflenetv2` 函数中，主要使用了 `ncnn::Net` 类进行模型加载和推理，主要流程如下：
    - 加载模型参数和模型二进制文件。
@@ -134,7 +134,7 @@ static int print_topk(const std::vector<float>& cls_scores, int topk)
 
 最后，实际跑下 sample 看下运行结果，这里模型用的是 imagenet 训练的 shufflenetv2 模型，然后用编译好的 shufflenetv2 程序去跑测试图片，输入图片和程序运行结果如下:
 
-![dog](../../images/ncnn/dog.png)
+![dog](../images/ncnn/dog.png)
 
 ```bash
 /ncnn/build/examples# ./shufflenetv2 demo.jpeg
@@ -197,7 +197,7 @@ for (int j = 0; j < out.w; j++)
 
 这里之所以需要手动调用 softmax 层，是因为官方提供的 shufflenetv2 模型结构文件的最后一层是 `fc` 层，没有 `softmax` 层。
 
-![shufflenetv2_param](../../images/ncnn/shufflenetv2_param.png)
+![shufflenetv2_param](../images/ncnn/shufflenetv2_param.png)
 
 值得注意的是，ncnn::Mat 类型默认采用的是 NCHW （通道在前，即 Number-Channel-Height-Width）的格式。在常见的分类任务中，ncnn 网络输出的一般是一个大小为 [1, 1, num_classes] 的张量，其中第三个维度的大小为类别数，上述代码即 `out.w` 表示类别数量，而 out.h 和 out.c 都为 1。
 

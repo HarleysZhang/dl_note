@@ -12,6 +12,7 @@
 
 `torch.Tensor` 是一种包含**单一数据类型**元素的多维矩阵，类似于 numpy 的 `array`。
 
+![tensor](../../images/tensor_datastructure/tensor.png)
 
 1，指定数据类型的 tensor 可以通过传递参数 `torch.dtype` 和/或者 `torch.device` 到构造函数生成：
 > 注意为了改变已有的 tensor 的 torch.device 和/或者 torch.dtype, 考虑使用 `to()` 方法.
@@ -335,7 +336,7 @@ torch.randn(*size, *, generator=None, out=None, dtype=None, layout=torch.strided
 功能：在区间 `[low, high)` 上生成指定形状 `size` 且均匀分布随机整数张量。
 
 ```python
-torch.randint（low=0， high， size， \*， generator=None， out=None， dtype=None， layout=torch.strided， device=None， requires_grad =False）→ Tensor
+torch.randint（low=0， high， size， *， generator=None， out=None， dtype=None， layout=torch.strided， device=None， requires_grad =False）-> Tensor
 ```
 
 5，`torch.tril` 和 `torch.tril` (triu 和 tril 分别是“triangle upper”和“triangle lower”的缩写。)

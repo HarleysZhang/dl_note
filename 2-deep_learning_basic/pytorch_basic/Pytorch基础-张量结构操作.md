@@ -1,18 +1,18 @@
 - [一，张量的基本操作](#一张量的基本操作)
-	- [1.1 改变形状: view 和 reshape](#11-改变形状-view-和-reshape)
+  - [1.1 改变形状: view 和 reshape](#11-改变形状-view-和-reshape)
 - [二，维度变换](#二维度变换)
-	- [2.1，unsqueeze vs squeeze 维度增减](#21unsqueeze-vs-squeeze-维度增减)
-	- [2.2，transpose vs permute 维度交换](#22transpose-vs-permute-维度交换)
+  - [2.1，unsqueeze vs squeeze 维度增减](#21unsqueeze-vs-squeeze-维度增减)
+  - [2.2，transpose vs permute 维度交换](#22transpose-vs-permute-维度交换)
 - [三，索引切片](#三索引切片)
-	- [3.1，规则索引切片方式](#31规则索引切片方式)
-	- [3.2，gather 和 torch.index\_select 算子](#32gather-和-torchindex_select-算子)
+  - [3.1，规则索引切片方式](#31规则索引切片方式)
+  - [3.2，gather 和 torch.index\_select 算子](#32gather-和-torchindex_select-算子)
 - [四，合并分割](#四合并分割)
-	- [4.1，torch.cat 和 torch.stack](#41torchcat-和-torchstack)
-	- [4.2，torch.split 和  torch.chunk](#42torchsplit-和--torchchunk)
+  - [4.1，torch.cat 和 torch.stack](#41torchcat-和-torchstack)
+  - [4.2，torch.split 和  torch.chunk](#42torchsplit-和--torchchunk)
 - [五，卷积相关算子](#五卷积相关算子)
-	- [5.1，上采样方法总结](#51上采样方法总结)
-	- [5.2，F.interpolate 采样函数](#52finterpolate-采样函数)
-	- [5.3，nn.ConvTranspose2d 反卷积](#53nnconvtranspose2d-反卷积)
+  - [5.1，上采样方法总结](#51上采样方法总结)
+  - [5.2，F.interpolate 采样函数](#52finterpolate-采样函数)
+  - [5.3，nn.ConvTranspose2d 反卷积](#53nnconvtranspose2d-反卷积)
 - [参考资料](#参考资料)
 
 > 授人以鱼不如授人以渔，原汁原味的知识才更富有精华，本文只是对张量基本操作知识的理解和学习笔记，看完之后，想要更深入理解，建议去 pytorch 官方网站，查阅相关函数和操作，英文版在[这里](https://pytorch.org/docs/1.7.0/torch.html)，中文版在[这里](https://pytorch-cn.readthedocs.io/zh/latest/package_references/torch/#tensors)。本文的代码是在 `pytorch1.7` 版本上测试的，其他版本一般也没问题。
@@ -203,7 +203,9 @@ tensor([[ 0.1427, -0.5414],
         [-1.1734,  0.7230]])
 ```
 ## 四，合并分割
+
 ### 4.1，torch.cat 和 torch.stack
+
 可以用 `torch.cat` 方法和 `torch.stack` 方法将多个张量合并，也可以用 `torch.split`方法把一个张量分割成多个张量。`torch.cat` 和 `torch.stack` 有略微的区别，`torch.cat` 是连接，不会增加维度，而 `torch.stack` 是堆叠，会增加一个维度。两者函数定义如下：
 ```python
 # Concatenates the given sequence of seq tensors in the given dimension. All tensors must either have the same shape (except in the concatenating dimension) or be empty.
@@ -256,6 +258,13 @@ tensor([[[ 0,  1,  2],
          [23, 24, 25],
          [26, 27, 28]]))
 ```
+
+另外，`torch.hstack` 函数用于将一系列张量沿水平方向（列方向）堆叠。对于一维张量，相当于直接按元素连接；对于二维及更高维张量，相当于沿第二个维度（列维度）堆叠。它是 torch.cat(tensors, dim=1) 的简便形式。
+
+两个二维张量的 `hstack` 操作过程可视化如下图所示:
+
+![hstack_visual](../../images/pytorch_tensor_structure/hstack_visual.png)
+
 ### 4.2，torch.split 和  torch.chunk
 `torch.split()` 和 `torch.chunk()` 可以看作是 `torch.cat()` 的逆运算。`split()` 作用是将张量拆分为多个块，每个块都是原始张量的视图。`split()` [函数定义](https://pytorch.org/docs/stable/generated/torch.split.html#torch.split)如下：
 ```python

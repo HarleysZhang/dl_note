@@ -1,6 +1,7 @@
 - [一 理解张量维度](#一-理解张量维度)
 - [二 理解 dim 参数](#二-理解-dim-参数)
 - [三 规约计算](#三-规约计算)
+  - [用法总结](#用法总结)
 
 PyTorch 张量数学运算就是对张量的元素值完成数学运算，常用的张量数学运算包括：标量运算、向量运算、矩阵运算。
 
@@ -47,7 +48,7 @@ tensor([[[ 0.6238, -0.9315,  0.2173,  0.1954, -1.1565], ... ]])
 
 ## 二 理解 dim 参数
 
-dim 参数在 pytorch 函数中的定义指**沿着 dim 这个维度进行操作**：求和/求平均/求累加，以及删除、增加指定 dim。如 x 的 shape 为 [2, 5, 3]，则：
+**`dim` 参数在 pytorch 数学函数中的定义一般指沿着 dim 这个维度进行操作**：求和/求平均/求累加，以及删除、增加指定 dim。如 x 的 shape 为 [2, 5, 3]，则：
 - `dim = 0`，即沿着具有 2 个元素的那个维度/轴进行操作
 - `dim = 1`，即沿着具有 5 个元素的那个维度/轴进行操作
 - `dim = 2`，即沿着具有 3 个元素的那个维度/轴进行操作
@@ -125,7 +126,93 @@ tensor([ 2.5269, -2.0317, -1.2381,  0.7056])
 
 当 dim = 0 时，就是沿着 `dim = 0`即 `x` 轴进行累加，sum 函数为规约函数会压缩维度，所以x.sum(dim=0) 结果为 tensor([-0.6453,  2.1187,  0.3796, -1.0821, -0.8082])，形状为 `[5]`。
 
-3，`torch.cumprod` 沿着 dim 维度计算累积。`min()` 沿着指定 dim 找
+3，`torch.max()` 用于获取张量的最大值，其有三种用法：
+
+- 获取张量中的最大值。
+- 沿指定维度获取最大值及其索引。
+- 逐元素比较两个张量，返回最大值，用法等同 `torch.minimum()` 函数
+
+这三种用法的各自语法如下:
+
+```python
+torch.max(input) -> Tensor
+torch.max(input, dim, keepdim=False, *, out=None)
+torch.min(input, other, *, out=None) -> Tensor # other 也是张量
+```
+
+- 第一种用法好理解，输入参数是一个多维张量，返回的结果是这个张量的**全局最大值**！
+- 第二种情况是适用于我们需要特定维度的最大值，且返回结果包含两个数据：一个是最大值对应的位置索引，一个是最大值本身，这个函数是量化算法的核心操作之一！
+- 第三种情况，用于对输入的两个张量 `input` 和 `other`中的每个元素进行比较，返回对应位置的最小值。
+
+```python
+>>> x = torch.randint(10, [2,5])
+>>> x
+tensor([[1, 6, 5, 7, 7],
+        [5, 3, 2, 2, 6]])
+>>> y = torch.randint(2, 12, [2,5])
+>>> y
+tensor([[ 8,  3,  8,  7,  4],
+        [11,  6,  2,  5,  3]])
+>>> torch.max(x, y)
+tensor([[ 8,  6,  8,  7,  7],
+        [11,  6,  2,  5,  6]])
+>>> torch.max(x)
+tensor(7)
+>>> max_x = torch.max(x, dim=0)  # 返回张量 x 在 dim=0 维度的最大值及对应索引
+>>> max_x
+torch.return_types.max(
+values=tensor([5, 6, 5, 7, 7]),
+indices=tensor([1, 0, 0, 0, 0]))
+>>> max_x[0]
+tensor([5, 6, 5, 7, 7])
+```
+
+`torch.min` 函数和 `torch.max()` 意义相同，只不过返回的是最小值。
+
+4，`torch.cumprod` 张量沿着指定 dim 维度计算累积乘积，其返回一个与 `input` 形状相同的张量，返回张量的每个元素是指定维度上该元素及其之前所有元素的乘积。函数定义(语法)如下:
+
+```python
+torch.cumprod(input, dim, *, dtype=None, out=None) -> Tensor
+```
+
+这个沿着 dim 方向计算累积的计算过程直观上不好理解，可以参考下述计算过程的可视化分解图来理解。
+
+<div align="center">
+<img src="../../images/pytorch_tensor_math/dim_compute_visual.png" width="60%" alt="dim_compute_visual">
+</div>
+
+多维张量的示例代码如下所示:
+
+```python
+import torch
+
+# 创建一个 2D 张量
+b = torch.tensor([[1, 2, 3], [4, 5, 6]])
+print("原始张量：\n", b)
+
+# 沿第 0 维计算累积乘积
+cumprod_b_dim0 = torch.cumprod(b, dim=0)
+print("沿第 0 维的累积乘积结果：\n", cumprod_b_dim0)
+
+# 沿第 1 维计算累积乘积
+cumprod_b_dim1 = torch.cumprod(b, dim=1)
+print("沿第 1 维的累积乘积结果：\n", cumprod_b_dim1)
+```
+
+程序运行后输出结果如下:
+
+```bash
+原始张量：
+ tensor([[1, 2, 3],
+        [4, 5, 6]])
+沿第 0 维的累积乘积结果：
+ tensor([[ 1,  2,  3],
+        [ 4, 10, 18]])
+沿第 1 维的累积乘积结果：
+ tensor([[  1,   2,   6],
+        [  4,  20, 120]])
+```
+### 用法总结
 
 ```bash
 >>> x = torch.Tensor([ # shape is [2, 5]

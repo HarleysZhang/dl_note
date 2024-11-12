@@ -218,7 +218,7 @@ array([[  1,   2,   3],
        [  4,   5, 100]])
 ```
 
-3， `torch.empty_like`、`torch.zeros_like`、`torch.ones_like`、`torch.randint_like()`等
+3，`torch.empty_like`、`torch.zeros_like`、`torch.ones_like`、`torch.randint_like()`等
 ```python
 torch.empty_like(input, *, dtype=None,) -> Tensor
 ```
@@ -338,14 +338,16 @@ torch.randn(*size, *, generator=None, out=None, dtype=None, layout=torch.strided
 torch.randint（low=0， high， size， \*， generator=None， out=None， dtype=None， layout=torch.strided， device=None， requires_grad =False）→ Tensor
 ```
 
-5，`torch.tril`
+5，`torch.tril` 和 `torch.tril` (triu 和 tril 分别是“triangle upper”和“triangle lower”的缩写。)
+
 ```python
 torch.tril(input, diagonal=0, *, out=None) → Tensor
 ```
 
-该函数返回输入矩阵（2D 张量）或一组矩阵的**下三角部分**，结果张量中的其余元素被设置为 0。下三角部分包含矩阵的主对角线及其以下的元素。
+- `torch.tril` 函数返回输入矩阵（2D 张量）或一组矩阵的**下三角部分**，结果张量中的其余元素被设置为 0。下三角部分包含矩阵的主对角线及其以下的元素。
+- `torch.triu` 函数返回一个矩阵的上三角部分（即矩阵上半部分，主对角线及其以上的元素），其余部分设为零。
 
-参数 `diagonal` 控制要保留的对角线。如果 diagonal = 0，则保留主对角线及其以下的所有元素。正值的 diagonal 会包括主对角线上方的对角线，负值则排除主对角线下方的对角线。主对角线的索引为  ${(i, i)}$ ，其中 $i \in [0, \min \{d_1, d_2\} - 1]$， $d_1$ 和 $d_2$ 分别为矩阵的维度。
+参数 `diagonal` 控制要保留的对角线。如果 diagonal = 0，则保留主对角线及其以下的所有元素。正值的 diagonal 会包括主对角线上方的对角线，负值则排除主对角线下方的对角线，即表示向上或向下偏移的对角线。主对角线的索引为  ${(i, i)}$ ，其中 $i \in [0, \min \{d_1, d_2\} - 1]$， $d_1$ 和 $d_2$ 分别为矩阵的维度。
 
 代码示例:
 ```python
@@ -387,11 +389,16 @@ tensor([[[ 1.3282, -0.0920],
 >>> torch.randint(10, (2,5))           # torch.randint() 用法
 tensor([[3, 8, 7, 3, 5],
         [9, 2, 2, 9, 6]])
->>> torch.randn(4,5).tril()
+>>> torch.randn(4,5).tril()            # 创建下三角矩阵
 tensor([[-0.8062,  0.0000,  0.0000,  0.0000,  0.0000],
         [ 1.4425,  0.8054,  0.0000,  0.0000,  0.0000],
         [ 0.9237,  0.8548,  0.2412,  0.0000,  0.0000],
         [-0.3921, -0.4880, -0.8847, -0.2170,  0.0000]])
+>>> torch.randn(4,5).triu()           # 创建上三角矩阵
+tensor([[-0.7354, -0.9383, -0.0798, -0.6155,  0.3702],
+        [ 0.0000,  0.5686,  0.2166, -0.5724, -0.0596],
+        [ 0.0000,  0.0000,  0.0751, -0.9832,  1.5582],
+        [ 0.0000,  0.0000,  0.0000, -0.0491,  1.3136]])
 ```
 
 检验 torch.normal 和 torch.randn 的均值情况：

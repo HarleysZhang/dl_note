@@ -1,18 +1,18 @@
 - [一，张量的基本操作](#一张量的基本操作)
-  - [1.1 改变形状: view 和 reshape](#11-改变形状-view-和-reshape)
+	- [1.1 改变形状: view 和 reshape](#11-改变形状-view-和-reshape)
 - [二，维度变换](#二维度变换)
-  - [2.1，squeeze vs unsqueeze 维度增减](#21squeeze-vs-unsqueeze-维度增减)
-  - [2.2，transpose vs permute 维度交换](#22transpose-vs-permute-维度交换)
+	- [2.1，unsqueeze vs squeeze 维度增减](#21unsqueeze-vs-squeeze-维度增减)
+	- [2.2，transpose vs permute 维度交换](#22transpose-vs-permute-维度交换)
 - [三，索引切片](#三索引切片)
-  - [3.1，规则索引切片方式](#31规则索引切片方式)
-  - [3.2，gather 和 torch.index\_select 算子](#32gather-和-torchindex_select-算子)
+	- [3.1，规则索引切片方式](#31规则索引切片方式)
+	- [3.2，gather 和 torch.index\_select 算子](#32gather-和-torchindex_select-算子)
 - [四，合并分割](#四合并分割)
-  - [4.1，torch.cat 和 torch.stack](#41torchcat-和-torchstack)
-  - [4.2，torch.split 和  torch.chunk](#42torchsplit-和--torchchunk)
+	- [4.1，torch.cat 和 torch.stack](#41torchcat-和-torchstack)
+	- [4.2，torch.split 和  torch.chunk](#42torchsplit-和--torchchunk)
 - [五，卷积相关算子](#五卷积相关算子)
-  - [5.1，上采样方法总结](#51上采样方法总结)
-  - [5.2，F.interpolate 采样函数](#52finterpolate-采样函数)
-  - [5.3，nn.ConvTranspose2d 反卷积](#53nnconvtranspose2d-反卷积)
+	- [5.1，上采样方法总结](#51上采样方法总结)
+	- [5.2，F.interpolate 采样函数](#52finterpolate-采样函数)
+	- [5.3，nn.ConvTranspose2d 反卷积](#53nnconvtranspose2d-反卷积)
 - [参考资料](#参考资料)
 
 > 授人以鱼不如授人以渔，原汁原味的知识才更富有精华，本文只是对张量基本操作知识的理解和学习笔记，看完之后，想要更深入理解，建议去 pytorch 官方网站，查阅相关函数和操作，英文版在[这里](https://pytorch.org/docs/1.7.0/torch.html)，中文版在[这里](https://pytorch-cn.readthedocs.io/zh/latest/package_references/torch/#tensors)。本文的代码是在 `pytorch1.7` 版本上测试的，其他版本一般也没问题。
@@ -30,9 +30,20 @@
 > 更多理解可以参考这篇[文章](https://blog.csdn.net/Flag_ing/article/details/109129752)。
 
 ## 二，维度变换
-### 2.1，squeeze vs unsqueeze 维度增减
-+ `squeeze()`：对 tensor 进行维度的压缩，去掉维数为 `1` 的维度。用法：`torch.squeeze(a)` 将 a 中所有为 1 的维度都删除，或者 `a.squeeze(1)` 是去掉 `a`中指定的维数为 `1` 的维度。
-+ `unsqueeze()`：对数据维度进行扩充，给指定位置加上维数为 `1` 的维度。用法：`torch.unsqueeze(a, N)`，或者 `a.unsqueeze(N)`，在 `a` 中指定位置 `N` 加上一个维数为 `1` 的维度。
+
+### 2.1，unsqueeze vs squeeze 维度增减
+
+- `torch.squeeze`: 默认用于移除张量中所有大小为 1 的维度。
+- `torch.unsqueeze`: 用于在指定位置插入一个大小为 1 的维度，从而增加张量的维度。
+
+```python
+# 参数, input：输入张量。dim（可选）：指定要移除的维度。如果未指定，则移除所有大小为 1 的维度。
+torch.squeeze(input, dim=None)
+# 参数, input：输入张量。dim：指定插入维度的位置。
+torch.unsqueeze(input, dim)
+```
+
+> “Squeeze” 单词作动词时，主要意思是“挤压、捏、榨取”
 
 `squeeze` 用例程序如下：
 ```python

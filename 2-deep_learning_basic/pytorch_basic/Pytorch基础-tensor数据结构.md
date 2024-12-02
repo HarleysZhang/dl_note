@@ -1,4 +1,4 @@
-- [Tensor 概述](#tensor-概述)
+- [一 Tensor 概述](#一-tensor-概述)
   - [1.1 Tensor 数据类型](#11-tensor-数据类型)
   - [1.2 Tensor 的属性](#12-tensor-的属性)
 - [二 创建 Tensor](#二-创建-tensor)
@@ -8,7 +8,7 @@
   - [创建张量方法总结](#创建张量方法总结)
 - [参考资料](#参考资料)
 
-## Tensor 概述
+## 一 Tensor 概述
 
 `torch.Tensor` 是一种包含**单一数据类型**元素的多维矩阵，类似于 numpy 的 `array`。
 

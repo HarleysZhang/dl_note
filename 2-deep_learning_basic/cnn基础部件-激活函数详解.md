@@ -16,8 +16,8 @@ categories: DeepLearning
 - [三 ReLU 函数及其变体（半线性激活函数）](#三-relu-函数及其变体半线性激活函数)
   - [3.1 ReLU 函数](#31-relu-函数)
   - [3.2，Leaky ReLU/PReLU/ELU/Softplus 函数](#32leaky-relupreluelusoftplus-函数)
-- [四，Swish 函数](#四swish-函数)
-- [五，激活函数总结](#五激活函数总结)
+- [四 Swish 函数](#四-swish-函数)
+- [五 激活函数总结](#五-激活函数总结)
 - [参考资料](#参考资料)
 
 > 本文分析了激活函数对于神经网络的必要性，同时讲解了几种常见的激活函数的原理，并给出相关公式、代码和示例图。
@@ -313,7 +313,7 @@ ReLU、Leaky ReLU、ELU 以及 Softplus 函数示意图如下图所示:
 <img src="../images/activation_function/relu_more.png" width="70%" alt="relu_more">
 </div>
 
-## 四，Swish 函数
+## 四 Swish 函数
 
 `Swish` 函数[Ramachandran et al., 2017] 是一种自门控(Self-Gated)激活 函数，定义为
 
@@ -340,7 +340,8 @@ class Swish(nn.Module):  #Swish激活函数
 </div>
 
 **Swish 函数可以看作线性函数和 ReLU 函数之间的非线性插值函数，其程度由参数 $\beta$ 控制**。
-## 五，激活函数总结
+
+## 五 激活函数总结
 
 常用的激活函数包括 `ReLU` 函数、`sigmoid` 函数和 `tanh` 函数。其标准代码总结如下（Pytorch 框架中会更复杂）
 

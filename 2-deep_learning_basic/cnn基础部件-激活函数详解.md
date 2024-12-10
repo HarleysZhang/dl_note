@@ -1,12 +1,20 @@
-- [一，激活函数概述](#一激活函数概述)
-  - [1.1，前言](#11前言)
-  - [1.2，激活函数定义](#12激活函数定义)
-  - [1.3，激活函数性质](#13激活函数性质)
-- [二，Sigmoid 型函数（挤压型激活函数）](#二sigmoid-型函数挤压型激活函数)
-  - [2.1，Logistic(sigmoid)函数](#21logisticsigmoid函数)
-  - [2.2，Tanh 函数](#22tanh-函数)
-- [三，ReLU 函数及其变体（半线性激活函数）](#三relu-函数及其变体半线性激活函数)
-  - [3.1，ReLU 函数](#31relu-函数)
+---
+layout: post
+title: cnn 基础部件-激活函数详解
+date: 2022-12-05 22:00:00
+summary: 本文分析了激活函数对于神经网络的必要性，同时讲解了几种常见的激活函数的原理，并给出相关公式、代码和示例图。
+categories: DeepLearning
+---
+
+- [一 激活函数概述](#一-激活函数概述)
+  - [1.1 前言](#11-前言)
+  - [1.2 激活函数定义](#12-激活函数定义)
+  - [1.3 激活函数性质](#13-激活函数性质)
+- [二 Sigmoid 型函数（挤压型激活函数）](#二-sigmoid-型函数挤压型激活函数)
+  - [2.1 Logistic(sigmoid)函数](#21-logisticsigmoid函数)
+  - [2.2 Tanh 函数](#22-tanh-函数)
+- [三 ReLU 函数及其变体（半线性激活函数）](#三-relu-函数及其变体半线性激活函数)
+  - [3.1 ReLU 函数](#31-relu-函数)
   - [3.2，Leaky ReLU/PReLU/ELU/Softplus 函数](#32leaky-relupreluelusoftplus-函数)
 - [四，Swish 函数](#四swish-函数)
 - [五，激活函数总结](#五激活函数总结)
@@ -14,18 +22,20 @@
 
 > 本文分析了激活函数对于神经网络的必要性，同时讲解了几种常见的激活函数的原理，并给出相关公式、代码和示例图。
 
-## 一，激活函数概述
+## 一 激活函数概述
 
-### 1.1，前言
+### 1.1 前言
 
 人工神经元(Artificial Neuron)，简称神经元(Neuron)，是构成神经网络的基本单元，其主要是模拟生物神经元的结构和特性，接收一组输入信号并产生输出。生物神经元与人工神经元的对比图如下所示。
 
-![neuron](../images/activation_function/neuron.png)
+<div align="center">
+<img src="../images/activation_function/neuron.png" width="60%" alt="neuron">
+</div>
 
 从机器学习的角度来看，神经网络其实就是一个**非线性模型**，其基本组成单元为具有非线性激活函数的神经元，通过大量神经元之间的连接，使得多层神经网络成为一种高度非线性的模型。**神经元之间的连接权重就是需要学习的参数**，其可以在机器学习的框架下通过**梯度下降方法**来进行学习。
 > 深度学习一般指的是深度神经网络模型，泛指网络层数在三层或者三层以上的神经网络结构。
 
-### 1.2，激活函数定义
+### 1.2 激活函数定义
 
 激活函数（也称“非线性映射函数”），是深度卷积神经网络模型中必不可少的网络层。
 
@@ -43,21 +53,24 @@ $$a = f(z)$$
 
 由此，典型的神经元结构如下所示:
 
-<img src="../images/activation_function/typical_neuron_architecture.png" alt="典型的神经元架构" style="zoom: 50%;" />
+<div align="center">
+<img src="../images/activation_function/typical_neuron_architecture.png" width="60%" alt="典型的神经元架构">
+</div>
 
-### 1.3，激活函数性质
+### 1.3 激活函数性质
 
 为了增强网络的表示能力和学习能力，激活函数需要具备以下几点性质:
 1. **连续并可导(允许少数点上不可导)的非线性函数**。可导的激活函数 可以直接利用数值优化的方法来学习网络参数。
 2. 激活函数及其导函数要**尽可能的简单**，有利于提高网络计算效率。
 3. 激活函数的导函数的**值域要在一个合适的区间内**，不能太大也不能太小，否则会影响训练的效率和稳定性.
 
-## 二，Sigmoid 型函数（挤压型激活函数）
+## 二 Sigmoid 型函数（挤压型激活函数）
 
 Sigmoid 型函数是指一类 S 型曲线函数，为两端饱和函数。常用的 Sigmoid 型函数有 Logistic 函数和 Tanh 函数。
+
 > 相关数学知识: 对于函数 $f(x)$，若 $x \to −\infty$ 时，其导数 ${f}'\to 0$，则称其为左饱和。若 $x \to +\infty$ 时，其导数 ${f}'\to 0$，则称其为右饱和。当同时满足左、右饱和时，就称为两端饱和。
 
-### 2.1，Logistic(sigmoid)函数
+### 2.1 Logistic(sigmoid)函数
 
 对于一个定义域在 $\mathbb{R}$ 中的输入，`sigmoid` 函数将输入变换为区间 `(0, 1)` 上的输出。因此，sigmoid 通常称为**挤压函数**(squashing function): 它将范围 (-inf, inf) 中的任意输入压缩到区间 (0, 1) 中的某个值:
 
@@ -73,7 +86,9 @@ $$
 
 sigmoid 函数及其导数曲线如下所示:
 
-<img src="../images/activation_function/sigmoid_and_gradient_curve2.png" alt="sigmoid 函数及其导数图像" style="zoom:67%;" />
+<div align="center">
+<img src="../images/activation_function/sigmoid_and_gradient_curve2.png" width="70%" alt="sigmoid 函数及其导数图像">
+</div>
 
 可以看出，sigmoid 函数连续，光滑、严格单调，以 (0,0.5) 中心对称，是一个非常良好的阈值函数。
 
@@ -83,15 +98,15 @@ sigmoid 函数及其导数曲线如下所示:
 
 当我们想要输出二分类或多分类、多标签问题的概率时，`sigmoid` **可用作模型最后一层的激活函数**。下表总结了常见问题类型的最后一层激活和损失函数。
 
-|问题类型|最后一层激活|损失函数|
-|-------|----------|-------|
-|二分类问题（binary）|`sigmoid`|`sigmoid + nn.BCELoss`(): 模型最后一层需要经过 ` torch.sigmoid` 函数|
+|问题类型|最后一层激活 |损失函数|
+|-------|-----------|-------|
+|二分类问题（binary）| `sigmoid` | `sigmoid + nn.BCELoss()` 模型最后一层需要经过 torch.sigmoid 函数 |
 |多分类、单标签问题（Multiclass）|`softmax`|`nn.CrossEntropyLoss()`: 无需手动做 `softmax`|
 |多分类、多标签问题（Multilabel）|`sigmoid`|`sigmoid + nn.BCELoss()`: 模型最后一层需要经过 `sigmoid` 函数|
 
 > `nn.BCEWithLogitsLoss()` 函数等效于 `sigmoid + nn.BCELoss`。
 
-### 2.2，Tanh 函数
+### 2.2 Tanh 函数
 
 `Tanh`（双曲正切）函数也是一种 Sigmoid 型函数，可以看作放大并平移的 `Sigmoid` 函数，公式如下所示：
 
@@ -169,20 +184,22 @@ plt.show()
 
 程序运行后得到的 Sigmoid 和 Tanh 函数曲线如下图所示:
 
-<img src="../images/activation_function/sigmoid_tanh_curve.png" alt="Logistic函数和Tanh函数" style="zoom:67%;" />
+<div align="center">
+<img src="../images/activation_function/sigmoid_tanh_curve.png" width="70%" alt="Logistic函数和Tanh函数">
+</div>
 
 以上代码的基础上，改下 plt.plot 函数的输入数据，同样可得到 Tanh 函数及其导数曲线图:
 
-<img src="../images/activation_function/tanh_and_gradient_curve.png" alt="Tanh函数及其导数" style="zoom:67%;" />
+<div align="center">
+<img src="../images/activation_function/tanh_and_gradient_curve.png" width="70%" alt="Tanh函数及其导数">
+</div>
 
-可以看出 `Sigmoid` 和 `Tanh` 函数在输入很大或是很小的时候，**输出都几乎平滑且梯度很小趋近于 0**，不利于权重更新；不同的是 `Tanh` 函数的输出区间是在 `(-1,1)` 之间，而且整个函数是以 0 为中心的，即他本身是零均值的，也就是说，在前向传播过程中，输入数据的均值并不会发生改变，这就使他在很多应用中效果能比 Sigmoid 优异一些。
+可以看出 `Sigmoid` 和 `Tanh` 函数在输入很大或是很小的时候，**输出都几乎平滑且梯度很小趋近于 0**，不利于权重更新；不同的是 `Tanh` 函数的输出区间是在 `(-1,1)` 之间，而且整个函数是以 0 为中心的，即他本身是零均值的，也就是说，在前向传播过程中，输入数据的均值并不会发生改变，这就使他在很多应用中效果能比 `Sigmoid` 优异一些。
 
-**Tanh 函数优缺点总结**：
+**`Tanh` 函数优缺点总结**：
 
 - 具有 Sigmoid 的所有优点。
 - `exp` 指数计算代价大。梯度消失问题仍然存在。
-
-
 
 `Tanh` 函数及其导数曲线如下所示:
 
@@ -190,8 +207,9 @@ Tanh 和 Logistic 函数的导数很类似，都有以下特点:
 - 当输入接近 0 时，导数接近最大值 1。
 - 输入在任一方向上越远离0点，导数越接近0。
 
-## 三，ReLU 函数及其变体（半线性激活函数）
-### 3.1，ReLU 函数
+## 三 ReLU 函数及其变体（半线性激活函数）
+
+### 3.1 ReLU 函数
 
 `ReLU`(Rectified Linear Unit，修正线性单元)，是目前深度神经网络中**最经常使用的激活函数**，它保留了类似 step 那样的生物学神经元机制: 输入超过阈值才会激发。公式如下所示:
 
@@ -232,7 +250,9 @@ class ReLU(object):
 ```
 **ReLU 激活函数及其函数梯度图**如下所示:
 
-<img src="../images/activation_function/relu_and_gradient_curve2.png" alt="relu_and_gradient_curve" style="zoom: 67%;" />
+<div align="center">
+<img src="../images/activation_function/relu_and_gradient_curve2.png" width="70%" alt="relu_and_gradient_curve">
+</div>
 
 > `ReLU` 激活函数的更多内容，请参考原论文 [Rectified Linear Units Improve Restricted Boltzmann Machines](https://www.cs.toronto.edu/~fritz/absps/reluICML.pdf)
 
@@ -289,7 +309,9 @@ $$
 
 ReLU、Leaky ReLU、ELU 以及 Softplus 函数示意图如下图所示:
 
-<img src="../images/activation_function/relu_more.png" alt="relu_more" style="zoom:50%;" />
+<div align="center">
+<img src="../images/activation_function/relu_more.png" width="70%" alt="relu_more">
+</div>
 
 ## 四，Swish 函数
 
@@ -313,7 +335,9 @@ class Swish(nn.Module):  #Swish激活函数
 
 结合前面的画曲线代码，可得 Swish 函数的示例图：
 
-<img src="../images/activation_function/swish_of_different_beta2.png" alt="Swish 函数" style="zoom:67%;" />
+<div align="center">
+<img src="../images/activation_function/swish_of_different_beta2.png" width="70%" alt="Swish 函数">
+</div>
 
 **Swish 函数可以看作线性函数和 ReLU 函数之间的非线性插值函数，其程度由参数 $\beta$ 控制**。
 ## 五，激活函数总结
@@ -371,7 +395,9 @@ class Softplus(object):
 
 下表汇总比较了几个激活函数的属性:
 
-![activation_function](../images/activation_function/activation_function_summary.png)
+<div align="center">
+<img src="../images/activation_function/activation_function_summary.png" width="100%" alt="activation_function">
+</div>
 
 **激活函数的在线可视化**移步 [Visualising Activation Functions in Neural Networks](https://dashee87.github.io/deep%20learning/visualising-activation-functions-in-neural-networks/)。
 

@@ -161,7 +161,7 @@
 
 4，Star History Chart：
 
-[![Star History Chart](https://api.star-history.com/svg?repos=HarleysZhang/deep_learning_system&type=Date)](https://star-history.com/#HarleysZhang/deep_learning_system&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=HarleysZhang/deep_learning_system&type=Date)](https://star-history.dera.page/#HarleysZhang/deep_learning_system&Date)
 
 ## 参考资料
 
